@@ -20,6 +20,9 @@ class SourcesConfigTest(TempEnv):
             self.assertIn(required, ids)
         self.assertEqual(len(ids), len(set(ids)), "duplicate source ids")
         self.assertFalse(cfg.get("oed")["enabled"])
+        self.assertFalse(cfg.get("deepl")["enabled"])            # free endpoints rate-limit
+        self.assertFalse(cfg.get("google-translate")["enabled"])
+        self.assertTrue(cfg.get("leo")["enabled"])
         self.assertEqual(oct(cfg.path.stat().st_mode & 0o777), "0o600")
         for s in cfg.sources:
             self.assertIn(s["type"], config.SOURCE_TYPES)
@@ -134,6 +137,22 @@ class HistoryTest(TempEnv):
         h = History()
         h.path.write_text("[[[", encoding="utf-8")
         self.assertEqual(History().entries, [])
+
+    def test_limit_from_prefs(self):
+        h = History()
+        for i in range(30):
+            h.add(f"w{i}")
+        self.assertEqual(History().limit, 1000)
+        config.Prefs().update({"history_max": 10})
+        trimmed = History()
+        self.assertEqual(trimmed.limit, 10)
+        self.assertEqual(len(trimmed.entries), 10)
+        self.assertEqual(trimmed.entries[0]["query"], "w29")
+        self.assertEqual(len(History().list()), 10)          # persisted trim
+        config.Prefs().update({"history_max": "abc"})          # ignored
+        self.assertEqual(config.Prefs().data["history_max"], 10)
+        config.Prefs().update({"history_max": 0})              # clamped
+        self.assertEqual(config.Prefs().data["history_max"], 1)
 
 
 if __name__ == "__main__":

@@ -14,7 +14,9 @@ Item {
   property var datasets: []         // data.list rows
   property var localStatus: ({})    // sources.status result
   property var installer: null      // ObInstaller
-  property string tab: "sources"    // "sources" | "data" | "edit"
+  property string tab: "sources"    // "sources" | "data" | "history" | "edit"
+  property int historyCount: 0
+  property int historyMax: 1000
   property var editing: null        // row being edited (copy)
   property bool editingNew: false
   property string message: ""
@@ -40,6 +42,8 @@ Item {
   signal refreshDatasets()
   signal testSource(string id)
   signal closeRequested()
+  signal historyMaxRequested(int value)
+  signal clearHistoryRequested()
 
   function driverInfo(name) {
     for (var i = 0; i < drivers.length; i++) if (drivers[i].driver === name) return drivers[i]
@@ -169,7 +173,7 @@ Item {
       ButtonGroup {
         id: tabsGroup
         anchors.verticalCenter: parent.verticalCenter
-        options: [{value: "sources", label: "Sources"}, {value: "data", label: "Data"}]
+        options: [{value: "sources", label: "Sources"}, {value: "data", label: "Data"}, {value: "history", label: "History"}]
         value: root.tab === "edit" ? "sources" : root.tab
         foreground: root.foreground
         background: "transparent"
@@ -180,7 +184,7 @@ Item {
       // Same height and baseline as the tab chips: the icon is kept at body
       // size so it cannot make the button taller than its neighbours.
       Button {
-        visible: root.tab !== "edit"
+        visible: root.tab === "sources" || root.tab === "data"
         anchors.verticalCenter: parent.verticalCenter
         height: tabsGroup.implicitHeight
         text: "Add source"
@@ -594,6 +598,76 @@ Item {
             onClicked: { root.deleteSource(root.editing.id); root.cancelEdit() }
           }
         }
+      }
+    }
+
+    // ---------------------------------------------------------- history
+    Column {
+      id: historyTab
+      visible: root.tab === "history"
+      width: parent.width
+      spacing: Style.spacing.lg
+
+      Text {
+        width: parent.width
+        textFormat: Text.PlainText
+        wrapMode: Text.WordWrap
+        text: "The search history feeds the ▾ dropdown of the search field and the Ctrl+P / Ctrl+N shortcuts. "
+          + "It is stored in ~/.local/state/omababel/history.json."
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.bodySmall
+      }
+
+      Row {
+        spacing: Style.spacing.huge
+        NumberField {
+          id: historyMaxField
+          label: "Maximum number of entries"
+          from: 1
+          to: 100000
+          stepSize: 100
+          value: root.historyMax
+          foreground: root.foreground
+          accent: root.accent
+          onModified: function(v) { root.historyMaxRequested(v) }
+        }
+        Column {
+          anchors.bottom: parent.bottom
+          spacing: Style.spacing.labelGap
+          FieldLabel { text: "Stored" }
+          Text {
+            textFormat: Text.PlainText
+            text: root.historyCount + " of " + root.historyMax + " entries"
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.body
+            height: Style.spacing.controlHeight
+            verticalAlignment: Text.AlignVCenter
+          }
+        }
+      }
+
+      Text {
+        width: parent.width
+        textFormat: Text.PlainText
+        wrapMode: Text.WordWrap
+        text: "Lowering the limit drops the oldest entries immediately. Use the arrows or type a number and press Enter."
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+      }
+
+      Button {
+        text: "Clear history"
+        iconText: "󰆴"
+        iconSize: Style.font.body
+        bordered: true
+        enabled: root.historyCount > 0
+        opacity: enabled ? 1 : 0.5
+        foreground: root.foreground
+        accent: root.accent
+        onClicked: root.clearHistoryRequested()
       }
     }
 

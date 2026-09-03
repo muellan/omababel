@@ -139,11 +139,8 @@ def google_code(code: str) -> Optional[str]:
 
 
 def options() -> List[dict]:
-    """The list the language selectors show, default languages first."""
-    ordered = list(DEFAULT_LANGUAGES) + sorted(
-        (c for c in LANGUAGES if c not in DEFAULT_LANGUAGES),
-        key=lambda c: LANGUAGES[c]["name"],
-    )
+    """The list the language selectors show: English first, then alphabetical."""
+    ordered = ["en"] + sorted((c for c in LANGUAGES if c != "en"), key=lambda c: LANGUAGES[c]["name"])
     return [
         {"value": c, "label": LANGUAGES[c]["name"], "native": LANGUAGES[c]["native"]}
         for c in ordered

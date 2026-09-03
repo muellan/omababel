@@ -63,7 +63,8 @@ def op_state(params: dict) -> dict:
         "drivers": S.registry(),
         "languages": languages.options(),
         "prefs": prefs.data,
-        "history": hist.list(limit=1000),
+        "history": hist.list(),
+        "history_max": hist.limit,
         "paths": {"config": str(paths.config_dir()), "data": str(paths.data_dir()),
                   "state": str(paths.state_dir()), "cache": str(paths.cache_dir())},
     }
@@ -88,8 +89,10 @@ def op_search(params: dict) -> dict:
 
 
 def op_history_list(params: dict) -> dict:
-    return {"history": History().list(prefix=str(params.get("prefix") or ""),
-                                      limit=int(params.get("limit") or 1000))}
+    hist = History()
+    limit = int(params["limit"]) if params.get("limit") else None
+    return {"history": hist.list(prefix=str(params.get("prefix") or ""), limit=limit),
+            "history_max": hist.limit}
 
 
 def op_history_remove(params: dict) -> dict:
@@ -103,7 +106,14 @@ def op_history_clear(params: dict) -> dict:
 
 def op_prefs_set(params: dict) -> dict:
     values = params.get("values") if isinstance(params.get("values"), dict) else params
-    return {"prefs": Prefs().update(values)}
+    prefs = Prefs().update(values)
+    out = {"prefs": prefs}
+    if "history_max" in values:
+        # apply the new cap right away and report the trimmed list
+        hist = History()
+        out["history"] = hist.list()
+        out["history_max"] = hist.limit
+    return out
 
 
 def op_sources_list(params: dict) -> dict:

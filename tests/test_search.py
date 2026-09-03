@@ -9,6 +9,7 @@ from pathlib import Path
 from helpers import TempEnv, FakeResponse, fake_fetch, fixture
 
 from ob import data, search
+from ob import results as R
 from ob import sources as S
 from ob.config import SourcesConfig
 from ob.sources.base import Source, SourceError, register
@@ -39,7 +40,7 @@ class FakeSource(Source):
 
     def thesaurus(self, word, lang):
         self._maybe_fail()
-        return {"synonyms": self.opts.get("syn", ["b", "a"]), "antonyms": self.opts.get("ant", ["z"]), "url": ""}
+        return R.thesaurus(self.opts.get("syn", ["b", "a"]), self.opts.get("ant", ["z"]))
 
     def translate(self, text, src, dst):
         self._maybe_fail()
@@ -156,6 +157,8 @@ class SearchRunTest(TempEnv):
         res = search.run("thesaurus", "x", "en", cfg=cfg_with(self.rows()))
         self.assertEqual(res["consolidated"]["synonyms"], ["a", "b", "c", "d"])
         self.assertEqual(res["consolidated"]["antonyms"], ["z"])   # crashed t2 excluded, "a" is a synonym
+        self.assertEqual([g["source"] for g in res["consolidated"]["groups"]], ["Thes One", "Thes Three"])
+        self.assertEqual(res["consolidated"]["groups"][0]["synonyms"], ["a", "b"])
         crashed = [r for r in res["results"] if r["source"]["id"] == "t2"][0]
         self.assertIn("ValueError", crashed["error"])
 

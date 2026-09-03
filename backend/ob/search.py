@@ -38,7 +38,7 @@ def _run_one(src: S.Source, mode: str, query: str, lang: str, lang2: str) -> dic
         elif mode == "thesaurus":
             res = src.thesaurus(query, lang)
             base.update({"synonyms": res.get("synonyms", []), "antonyms": res.get("antonyms", []),
-                         "url": res.get("url", "")})
+                         "groups": res.get("groups", []), "url": res.get("url", "")})
             base["count"] = len(base["synonyms"]) + len(base["antonyms"])
         else:
             res = src.translate(query, lang, lang2)

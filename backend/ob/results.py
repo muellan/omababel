@@ -60,8 +60,37 @@ def translation(mode: str, pairs: Optional[List[dict]] = None, text: str = "",
     }
 
 
-def thesaurus(synonyms: Iterable[str], antonyms: Iterable[str] = (), url: str = "") -> dict:
-    return {"synonyms": dedupe(synonyms), "antonyms": dedupe(antonyms), "url": url}
+def group(synonyms: Iterable[str], antonyms: Iterable[str] = (), label: str = "", pos: str = "") -> dict:
+    """One meaning: the words that belong to it (thesaurus.com-style grouping)."""
+    return {"label": clean(label), "pos": clean(pos), "synonyms": dedupe(synonyms), "antonyms": dedupe(antonyms)}
+
+
+def thesaurus(synonyms: Iterable[str], antonyms: Iterable[str] = (), url: str = "",
+              groups: Optional[List[dict]] = None) -> dict:
+    """Thesaurus result: flat lists plus ``groups`` (words per meaning).
+
+    When a source cannot tell meanings apart, ``groups`` holds the flat lists
+    as one unlabelled group.
+    """
+    syn, ant = dedupe(synonyms), dedupe(antonyms)
+    groups = [g for g in (groups or []) if g.get("synonyms") or g.get("antonyms")]
+    if not groups and (syn or ant):
+        groups = [group(syn, ant)]
+    if groups and not syn and not ant:
+        syn = dedupe(w for g in groups for w in g["synonyms"])
+        ant = dedupe(w for g in groups for w in g["antonyms"])
+    return {"synonyms": syn, "antonyms": ant, "url": url, "groups": groups}
+
+
+def groups_from_senses(entries: Iterable[dict]) -> List[dict]:
+    """One group per sense that carries synonyms/antonyms (label = gloss)."""
+    out: List[dict] = []
+    for e in entries:
+        for s in e.get("senses", []):
+            if s.get("synonyms") or s.get("antonyms"):
+                out.append(group(s.get("synonyms", []), s.get("antonyms", []),
+                                 label=s.get("gloss", ""), pos=e.get("pos", "")))
+    return out
 
 
 _WS = re.compile(r"\s+")
@@ -102,16 +131,26 @@ def sort_words(words: Iterable[str]) -> List[str]:
 
 
 def consolidate(parts: Iterable[dict]) -> dict:
-    """Merge many thesaurus results into alphabetical synonym/antonym lists."""
+    """Merge many thesaurus results: per-meaning groups (in source order) plus
+    alphabetical all-synonym / all-antonym lists."""
     syn: List[str] = []
     ant: List[str] = []
+    groups: List[dict] = []
     for p in parts:
         if not p:
             continue
         syn.extend(p.get("synonyms", []))
         ant.extend(p.get("antonyms", []))
+        src = p.get("source") or {}
+        for g in p.get("groups") or []:
+            if g.get("synonyms") or g.get("antonyms"):
+                groups.append({"source": src.get("name", ""), "source_id": src.get("id", ""),
+                               "label": g.get("label", ""), "pos": g.get("pos", ""),
+                               "synonyms": sort_words(g.get("synonyms", [])),
+                               "antonyms": sort_words(g.get("antonyms", []))})
     syn_sorted = sort_words(syn)
     ant_keys = {fold(a) for a in ant}
     # A word can't sensibly be both; prefer the synonym reading.
     ant_sorted = [a for a in sort_words(ant) if fold(a) not in {fold(s) for s in syn_sorted}]
-    return {"synonyms": syn_sorted, "antonyms": ant_sorted, "antonym_count_raw": len(ant_keys)}
+    return {"synonyms": syn_sorted, "antonyms": ant_sorted, "antonym_count_raw": len(ant_keys),
+            "groups": groups}

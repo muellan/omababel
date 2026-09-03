@@ -54,9 +54,40 @@
    "antonyms": [
     "evict"
    ],
+   "groups": [
+    {
+     "label": "a building for human habitation",
+     "pos": "noun",
+     "synonyms": [
+      "home",
+      "dwelling",
+      "residence"
+     ],
+     "antonyms": []
+    },
+    {
+     "label": "a legislative assembly",
+     "pos": "noun",
+     "synonyms": [
+      "chamber"
+     ],
+     "antonyms": []
+    },
+    {
+     "label": "to provide with a house",
+     "pos": "verb",
+     "synonyms": [
+      "accommodate",
+      "lodge"
+     ],
+     "antonyms": [
+      "evict"
+     ]
+    }
+   ],
    "url": "",
    "count": 7,
-   "ms": 6
+   "ms": 9
   }
  ],
  "skipped": [
@@ -151,6 +182,43 @@
   "antonyms": [
    "evict"
   ],
-  "antonym_count_raw": 1
+  "antonym_count_raw": 1,
+  "groups": [
+   {
+    "source": "Mini English synonyms",
+    "source_id": "mini-en-thes",
+    "label": "a building for human habitation",
+    "pos": "noun",
+    "synonyms": [
+     "dwelling",
+     "home",
+     "residence"
+    ],
+    "antonyms": []
+   },
+   {
+    "source": "Mini English synonyms",
+    "source_id": "mini-en-thes",
+    "label": "a legislative assembly",
+    "pos": "noun",
+    "synonyms": [
+     "chamber"
+    ],
+    "antonyms": []
+   },
+   {
+    "source": "Mini English synonyms",
+    "source_id": "mini-en-thes",
+    "label": "to provide with a house",
+    "pos": "verb",
+    "synonyms": [
+     "accommodate",
+     "lodge"
+    ],
+    "antonyms": [
+     "evict"
+    ]
+   }
+  ]
  }
 }

@@ -7,9 +7,10 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
   language (Duden, Merriam-Webster, OED, Wiktionary, CC-CEDICT, ECDICT, Unihan, ...),
   with one clearly separated results section per dictionary.
 
-- **Thesaurus** - one consolidated, alphabetical list of synonyms and one of
-  antonyms, merged from all configured thesauruses for the selected language 
-  (Thesaurus.com, Merriam-Webster, Wiktionary, ...).
+- **Thesaurus** - synonyms and antonyms from all configured thesauruses for the
+  selected language (Thesaurus.com, Merriam-Webster, Wiktionary, ...), grouped
+  by meaning like thesaurus.com does it, plus a merged overview; words can be
+  sorted alphabetically or by length.
 
 - **Translate** - word-by-word translations (LEO, FreeDict, Wiktionary,
   CC-CEDICT, ECDICT, ...) and full-text translation services 
@@ -54,7 +55,7 @@ Payload keys: `query`, `mode` (`lookup` | `thesaurus` | `translate`),
 Requirements: 
   - Omarchy Quattro (`omarchy-shell`)
   - `python3` (part of every Omarchy install)
-  - `wl-clipboard` for Alt+click copying.
+  - `wl-clipboard` for right-click copying.
 
 
 
@@ -82,7 +83,7 @@ omababel data list
  ────────────────────────────────────────────────────────────────────────────
   results ...                                                                
  ────────────────────────────────────────────────────────────────────────────
- 3 results from 2 sources · 480 ms      Ctrl+click: look up · Alt+click: copy
+ 3 results from 2 sources · 480 ms        Click: look up · Right-click: copy
 ```
 
 - The search field is focused when the panel opens; **Enter** searches.
@@ -93,20 +94,48 @@ omababel data list
   the primary one is active; translate mode also uses the secondary (target)
   language. `Ctrl+S` or the 󰓡 button swaps them.
 - The **history dropdown** (▾, `↓` in the field, or `Ctrl+H`) lists the last
-  1000 searches, filtered by what you typed. `↑`/`↓` walk it, Enter re-runs an
+  searches (1000 by default – see ⚙ → **History**), filtered by what you typed. `↑`/`↓` walk it, Enter re-runs an
   entry with its original mode and languages, × removes one, "Clear history"
   empties it.
-- In the results, **Ctrl + left click** on any word starts a new search with
-  that word. **Alt + left click** copies the word to the clipboard - or the
-  whole translation when you click the output of a full-text translation
-  service (Google, DeepL).
+- In the results, a **left click** on any word starts a new search with that
+  word. A **right click** copies the word to the clipboard - or the whole
+  translation when you click the output of a full-text translation service
+  (Google, DeepL).
+- Thesaurus results are grouped by meaning (part of speech, definition and
+  source shown per group) with an "All meanings" overview at the end; the
+  **A–Z / Length** switch sorts the words inside every group.
+- The language selectors list English first, then all other languages
+  alphabetically. Emptying the search field clears the results.
 - Every source section has an *open ↗* link to the web page it came from.
+- The **×** button right of the field (or `Ctrl+C` / `Ctrl+Backspace`) clears
+  the field and the results.
+- `Ctrl+P` / `Ctrl+N` step backwards / forwards through the search history and
+  re-run the entry; `Ctrl+[` / `Ctrl+]` open the primary / target language
+  picker; `Ctrl+D` / `Ctrl+U` scroll the results half a page.
 - `Ctrl+,` or ⚙ opens the preferences, `Esc` goes back / closes the panel.
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Search |
+| `Ctrl+1` `Ctrl+2` `Ctrl+3` | Lookup / Thesaurus / Translate mode |
+| `Ctrl+[` `Ctrl+]` | Open the primary / target language picker |
+| `Ctrl+S` | Swap languages |
+| `Ctrl+L` | Focus the search field |
+| `Ctrl+C` `Ctrl+Backspace` | Clear field and results |
+| `↓` `Ctrl+H` | History dropdown |
+| `Ctrl+P` `Ctrl+N` | Previous / next history entry |
+| `Ctrl+D` `Ctrl+U` | Scroll results down / up |
+| `Ctrl+,` | Preferences |
+| `Esc` | Close popup / back / close panel |
 
 
 
 
 ## Sources and Preferences
+
+The preferences have three tabs: **Sources**, **Data** (downloadable
+dictionaries) and **History** (maximum number of remembered searches, plus a
+button to clear the history).
 
 ⚙ → **Sources** lists every search source. Each row can be enabled/disabled
 (disabled sources are not queried), edited, moved, deleted, or tested with a
@@ -137,8 +166,8 @@ sample word. **Add source** creates a new one. A source has:
 | [Oxford English Dictionary](https://www.oed.com/)   | dictionary (en)             | Subscription site - **disabled by default**; free access only yields search snippets, an OED Researcher API credential (`app_id:app_key`) gives full entries |
 | [Thesaurus.com](https://www.thesaurus.com/)         | thesaurus (en)              |                                                                                                                                                              |
 | [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
-| Google Translate                                    | translator, text            | Public web endpoint, or the Cloud Translation API with a key                                                                                                 |
-| DeepL                                               | translator, text            | Web app endpoint, or the official API with a key (free keys end in `:fx`)                                                                                    |
+| Google Translate                                    | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a Cloud Translation API key and enable it                             |
+| DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
 
 The web sources are scraped from the public pages (like a browser would).
 Page layouts change; when a source stops returning results, check for a plugin
@@ -211,16 +240,16 @@ row, a *thesaurus* row (its synonyms/antonyms) and a *translator* row
 
 **Word vs. full-text translators** - the *Translation kind* only affects how
 results are presented and copied: word translators show `source → target`
-pairs and Alt+click copies one side; full-text services show the translated
-text and Alt+click copies all of it.
+pairs and a right click copies one side; full-text services show the translated
+text and a right click copies all of it.
 
 Everything is stored in plain files you can edit as well:
 
 | File | Purpose |
 |------|---------|
 | `~/.config/omababel/sources.json` | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted |
-| `~/.config/omababel/prefs.json` | Last mode and languages |
-| `~/.local/state/omababel/history.json` | Search history (max 1000) |
+| `~/.config/omababel/prefs.json` | Last mode, languages and thesaurus sort order |
+| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000) |
 | `~/.local/share/omababel/` | Dictionary data and indexes |
 | `~/.cache/omababel/` | Indexes built from raw local files |
 

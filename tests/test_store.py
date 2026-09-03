@@ -41,7 +41,11 @@ class StoreTest(TempEnv):
         res = st.thesaurus("house", "en")
         self.assertEqual(res["synonyms"], ["home", "dwelling", "residence", "chamber", "accommodate", "lodge"])
         self.assertEqual(res["antonyms"], ["evict"])
+        self.assertEqual([g["label"] for g in res["groups"]],
+                         ["a building for human habitation", "a legislative assembly", "to provide with a house"])
+        self.assertEqual(res["groups"][2]["antonyms"], ["evict"])
         self.assertEqual(st.thesaurus("nothing")["synonyms"], [])
+        self.assertEqual(st.thesaurus("nothing")["groups"], [])
 
     def test_translate_forward_and_reverse(self):
         st = self.build()

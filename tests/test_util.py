@@ -54,6 +54,25 @@ class ResultsTest(unittest.TestCase):
         out = R.consolidate(parts)
         self.assertEqual(out["synonyms"], ["abode", "Dwelling", "home"])
         self.assertEqual(out["antonyms"], ["office"])   # "home" dropped: it is a synonym
+        self.assertEqual(out["groups"], [])
+
+    def test_thesaurus_groups(self):
+        # flat lists only -> one unlabelled group; groups only -> flat lists derived
+        flat = R.thesaurus(["b", "a"], ["z"])
+        self.assertEqual(flat["groups"], [{"label": "", "pos": "", "synonyms": ["b", "a"], "antonyms": ["z"]}])
+        grouped = R.thesaurus([], [], groups=[R.group(["x", "y"], [], label="one", pos="noun"),
+                                              R.group(["y", "w"], ["q"], label="two"), R.group([], [], label="empty")])
+        self.assertEqual(grouped["synonyms"], ["x", "y", "w"])
+        self.assertEqual(grouped["antonyms"], ["q"])
+        self.assertEqual([g["label"] for g in grouped["groups"]], ["one", "two"])
+        entries = [{"pos": "noun", "senses": [{"gloss": "g1", "synonyms": ["s1"], "antonyms": []},
+                                             {"gloss": "g2", "synonyms": [], "antonyms": []},
+                                             {"gloss": "g3", "synonyms": [], "antonyms": ["a3"]}]}]
+        self.assertEqual([g["label"] for g in R.groups_from_senses(entries)], ["g1", "g3"])
+        out = R.consolidate([{"source": {"id": "s", "name": "S"}, "synonyms": ["b", "a"], "antonyms": [],
+                             "groups": [R.group(["b", "a"], [], label="L")]}])
+        self.assertEqual(out["groups"], [{"source": "S", "source_id": "s", "label": "L", "pos": "",
+                                          "synonyms": ["a", "b"], "antonyms": []}])
 
     def test_entry_shape(self):
         e = R.entry(" Haus ", pos="n", senses=[R.sense("x", examples=["", "y"])], extra={"a": "", "b": "c"})
@@ -76,9 +95,11 @@ class LanguagesTest(unittest.TestCase):
         self.assertEqual(languages.google_code("zh"), "zh-CN")
         self.assertIsNone(languages.leo_code("ja"))
 
-    def test_options_default_first(self):
+    def test_options_english_first_then_alphabetical(self):
         opts = languages.options()
-        self.assertEqual([o["value"] for o in opts[:7]], languages.DEFAULT_LANGUAGES)
+        self.assertEqual(opts[0]["value"], "en")
+        labels = [o["label"] for o in opts[1:]]
+        self.assertEqual(labels, sorted(labels))
         self.assertEqual(len(opts), len(languages.LANGUAGES))
 
 

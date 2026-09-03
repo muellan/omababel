@@ -55,10 +55,14 @@ def default_sources() -> List[dict]:
                     url="https://www.thesaurus.com/browse/{word}", languages=["en"]))
     # ---- remote translators
     rows.append(row("leo", "LEO", "translator", "leo", url="https://dict.leo.org/", translation_mode="word"))
-    rows.append(row("google-translate", "Google Translate", "translator", "google",
-                    url="https://translate.googleapis.com/translate_a/single", translation_mode="text"))
-    rows.append(row("deepl", "DeepL", "translator", "deepl", url="https://www.deepl.com/translator",
-                    translation_mode="text"))
+    # The key-less web endpoints of both services rate-limit within a handful
+    # of requests, so they ship disabled; enable them after adding an API key.
+    rows.append(row("google-translate", "Google Translate", "translator", "google", enabled=False,
+                    url="https://translate.googleapis.com/translate_a/single", translation_mode="text",
+                    notes="Disabled by default: the free endpoint rate-limits quickly. Add a Cloud Translation API key, then enable."))
+    rows.append(row("deepl", "DeepL", "translator", "deepl", enabled=False, url="https://www.deepl.com/translator",
+                    translation_mode="text",
+                    notes="Disabled by default: the free endpoint rate-limits quickly. Add a DeepL API key, then enable."))
     # ---- local datasets (installed on demand)
     for code in languages.DEFAULT_LANGUAGES:
         lname = _lang_name(code)
@@ -261,6 +265,8 @@ DEFAULT_PREFS = {
     "mode": "lookup",
     "lang": "de",
     "lang2": "en",
+    "thesaurus_sort": "alpha",
+    "history_max": 1000,
     "panel_width": 0,
     "panel_height": 0,
     "font_scale": 1.0,
@@ -287,6 +293,13 @@ class Prefs:
                 v = languages.normalize(str(v)) or DEFAULT_PREFS[k]
             if k == "mode" and v not in ("lookup", "thesaurus", "translate"):
                 continue
+            if k == "thesaurus_sort" and v not in ("alpha", "length"):
+                continue
+            if k == "history_max":
+                try:
+                    v = max(1, min(100000, int(v)))
+                except (TypeError, ValueError):
+                    continue
             self.data[k] = v
         self.save()
         return dict(self.data)
