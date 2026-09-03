@@ -77,6 +77,12 @@ Item {
           p.mode = "thesaurus"
           p.result = harness.readJson(fx + "/thesaurus.json")
           harness.check(p.result.consolidated.synonyms.length > 0, "thesaurus synonyms present")
+          harness.check(p.result.consolidated.groups.length > 1, "thesaurus meanings grouped")
+          harness.check(p.resultsView.sorted(["bb", "a", "ccc"]).join(",") === "a,bb,ccc", "alphabetical sort")
+          p.setThesaurusSort("length")
+          harness.check(p.resultsView.sortMode === "length", "sort mode propagated")
+          harness.check(p.resultsView.sorted(["ccc", "a", "bb", "dd"]).join(",") === "a,bb,dd,ccc", "length sort")
+          p.setThesaurusSort("alpha")
           break
         case 4:
           p.mode = "translate"
@@ -144,6 +150,8 @@ Item {
         case 12:
           p.searchWord("house")     // backend stub never answers: must not throw
           harness.check(p.searching === true && p.searchInput.text === "house", "searchWord updates field + searches")
+          p.clearResults()
+          harness.check(p.searching === false && p.result === null, "clearResults drops results")
           p.setMode("thesaurus")
           harness.check(p.mode === "thesaurus", "mode switch")
           p.swapLangs()

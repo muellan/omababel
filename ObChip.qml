@@ -3,7 +3,7 @@ import qs.Commons
 import qs.Ui
 
 // A single word as a small bordered chip (thesaurus lists).
-// Ctrl+click -> search that word, Alt+click -> copy it.
+// Left click -> search that word, right click -> copy it.
 BorderSurface {
   id: root
 
@@ -37,9 +37,10 @@ BorderSurface {
     anchors.fill: parent
     hoverEnabled: true
     cursorShape: Qt.PointingHandCursor
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     onClicked: function(mouse) {
-      if (mouse.modifiers & Qt.ControlModifier) root.searchWord(root.word)
-      else if (mouse.modifiers & Qt.AltModifier) root.copyText(root.word)
+      if (mouse.button === Qt.RightButton) root.copyText(root.word)
+      else root.searchWord(root.word)
     }
   }
 }

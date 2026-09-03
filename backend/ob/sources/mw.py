@@ -76,8 +76,7 @@ class MerriamWebster(Source):
             if e.status == 404:
                 return R.thesaurus([], [], url=url)
             raise SourceError(f"Merriam-Webster thesaurus: {e}")
-        syn, ant = self.parse_thesaurus(markup)
-        return R.thesaurus(syn, ant, url=url)
+        return R.thesaurus([], [], url=url, groups=self.parse_thesaurus_groups(markup))
 
     # ---------------------------------------------------------------- api
     def _api_get(self, template: str, word: str):
@@ -210,9 +209,19 @@ class MerriamWebster(Source):
 
     @classmethod
     def parse_thesaurus(cls, markup: str):
+        """Flat synonym / antonym lists (all meanings merged)."""
+        groups = cls.parse_thesaurus_groups(markup)
+        return (R.dedupe(w for g in groups for w in g["synonyms"]),
+                R.dedupe(w for g in groups for w in g["antonyms"]))
+
+    _AS_IN = re.compile(r"(?i)^as in\b")
+
+    @classmethod
+    def parse_thesaurus_groups(cls, markup: str) -> List[dict]:
+        """One group per meaning.  MW labels meanings "as in <word>"; the
+        label preceding a synonym list names the group, an antonym list joins
+        the group opened by the synonym list before it."""
         doc = htmlutil.parse(markup)
-        syn: List[str] = []
-        ant: List[str] = []
 
         def words_in(node: Node) -> List[str]:
             out = [a.inline_text() for a in node.find_all("a")]
@@ -220,16 +229,47 @@ class MerriamWebster(Source):
                 out = [li.inline_text() for li in node.find_all("li")]
             return [w for w in out if w and len(w) < 60]
 
+        groups: List[dict] = []
+        current: Optional[dict] = None
+        pending_label = ""
+        pending_pos = ""
+        handled = set()
         for node in doc.elements():
+            if any(id(a) in handled for a in node.ancestors()):
+                continue
             cls_ = " ".join(node.classes)
+            text = node.inline_text() if node.tag in ("p", "span", "h2", "h3", "h4", "div", "strong", "em") else ""
+            if text and len(text) < 80 and cls._AS_IN.match(text) and not node.find("a"):
+                pending_label = text
+                continue
+            if text and len(text) < 60 and re.match(r"(?i)^synonyms? of\b|^synonyms?\s*\(", text) and not node.find("a"):
+                m = re.search(r"\(([^)]+)\)", text)
+                if m:
+                    pending_pos = m.group(1)
+                continue
             if not cls_:
                 continue
             if re.search(r"\b(synonyms_list|syn-list|synonym-list)\b", cls_):
-                syn.extend(words_in(node))
+                words = words_in(node)
+                handled.add(id(node))
+                if not words:
+                    continue
+                current = R.group(words, [], label=pending_label, pos=pending_pos)
+                groups.append(current)
+                pending_label = ""
             elif re.search(r"\b(antonyms_list|ant-list|antonym-list)\b", cls_) and "near" not in cls_:
-                ant.extend(words_in(node))
-        if not syn:
+                words = words_in(node)
+                handled.add(id(node))
+                if not words:
+                    continue
+                if current is None:
+                    current = R.group([], [], label=pending_label, pos=pending_pos)
+                    groups.append(current)
+                current["antonyms"] = R.dedupe(current["antonyms"] + words)
+        if not groups:
             # Newer layout: headings "Synonyms of X" / "Antonyms of X" followed by lists.
+            syn: List[str] = []
+            ant: List[str] = []
             for h in doc.find_all("h2,h3,p", pred=lambda n: bool(re.match(r"(?i)^(synonyms|antonyms)\b", n.inline_text()))):
                 target = syn if h.inline_text().lower().startswith("syn") else ant
                 sib = h.parent
@@ -246,4 +286,6 @@ class MerriamWebster(Source):
                         break
                 if lst is not None:
                     target.extend(words_in(lst))
-        return R.dedupe(syn), R.dedupe(ant)
+            if syn or ant:
+                groups.append(R.group(syn, ant))
+        return [g for g in groups if g["synonyms"] or g["antonyms"]]

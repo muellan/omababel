@@ -118,10 +118,5 @@ class Source:
     # ------------------------------------------------------------ helpers
     @staticmethod
     def thesaurus_from_entries(entries: Iterable[dict], url: str = "") -> dict:
-        syn: List[str] = []
-        ant: List[str] = []
-        for e in entries:
-            for s in e.get("senses", []):
-                syn.extend(s.get("synonyms", []))
-                ant.extend(s.get("antonyms", []))
-        return R.thesaurus(syn, ant, url=url)
+        entries = list(entries)
+        return R.thesaurus([], [], url=url, groups=R.groups_from_senses(entries))

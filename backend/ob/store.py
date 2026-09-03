@@ -242,15 +242,14 @@ class Store:
         return out
 
     def thesaurus(self, word: str, lang: Optional[str] = None) -> dict:
-        syn: List[str] = []
-        ant: List[str] = []
-        for e in self.lookup(word, lang, prefix=False):
-            for s in e["senses"]:
-                syn.extend(s.get("synonyms", []))
-                ant.extend(s.get("antonyms", []))
-            syn.extend(e["extra"].get("synonyms", []) if isinstance(e["extra"].get("synonyms"), list) else [])
-            ant.extend(e["extra"].get("antonyms", []) if isinstance(e["extra"].get("antonyms"), list) else [])
-        return R.thesaurus(syn, ant)
+        entries = self.lookup(word, lang, prefix=False)
+        groups = R.groups_from_senses(entries)
+        for e in entries:
+            extra_syn = e["extra"].get("synonyms") if isinstance(e["extra"].get("synonyms"), list) else []
+            extra_ant = e["extra"].get("antonyms") if isinstance(e["extra"].get("antonyms"), list) else []
+            if extra_syn or extra_ant:
+                groups.append(R.group(extra_syn, extra_ant, pos=e.get("pos", "")))
+        return R.thesaurus([], [], groups=groups)
 
     def translate(self, word: str, src: str, dst: str, limit: int = 60) -> List[dict]:
         """Word translations ``src -> dst`` as result pairs."""

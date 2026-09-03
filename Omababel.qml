@@ -44,6 +44,7 @@ Item {
   property bool statusError: false
   property bool prefsOpen: false
   property var pendingPayload: null
+  property string thesaurusSort: "alpha"    // "alpha" | "length" (persisted)
 
   // --- exposed for tests / IPC callers
   readonly property alias searchInput: searchField
@@ -142,6 +143,7 @@ Item {
       root.mode = data.prefs.mode || "lookup"
       root.lang = data.prefs.lang || "de"
       root.lang2 = data.prefs.lang2 || "en"
+      root.thesaurusSort = data.prefs.thesaurus_sort === "length" ? "length" : "alpha"
     }
   }
 
@@ -158,7 +160,23 @@ Item {
   }
 
   function savePrefs() {
-    backend.call("prefs.set", {values: {mode: root.mode, lang: root.lang, lang2: root.lang2}}, null)
+    backend.call("prefs.set", {values: {mode: root.mode, lang: root.lang, lang2: root.lang2,
+                                        thesaurus_sort: root.thesaurusSort}}, null)
+  }
+
+  function setThesaurusSort(mode) {
+    root.thesaurusSort = mode === "length" ? "length" : "alpha"
+    root.savePrefs()
+  }
+
+  // Emptying the field (backspace / clear) drops the results that belonged
+  // to the previous query.
+  function clearResults() {
+    root.searchSeq++          // ignore any reply still in flight
+    root.searching = false
+    root.result = null
+    root.lastQuery = ""
+    root.setStatus("", false)
   }
 
   function langName(code) {
@@ -378,7 +396,7 @@ Item {
             Text {
               id: titleText
               textFormat: Text.PlainText
-              text: root.prefsOpen ? "omababel · preferences" : "omababel"
+              text: root.prefsOpen ? "Omababel · Preferences" : "Omababel"
               color: root.foreground
               font.family: root.fontFamily
               font.pixelSize: Style.font.heading
@@ -509,7 +527,10 @@ Item {
               if (historyPopup.opened && historyPopup.currentIndex >= 0) historyPopup.pickCurrent()
               else root.runSearch(text)
             }
-            onTextEdited: if (historyPopup.opened) historyPopup.filter(text)
+            onTextEdited: {
+              if (historyPopup.opened) historyPopup.filter(text)
+              if (text.trim() === "" && (root.result !== null || root.searching)) root.clearResults()
+            }
             Keys.priority: Keys.BeforeItem
             Keys.onPressed: function(event) {
               if (event.key === Qt.Key_Down) {
@@ -722,11 +743,13 @@ Item {
           result: root.result
           mode: root.mode
           searching: root.searching
+          sortMode: root.thesaurusSort
           foreground: root.foreground
           accent: root.accent
           fontFamily: root.fontFamily
           onSearchWord: function(w) { root.searchWord(w) }
           onCopyText: function(t) { root.copyText(t) }
+          onSortRequested: function(m) { root.setThesaurusSort(m) }
         }
 
         // ------------------------------------------------------ preferences
@@ -808,7 +831,7 @@ Item {
             id: hintText
             anchors.right: parent.right
             textFormat: Text.PlainText
-            text: root.prefsOpen ? "Esc: back" : "Ctrl+click: look up · Alt+click: copy · Ctrl+1/2/3: mode · Ctrl+,: preferences"
+            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+,: preferences"
             color: root.muted
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption

@@ -20,9 +20,26 @@ Item {
   readonly property color errorColor: Color.urgent
   property string fontFamily: Style.font.family
 
+  // thesaurus word order inside groups: "alpha" (default) or "length"
+  property string sortMode: "alpha"
+
   signal searchWord(string word)
   signal copyText(string text)
   signal installRequested(string dataset)
+  signal sortRequested(string mode)
+
+  function sorted(words) {
+    var out = (words || []).slice()
+    if (root.sortMode === "length") {
+      out.sort(function(a, b) {
+        if (a.length !== b.length) return a.length - b.length
+        return a.localeCompare(b, undefined, {sensitivity: "base"})
+      })
+    } else {
+      out.sort(function(a, b) { return a.localeCompare(b, undefined, {sensitivity: "base"}) })
+    }
+    return out
+  }
 
   function scrollToTop() { flick.contentY = 0 }
 
@@ -98,6 +115,38 @@ Item {
     }
   }
 
+  // "Synonyms (n)" label followed by a flow of word chips; hidden when empty.
+  component WordSection: Column {
+    property string title: ""
+    property var words: []
+    visible: words.length > 0
+    width: parent.width
+    spacing: Style.spacing.xs
+    Text {
+      textFormat: Text.PlainText
+      text: parent.title + "  (" + parent.words.length + ")"
+      color: root.muted
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.caption
+      font.bold: true
+    }
+    Flow {
+      width: parent.width
+      spacing: Style.spacing.sm
+      Repeater {
+        model: parent.parent.words
+        delegate: ObChip {
+          required property var modelData
+          word: modelData
+          foreground: root.foreground
+          accent: root.accent
+          onSearchWord: function(w) { root.searchWord(w) }
+          onCopyText: function(t) { root.copyText(t) }
+        }
+      }
+    }
+  }
+
   component Hint: Text {
     width: parent.width
     textFormat: Text.PlainText
@@ -124,7 +173,7 @@ Item {
       // ------------------------------------------------------ empty states
       Hint {
         visible: root.result === null && !root.searching
-        text: "Type a word or phrase and press Enter.\n\nCtrl+click a word in the results to look it up · Alt+click copies it."
+        text: "Type a word or phrase and press Enter.\n\nClick a word in the results to look it up · right-click copies it."
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
       }
@@ -137,8 +186,8 @@ Item {
       Hint {
         visible: !!(root.result && !root.searching && root.isEmpty() && !(root.result.results && root.result.results.length > 0))
         text: root.result && root.result.skipped && root.result.skipped.length > 0
-          ? "No enabled source covers this language yet. " + root.result.skipped.length + " local source(s) are not installed – open the preferences (⚙) to download dictionary data."
-          : "No source is configured for this language and mode. Open the preferences (⚙) to add or enable sources."
+          ? "No enabled source covers this language yet. " + root.result.skipped.length + " local source(s) are not installed – open the preferences (󰒓) to download dictionary data."
+          : "No source is configured for this language and mode. Open the preferences (󰒓) to add or enable sources."
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
       }
@@ -149,67 +198,94 @@ Item {
         width: parent.width
         spacing: Style.spacing.lg
 
-        Column {
+        // sort switch: alphabetical (default) or by word length, within groups
+        Row {
           width: parent.width
-          spacing: Style.spacing.sm
+          spacing: Style.spacing.md
           Text {
             textFormat: Text.PlainText
-            text: "Synonyms" + (root.result && root.result.consolidated ? "  (" + root.result.consolidated.synonyms.length + ")" : "")
-            color: root.foreground
+            text: "Sort"
+            color: root.muted
             font.family: root.fontFamily
-            font.pixelSize: Style.font.title
-            font.bold: true
+            font.pixelSize: Style.font.caption
+            anchors.verticalCenter: parent.verticalCenter
           }
-          Hint {
-            visible: !!(root.result && root.result.consolidated && root.result.consolidated.synonyms.length === 0)
-            text: "No synonyms found."
+          ButtonGroup {
+            options: [{value: "alpha", label: "A–Z"}, {value: "length", label: "Length"}]
+            value: root.sortMode
+            foreground: root.foreground
+            background: "transparent"
+            accent: root.accent
+            fontSize: Style.font.bodySmall
+            onChanged: function(v) { root.sortRequested(v) }
           }
-          Flow {
-            width: parent.width
-            spacing: Style.spacing.sm
-            Repeater {
-              model: root.result && root.result.consolidated ? root.result.consolidated.synonyms : []
-              delegate: ObChip {
-                required property var modelData
-                word: modelData
-                foreground: root.foreground
-                accent: root.accent
-                onSearchWord: function(w) { root.searchWord(w) }
-                onCopyText: function(t) { root.copyText(t) }
+        }
+
+        // one block per meaning, in source order (thesaurus.com style)
+        Repeater {
+          model: root.result && root.result.consolidated ? root.result.consolidated.groups : []
+          delegate: Card {
+            id: groupCard
+            required property var modelData
+            required property int index
+
+            Row {
+              width: parent.width
+              spacing: Style.spacing.md
+              Text {
+                textFormat: Text.PlainText
+                text: groupCard.modelData.label ? groupCard.modelData.label : "Meaning " + (groupCard.index + 1)
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.subtitle
+                font.bold: true
+                elide: Text.ElideRight
+                width: Math.min(implicitWidth, groupCard.width - Style.spacing.lg * 2 - groupMeta.width - Style.spacing.md)
               }
+              Text {
+                id: groupMeta
+                textFormat: Text.PlainText
+                text: (groupCard.modelData.pos ? groupCard.modelData.pos + "  ·  " : "") + groupCard.modelData.source
+                color: root.muted
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.caption
+                anchors.baseline: parent.children[0].baseline
+              }
+            }
+            WordSection {
+              title: "Synonyms"
+              words: root.sorted(groupCard.modelData.synonyms)
+            }
+            WordSection {
+              title: "Antonyms"
+              words: root.sorted(groupCard.modelData.antonyms)
             }
           }
         }
 
-        Column {
-          width: parent.width
-          spacing: Style.spacing.sm
+        // everything merged, for a quick overview
+        Card {
+          visible: !!(root.result && root.result.consolidated && root.result.consolidated.groups.length !== 1)
           Text {
             textFormat: Text.PlainText
-            text: "Antonyms" + (root.result && root.result.consolidated ? "  (" + root.result.consolidated.antonyms.length + ")" : "")
+            text: "All meanings"
             color: root.foreground
             font.family: root.fontFamily
-            font.pixelSize: Style.font.title
+            font.pixelSize: Style.font.subtitle
             font.bold: true
           }
           Hint {
-            visible: !!(root.result && root.result.consolidated && root.result.consolidated.antonyms.length === 0)
-            text: "No antonyms found."
+            visible: !!(root.result && root.result.consolidated && root.result.consolidated.synonyms.length === 0
+                        && root.result.consolidated.antonyms.length === 0)
+            text: "No synonyms or antonyms found."
           }
-          Flow {
-            width: parent.width
-            spacing: Style.spacing.sm
-            Repeater {
-              model: root.result && root.result.consolidated ? root.result.consolidated.antonyms : []
-              delegate: ObChip {
-                required property var modelData
-                word: modelData
-                foreground: root.foreground
-                accent: root.accent
-                onSearchWord: function(w) { root.searchWord(w) }
-                onCopyText: function(t) { root.copyText(t) }
-              }
-            }
+          WordSection {
+            title: "Synonyms"
+            words: root.result && root.result.consolidated ? root.sorted(root.result.consolidated.synonyms) : []
+          }
+          WordSection {
+            title: "Antonyms"
+            words: root.result && root.result.consolidated ? root.sorted(root.result.consolidated.antonyms) : []
           }
         }
 
@@ -290,7 +366,7 @@ Item {
                 width: parent.width
                 spacing: Style.spacing.md
                 ObLinkText {
-                  text: "<b>" + (entryCol.modelData.headword_html || "") + "</b>"
+                  html: "<b>" + (entryCol.modelData.headword_html || "") + "</b>"
                   font.pixelSize: Style.font.title
                   color: root.foreground
                   onSearchWord: function(w) { root.searchWord(w) }
@@ -341,7 +417,7 @@ Item {
                     }
                     ObLinkText {
                       width: parent.width - senseLabel.width - Style.spacing.md
-                      text: (senseCol.modelData.gloss_html || "")
+                      html: (senseCol.modelData.gloss_html || "")
                         + (senseCol.modelData.tags && senseCol.modelData.tags.length
                             ? "  <font color=\"" + root.muted + "\"><i>[" + senseCol.modelData.tags.join(", ") + "]</i></font>" : "")
                       color: root.foreground
@@ -355,7 +431,7 @@ Item {
                       required property var modelData
                       width: senseCol.width - senseCol.leftPadding - Style.space(18) - Style.spacing.md
                       x: Style.space(18) + Style.spacing.md
-                      text: "<i>» " + modelData + "</i>"
+                      html: "<i>» " + modelData + "</i>"
                       color: root.muted
                       font.pixelSize: Style.font.bodySmall
                       onSearchWord: function(w) { root.searchWord(w) }
@@ -366,7 +442,7 @@ Item {
                     visible: (senseCol.modelData.synonyms_html || "") !== ""
                     width: senseCol.width - senseCol.leftPadding - Style.space(18) - Style.spacing.md
                     x: Style.space(18) + Style.spacing.md
-                    text: "<font color=\"" + root.muted + "\">syn:</font> " + (senseCol.modelData.synonyms_html || "")
+                    html: "<font color=\"" + root.muted + "\">syn:</font> " + (senseCol.modelData.synonyms_html || "")
                     color: root.foreground
                     font.pixelSize: Style.font.bodySmall
                     onSearchWord: function(w) { root.searchWord(w) }
@@ -376,7 +452,7 @@ Item {
                     visible: (senseCol.modelData.antonyms_html || "") !== ""
                     width: senseCol.width - senseCol.leftPadding - Style.space(18) - Style.spacing.md
                     x: Style.space(18) + Style.spacing.md
-                    text: "<font color=\"" + root.muted + "\">ant:</font> " + (senseCol.modelData.antonyms_html || "")
+                    html: "<font color=\"" + root.muted + "\">ant:</font> " + (senseCol.modelData.antonyms_html || "")
                     color: root.foreground
                     font.pixelSize: Style.font.bodySmall
                     onSearchWord: function(w) { root.searchWord(w) }
@@ -391,7 +467,7 @@ Item {
                   required property var modelData
                   width: entryCol.width - Style.spacing.lg
                   x: Style.spacing.lg
-                  text: "<font color=\"" + root.muted + "\">" + modelData.key + ":</font> " + modelData.value
+                  html: "<font color=\"" + root.muted + "\">" + modelData.key + ":</font> " + modelData.value
                   color: root.foreground
                   font.pixelSize: Style.font.bodySmall
                   onSearchWord: function(w) { root.searchWord(w) }
@@ -405,7 +481,7 @@ Item {
           ObLinkText {
             visible: root.mode === "translate" && (card.modelData.text_html || "") !== ""
             width: parent.width
-            text: card.modelData.text_html || ""
+            html: card.modelData.text_html || ""
             plainText: card.modelData.text || ""
             copyWhole: true
             color: root.foreground
@@ -415,14 +491,14 @@ Item {
           }
           Hint {
             visible: root.mode === "translate" && (card.modelData.text_html || "") !== ""
-            text: "Alt+click copies the whole translation" + (card.modelData.detected ? "  ·  detected: " + card.modelData.detected : "")
+            text: "Right-click copies the whole translation" + (card.modelData.detected ? "  ·  detected: " + card.modelData.detected : "")
           }
           Repeater {
             model: root.mode === "translate" ? (card.modelData.alternatives_html || []) : []
             delegate: ObLinkText {
               required property var modelData
               width: card.width - Style.spacing.lg * 2
-              text: "<font color=\"" + root.muted + "\">~</font> " + modelData
+              html: "<font color=\"" + root.muted + "\">~</font> " + modelData
               color: root.foreground
               onSearchWord: function(w) { root.searchWord(w) }
               onCopyText: function(t) { root.copyText(t) }
@@ -444,7 +520,7 @@ Item {
                 id: srcText
                 x: 0
                 width: pairRow.half
-                text: pairRow.modelData.src_html || ""
+                html: pairRow.modelData.src_html || ""
                 plainText: pairRow.modelData.src || ""
                 copyWhole: true
                 color: root.foreground
@@ -464,7 +540,7 @@ Item {
                 id: dstText
                 x: arrow.x + arrow.width + Style.spacing.md
                 width: pairRow.half
-                text: (pairRow.modelData.dst_html || "")
+                html: (pairRow.modelData.dst_html || "")
                   + (pairRow.modelData.note_html ? "  <font color=\"" + root.muted + "\">" + pairRow.modelData.note_html + "</font>" : "")
                 plainText: pairRow.modelData.dst || ""
                 copyWhole: true
@@ -494,8 +570,9 @@ Item {
         visible: !!(root.result && !root.searching && root.result.skipped && root.result.skipped.length > 0)
         width: parent.width
         spacing: Style.spacing.xs
+        topPadding: Style.spacing.huge
         Hint {
-          text: "Not installed (open ⚙ → Data to download): "
+          text: "Not installed (open 󰒓 → Data to download): "
             + (root.result && root.result.skipped ? root.result.skipped.map(function(s) { return s.name }).join(", ") : "")
         }
       }

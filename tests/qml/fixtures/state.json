@@ -128,7 +128,7 @@
   {
    "id": "google-translate",
    "name": "Google Translate",
-   "enabled": true,
+   "enabled": false,
    "type": "translator",
    "driver": "google",
    "url": "https://translate.googleapis.com/translate_a/single",
@@ -138,7 +138,7 @@
    "translation_mode": "text",
    "api_key": "",
    "builtin": true,
-   "notes": "",
+   "notes": "Disabled by default: the free endpoint rate-limits quickly. Add a Cloud Translation API key, then enable.",
    "kind": "remote",
    "languages": [],
    "pairs": [],
@@ -147,7 +147,7 @@
   {
    "id": "deepl",
    "name": "DeepL",
-   "enabled": true,
+   "enabled": false,
    "type": "translator",
    "driver": "deepl",
    "url": "https://www.deepl.com/translator",
@@ -157,7 +157,7 @@
    "translation_mode": "text",
    "api_key": "",
    "builtin": true,
-   "notes": "",
+   "notes": "Disabled by default: the free endpoint rate-limits quickly. Add a DeepL API key, then enable.",
    "kind": "remote",
    "languages": [],
    "pairs": [],
@@ -1795,39 +1795,9 @@
  ],
  "languages": [
   {
-   "value": "de",
-   "label": "German",
-   "native": "Deutsch"
-  },
-  {
    "value": "en",
    "label": "English",
    "native": "English"
-  },
-  {
-   "value": "zh",
-   "label": "Chinese (Mandarin)",
-   "native": "中文"
-  },
-  {
-   "value": "fr",
-   "label": "French",
-   "native": "Français"
-  },
-  {
-   "value": "es",
-   "label": "Spanish",
-   "native": "Español"
-  },
-  {
-   "value": "pt",
-   "label": "Portuguese",
-   "native": "Português"
-  },
-  {
-   "value": "ja",
-   "label": "Japanese",
-   "native": "日本語"
   },
   {
    "value": "ar",
@@ -1843,6 +1813,11 @@
    "value": "ca",
    "label": "Catalan",
    "native": "Català"
+  },
+  {
+   "value": "zh",
+   "label": "Chinese (Mandarin)",
+   "native": "中文"
   },
   {
    "value": "hr",
@@ -1878,6 +1853,16 @@
    "value": "fi",
    "label": "Finnish",
    "native": "Suomi"
+  },
+  {
+   "value": "fr",
+   "label": "French",
+   "native": "Français"
+  },
+  {
+   "value": "de",
+   "label": "German",
+   "native": "Deutsch"
   },
   {
    "value": "el",
@@ -1920,6 +1905,11 @@
    "native": "Italiano"
   },
   {
+   "value": "ja",
+   "label": "Japanese",
+   "native": "日本語"
+  },
+  {
    "value": "ko",
    "label": "Korean",
    "native": "한국어"
@@ -1952,12 +1942,17 @@
   {
    "value": "fa",
    "label": "Persian",
-   "native": "فارسی"
+   "native": "فارس"
   },
   {
    "value": "pl",
    "label": "Polish",
    "native": "Polski"
+  },
+  {
+   "value": "pt",
+   "label": "Portuguese",
+   "native": "Português"
   },
   {
    "value": "ro",
@@ -1983,6 +1978,11 @@
    "value": "sl",
    "label": "Slovene",
    "native": "Slovenščina"
+  },
+  {
+   "value": "es",
+   "label": "Spanish",
+   "native": "Español"
   },
   {
    "value": "sw",
@@ -2019,6 +2019,7 @@
   "mode": "lookup",
   "lang": "de",
   "lang2": "en",
+  "thesaurus_sort": "alpha",
   "panel_width": 0,
   "panel_height": 0,
   "font_scale": 1.0
@@ -2029,20 +2030,20 @@
    "mode": "translate",
    "lang": "en",
    "lang2": "de",
-   "time": 1788459284
+   "time": 1788473036
   },
   {
    "query": "Haus",
    "mode": "translate",
    "lang": "de",
    "lang2": "en",
-   "time": 1788459284
+   "time": 1788473036
   }
  ],
  "paths": {
-  "config": "/tmp/omababel-fixtures-cn4diyer/config",
-  "data": "/tmp/omababel-fixtures-cn4diyer/data",
-  "state": "/tmp/omababel-fixtures-cn4diyer/state",
-  "cache": "/tmp/omababel-fixtures-cn4diyer/cache"
+  "config": "/tmp/omababel-fixtures-hv_f2ey9/config",
+  "data": "/tmp/omababel-fixtures-hv_f2ey9/data",
+  "state": "/tmp/omababel-fixtures-hv_f2ey9/state",
+  "cache": "/tmp/omababel-fixtures-hv_f2ey9/cache"
  }
 }

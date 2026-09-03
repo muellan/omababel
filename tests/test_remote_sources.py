@@ -77,6 +77,7 @@ class DudenTest(unittest.TestCase):
         with fake_fetch(lambda url, **kw: FakeResponse(read_fixture("duden-haus.html"))):
             th = src.thesaurus("Haus", "de")
         self.assertIn("Gebäude", th["synonyms"])
+        self.assertEqual(th["groups"][0]["label"], "Gebäude, das Menschen zum Wohnen dient")
 
 
 class MerriamWebsterTest(unittest.TestCase):
@@ -98,6 +99,11 @@ class MerriamWebsterTest(unittest.TestCase):
         self.assertEqual(ant, ["evict"])           # near antonyms ignored
         syn, ant = mw.MerriamWebster.parse_thesaurus(read_fixture("mw-thes-new.html"))
         self.assertEqual((syn, ant), (["home", "abode"], ["evict"]))
+        groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-senses.html"))
+        self.assertEqual([(g["pos"], g["label"], g["synonyms"], g["antonyms"]) for g in groups],
+                         [("noun", "as in home", ["home", "abode"], ["office"]),
+                          ("noun", "as in family", ["household"], []),
+                          ("verb", "as in accommodate", ["lodge"], ["evict"])])
 
     def test_api_parsing(self):
         data = [{"meta": {"id": "house:1"}, "hwi": {"hw": "house", "prs": [{"mw": "ˈhau̇s"}]}, "fl": "noun",
@@ -136,6 +142,10 @@ class ThesaurusComTest(unittest.TestCase):
         syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house.html"))
         self.assertEqual(syn, ["apartment", "home", "shack", "household", "clan"])
         self.assertEqual(ant, ["office"])
+        groups = thesauruscom.ThesaurusCom.parse_groups(read_fixture("thesaurus-house.html"))
+        self.assertEqual([(g["pos"], g["label"], g["synonyms"], g["antonyms"]) for g in groups],
+                         [("noun", "human habitat", ["apartment", "home", "shack"], ["office"]),
+                          ("noun", "family", ["household", "clan"], [])])
 
     def test_dom_path(self):
         syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house-dom.html"))
@@ -146,6 +156,10 @@ class ThesaurusComTest(unittest.TestCase):
         syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house-2026.html"))
         self.assertEqual(syn, ["apartment", "home", "abode", "household", "clan"])
         self.assertEqual(ant, ["office"])          # not lumped into synonyms; related words ignored
+        groups = thesauruscom.ThesaurusCom.parse_groups(read_fixture("thesaurus-house-2026.html"))
+        self.assertEqual([(g["pos"], g["label"]) for g in groups], [("noun", "human habitat"), ("noun", "family, ancestry")])
+        self.assertEqual(groups[0]["antonyms"], ["office"])
+        self.assertEqual(groups[1]["antonyms"], [])
 
     def test_escaped_json(self):
         markup = 'self.__next_f.push("{\\"synonyms\\":[{\\"term\\":\\"abode\\"}]}")'
@@ -158,6 +172,7 @@ class ThesaurusComTest(unittest.TestCase):
             res = src.thesaurus("house", "en")
         self.assertEqual(res["url"], "https://www.thesaurus.com/browse/house")
         self.assertIn("home", res["synonyms"])
+        self.assertEqual(len(res["groups"]), 2)
 
 
 class LeoTest(unittest.TestCase):
