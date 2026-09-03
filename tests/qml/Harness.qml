@@ -1,0 +1,166 @@
+import QtQuick
+import QtQuick.Window
+
+// Offscreen smoke test for the panel QML.
+//
+// Loads the plugin's Omababel.qml (with Quickshell replaced by the stubs in
+// tests/qml/stubs and `qs` pointing at an Omarchy shell checkout), feeds it
+// state + result fixtures produced by the real backend and walks through
+// every mode and the preferences panel.  Any QML error/warning printed
+// while doing so fails the test (tests/run.sh greps stderr).
+Item {
+  id: harness
+  width: 1400
+  height: 900
+
+  property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
+  property string fixtureDir: ""
+  property int step: 0
+  property var panel: null
+
+  function readJson(path) {
+    var xhr = new XMLHttpRequest()
+    xhr.open("GET", "file://" + path, false)
+    xhr.send()
+    return JSON.parse(xhr.responseText)
+  }
+
+  function fail(msg) {
+    console.error("HARNESS FAIL: " + msg)
+    Qt.exit(1)
+  }
+
+  function check(cond, msg) {
+    if (!cond) fail(msg)
+  }
+
+  Loader {
+    id: loader
+    source: harness.pluginDir + "/Omababel.qml"
+    onStatusChanged: {
+      if (status === Loader.Error) harness.fail("cannot load Omababel.qml: " + sourceComponent)
+      if (status === Loader.Ready) {
+        harness.panel = item
+        item.shell = ({ hide: function(id) { console.log("shell.hide(" + id + ")") } })
+        item.manifest = ({ id: "muellan.omababel" })
+        stepper.start()
+      }
+    }
+  }
+
+  Timer {
+    id: stepper
+    interval: 150
+    repeat: true
+    onTriggered: {
+      var p = harness.panel
+      var fx = harness.fixtureDir
+      try {
+        switch (harness.step) {
+        case 0:
+          p.open("{}")
+          harness.check(p.opened === true, "open() sets opened")
+          break
+        case 1:
+          p.applyState(harness.readJson(fx + "/state.json"), true)
+          p.stateLoaded = true
+          harness.check(p.languages.length > 10, "languages loaded")
+          harness.check(p.sources.length > 10, "sources loaded")
+          harness.check(p.mode === "lookup", "prefs mode applied")
+          break
+        case 2:
+          p.mode = "lookup"
+          p.result = harness.readJson(fx + "/lookup.json")
+          harness.check(p.result.results.length > 0, "lookup result has sources")
+          break
+        case 3:
+          p.mode = "thesaurus"
+          p.result = harness.readJson(fx + "/thesaurus.json")
+          harness.check(p.result.consolidated.synonyms.length > 0, "thesaurus synonyms present")
+          break
+        case 4:
+          p.mode = "translate"
+          p.result = harness.readJson(fx + "/translate.json")
+          break
+        case 5:
+          p.mode = "translate"
+          p.result = harness.readJson(fx + "/translate_text.json")
+          break
+        case 6:
+          p.rememberHistory("Haus")
+          p.rememberHistory("house")
+          harness.check(p.history.length >= 2 && p.history[0].query === "house", "history bookkeeping")
+          break
+        case 7:
+          p.openPrefs()
+          harness.check(p.prefsOpen === true, "prefs open")
+          break
+        case 8:
+          p.datasets = harness.readJson(fx + "/datasets.json").datasets
+          p.localStatus = harness.readJson(fx + "/status.json").status
+          break
+        case 9:
+          // preferences editor: validation + field wiring
+          var prefs = p.prefsView
+          prefs.startNew()
+          harness.check(prefs.tab === "edit" && prefs.editingNew, "editor opened for a new row")
+          prefs.commitEdit()
+          harness.check(prefs.message.indexOf("name") >= 0, "empty name rejected: " + prefs.message)
+          prefs.nameInput.text = "My Dict"
+          prefs.urlInput.text = "https://example.org/no-placeholder"
+          prefs.commitEdit()
+          harness.check(prefs.message.indexOf("{word}") >= 0, "missing {word} rejected: " + prefs.message)
+          prefs.setEditField("type", "translator")
+          harness.check(prefs.editing.type === "translator", "type switch")
+          prefs.setEditField("kind", "local")
+          harness.check(prefs.editing.driver === "local", "local kind selects local driver")
+          prefs.setEditField("kind", "remote")
+          prefs.setEditField("driver", "google")
+          harness.check(prefs.editing.url.indexOf("translate.googleapis.com") >= 0, "driver default url applied")
+          prefs.urlInput.text = "https://example.org/{word}"
+          prefs.commitEdit()      // emits saveSource -> backend stub (no reply); must not throw
+          prefs.startEdit(p.sources[0])
+          harness.check(prefs.editing.id === p.sources[0].id && !prefs.editingNew, "edit existing row")
+          prefs.cancelEdit()
+          harness.check(prefs.tab === "sources" && prefs.editing === null, "cancel returns to list")
+          prefs.tab = "data"
+          break
+        case 10:
+          p.closePrefs()
+          harness.check(p.prefsOpen === false, "prefs closed")
+          break
+        case 11:
+          // history popup: filter, keyboard walk, pick
+          var hp = p.historyView
+          hp.openWith("ha")
+          harness.check(hp.opened === true, "history popup opens")
+          harness.check(hp.rows.length === 1 && hp.rows[0].query === "Haus", "history filtered by substring")
+          hp.move(1)
+          harness.check(hp.currentIndex === 0, "history cursor moves")
+          hp.pickCurrent()
+          harness.check(hp.opened === false, "pick closes popup")
+          harness.check(p.searchInput.text === "Haus" && p.searching === true, "pick starts a search")
+          break
+        case 12:
+          p.searchWord("house")     // backend stub never answers: must not throw
+          harness.check(p.searching === true && p.searchInput.text === "house", "searchWord updates field + searches")
+          p.setMode("thesaurus")
+          harness.check(p.mode === "thesaurus", "mode switch")
+          p.swapLangs()
+          harness.check(p.lang === "en" && p.lang2 === "de", "swap languages: " + p.lang + "/" + p.lang2)
+          break
+        case 13:
+          p.dismiss()
+          harness.check(p.opened === false, "dismiss closes")
+          break
+        default:
+          console.log("HARNESS OK")
+          Qt.exit(0)
+        }
+      } catch (e) {
+        harness.fail("step " + harness.step + " threw: " + e)
+      }
+      harness.step++
+    }
+  }
+}

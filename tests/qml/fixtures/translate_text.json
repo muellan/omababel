@@ -1,0 +1,327 @@
+{
+ "mode": "translate",
+ "query": "house",
+ "lang": "en",
+ "lang2": "de",
+ "results": [
+  {
+   "source": {
+    "id": "leo",
+    "name": "LEO",
+    "type": "translator",
+    "driver": "leo",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": false,
+   "error": "LEO: offline mode (OMABABEL_OFFLINE is set); offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0,
+   "alternatives_html": []
+  },
+  {
+   "source": {
+    "id": "google-translate",
+    "name": "Google Translate",
+    "type": "translator",
+    "driver": "google",
+    "kind": "remote",
+    "translation_mode": "text"
+   },
+   "ok": false,
+   "error": "Google Translate: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0,
+   "alternatives_html": []
+  },
+  {
+   "source": {
+    "id": "deepl",
+    "name": "DeepL",
+    "type": "translator",
+    "driver": "deepl",
+    "kind": "remote",
+    "translation_mode": "text"
+   },
+   "ok": false,
+   "error": "DeepL web endpoint: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0,
+   "alternatives_html": []
+  },
+  {
+   "source": {
+    "id": "freedict-deu-eng",
+    "name": "FreeDict German → English",
+    "type": "translator",
+    "driver": "local",
+    "kind": "local",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "mode": "word",
+   "pairs": [
+    {
+     "src": "house",
+     "dst": "Haus",
+     "pos": "n, n",
+     "note": "",
+     "src_html": "<a href=\"w:house\">house</a>",
+     "dst_html": "<a href=\"w:Haus\">Haus</a>",
+     "note_html": ""
+    }
+   ],
+   "text": "",
+   "detected": "",
+   "url": "",
+   "alternatives": [],
+   "count": 1,
+   "ms": 1,
+   "alternatives_html": []
+  },
+  {
+   "source": {
+    "id": "mini-trans",
+    "name": "Mini translations",
+    "type": "translator",
+    "driver": "local",
+    "kind": "local",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "mode": "word",
+   "pairs": [
+    {
+     "src": "house",
+     "dst": "Haus",
+     "pos": "noun",
+     "note": "",
+     "src_html": "<a href=\"w:house\">house</a>",
+     "dst_html": "<a href=\"w:Haus\">Haus</a>",
+     "note_html": ""
+    },
+    {
+     "src": "house",
+     "dst": "Gebäude",
+     "pos": "noun",
+     "note": "",
+     "src_html": "<a href=\"w:house\">house</a>",
+     "dst_html": "<a href=\"w:Geb%C3%A4ude\">Gebäude</a>",
+     "note_html": ""
+    },
+    {
+     "src": "house",
+     "dst": "unterbringen",
+     "pos": "verb",
+     "note": "",
+     "src_html": "<a href=\"w:house\">house</a>",
+     "dst_html": "<a href=\"w:unterbringen\">unterbringen</a>",
+     "note_html": ""
+    }
+   ],
+   "text": "",
+   "detected": "",
+   "url": "",
+   "alternatives": [],
+   "count": 3,
+   "ms": 1,
+   "alternatives_html": []
+  },
+  {
+   "source": {
+    "id": "google-translate",
+    "name": "Google Translate",
+    "type": "translator",
+    "driver": "google",
+    "kind": "remote",
+    "translation_mode": "text"
+   },
+   "ok": true,
+   "error": "",
+   "mode": "text",
+   "pairs": [
+    {
+     "src": "house",
+     "dst": "Haus",
+     "pos": "noun",
+     "note": "house, home",
+     "src_html": "<a href=\"w:house\">house</a>",
+     "dst_html": "<a href=\"w:Haus\">Haus</a>",
+     "note_html": "house, home"
+    }
+   ],
+   "text": "Das Haus",
+   "text_html": "<a href=\"w:Das\">Das</a> <a href=\"w:Haus\">Haus</a>",
+   "detected": "en",
+   "url": "https://translate.google.com/?sl=en&tl=de&text=house",
+   "alternatives": [
+    "Das Gebäude"
+   ],
+   "alternatives_html": [
+    "<a href=\"w:Das\">Das</a> <a href=\"w:Geb%C3%A4ude\">Gebäude</a>"
+   ],
+   "count": 2,
+   "ms": 240
+  }
+ ],
+ "skipped": [
+  {
+   "id": "wiktionary-de-translator",
+   "name": "Wiktionary translations (German)",
+   "reason": "not installed",
+   "dataset": "wiktionary-de"
+  },
+  {
+   "id": "wiktionary-en-translator",
+   "name": "Wiktionary translations (English)",
+   "reason": "not installed",
+   "dataset": "wiktionary-en"
+  },
+  {
+   "id": "wiktionary-zh-translator",
+   "name": "Wiktionary translations (Chinese (Mandarin))",
+   "reason": "not installed",
+   "dataset": "wiktionary-zh"
+  },
+  {
+   "id": "wiktionary-fr-translator",
+   "name": "Wiktionary translations (French)",
+   "reason": "not installed",
+   "dataset": "wiktionary-fr"
+  },
+  {
+   "id": "wiktionary-es-translator",
+   "name": "Wiktionary translations (Spanish)",
+   "reason": "not installed",
+   "dataset": "wiktionary-es"
+  },
+  {
+   "id": "wiktionary-pt-translator",
+   "name": "Wiktionary translations (Portuguese)",
+   "reason": "not installed",
+   "dataset": "wiktionary-pt"
+  },
+  {
+   "id": "wiktionary-ja-translator",
+   "name": "Wiktionary translations (Japanese)",
+   "reason": "not installed",
+   "dataset": "wiktionary-ja"
+  },
+  {
+   "id": "freedict-eng-deu",
+   "name": "FreeDict English → German",
+   "reason": "not installed",
+   "dataset": "freedict-eng-deu"
+  },
+  {
+   "id": "freedict-deu-fra",
+   "name": "FreeDict German → French",
+   "reason": "not installed",
+   "dataset": "freedict-deu-fra"
+  },
+  {
+   "id": "freedict-fra-deu",
+   "name": "FreeDict French → German",
+   "reason": "not installed",
+   "dataset": "freedict-fra-deu"
+  },
+  {
+   "id": "freedict-deu-spa",
+   "name": "FreeDict German → Spanish",
+   "reason": "not installed",
+   "dataset": "freedict-deu-spa"
+  },
+  {
+   "id": "freedict-spa-deu",
+   "name": "FreeDict Spanish → German",
+   "reason": "not installed",
+   "dataset": "freedict-spa-deu"
+  },
+  {
+   "id": "freedict-deu-por",
+   "name": "FreeDict German → Portuguese",
+   "reason": "not installed",
+   "dataset": "freedict-deu-por"
+  },
+  {
+   "id": "freedict-por-deu",
+   "name": "FreeDict Portuguese → German",
+   "reason": "not installed",
+   "dataset": "freedict-por-deu"
+  },
+  {
+   "id": "freedict-eng-fra",
+   "name": "FreeDict English → French",
+   "reason": "not installed",
+   "dataset": "freedict-eng-fra"
+  },
+  {
+   "id": "freedict-fra-eng",
+   "name": "FreeDict French → English",
+   "reason": "not installed",
+   "dataset": "freedict-fra-eng"
+  },
+  {
+   "id": "freedict-eng-spa",
+   "name": "FreeDict English → Spanish",
+   "reason": "not installed",
+   "dataset": "freedict-eng-spa"
+  },
+  {
+   "id": "freedict-spa-eng",
+   "name": "FreeDict Spanish → English",
+   "reason": "not installed",
+   "dataset": "freedict-spa-eng"
+  },
+  {
+   "id": "freedict-eng-por",
+   "name": "FreeDict English → Portuguese",
+   "reason": "not installed",
+   "dataset": "freedict-eng-por"
+  },
+  {
+   "id": "freedict-por-eng",
+   "name": "FreeDict Portuguese → English",
+   "reason": "not installed",
+   "dataset": "freedict-por-eng"
+  },
+  {
+   "id": "freedict-eng-jpn",
+   "name": "FreeDict English → Japanese",
+   "reason": "not installed",
+   "dataset": "freedict-eng-jpn"
+  },
+  {
+   "id": "freedict-jpn-eng",
+   "name": "FreeDict Japanese → English",
+   "reason": "not installed",
+   "dataset": "freedict-jpn-eng"
+  },
+  {
+   "id": "freedict-deu-jpn",
+   "name": "FreeDict German → Japanese",
+   "reason": "not installed",
+   "dataset": "freedict-deu-jpn"
+  },
+  {
+   "id": "freedict-jpn-deu",
+   "name": "FreeDict Japanese → German",
+   "reason": "not installed",
+   "dataset": "freedict-jpn-deu"
+  },
+  {
+   "id": "freedict-eng-zho",
+   "name": "FreeDict English → Chinese (Mandarin)",
+   "reason": "not installed",
+   "dataset": "freedict-eng-zho"
+  },
+  {
+   "id": "ecdict-translator",
+   "name": "ECDICT translations",
+   "reason": "not installed",
+   "dataset": "ecdict"
+  }
+ ]
+}

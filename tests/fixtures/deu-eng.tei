@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+  <teiHeader>
+    <fileDesc><titleStmt><title>German-English FreeDict Dictionary</title></titleStmt>
+      <publicationStmt><availability status="free"><p>GNU General Public License</p></availability></publicationStmt>
+      <sourceDesc><p>sample</p></sourceDesc></fileDesc>
+    <profileDesc><langUsage><language ident="de">German</language><language ident="en">English</language></langUsage></profileDesc>
+  </teiHeader>
+  <text><body>
+    <entry>
+      <form><orth>Haus</orth><pron>haʊs</pron></form>
+      <gramGrp><pos>n</pos><gen>n</gen></gramGrp>
+      <sense><cit type="trans"><quote>house</quote></cit><cit type="trans"><quote>home</quote></cit></sense>
+      <sense><usg type="dom">arch.</usg><cit type="trans"><quote>building</quote></cit><note>Gebäude</note></sense>
+      <xr type="syn"><ref>Gebäude</ref></xr>
+    </entry>
+    <entry>
+      <form><orth>groß</orth></form>
+      <gramGrp><pos>adj</pos></gramGrp>
+      <sense><cit type="trans"><quote>big</quote></cit><cit type="trans"><quote>large</quote></cit><def>von großer Ausdehnung</def></sense>
+    </entry>
+    <entry><form><orth>leer</orth></form><sense></sense></entry>
+  </body></text>
+</TEI>

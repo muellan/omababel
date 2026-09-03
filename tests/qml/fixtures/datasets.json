@@ -1,0 +1,2115 @@
+{
+ "datasets": [
+  {
+   "id": "wiktionary-de",
+   "title": "Wiktionary – German (English edition)",
+   "description": "All German entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "de",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/German/kaikki.org-dictionary-German.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de.sqlite"
+  },
+  {
+   "id": "wiktionary-de-native",
+   "title": "Wiktionary – German (Deutsch edition)",
+   "description": "German entries of the Deutsch Wiktionary edition (kaikki.org): definitions in German, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "de",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/de/de-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de-native.sqlite"
+  },
+  {
+   "id": "wiktionary-en",
+   "title": "Wiktionary – English (English edition)",
+   "description": "All English entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "en",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-en.sqlite"
+  },
+  {
+   "id": "wiktionary-zh",
+   "title": "Wiktionary – Chinese (Mandarin) (English edition)",
+   "description": "All Chinese (Mandarin) entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "zh",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Chinese/kaikki.org-dictionary-Chinese.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh.sqlite"
+  },
+  {
+   "id": "wiktionary-zh-native",
+   "title": "Wiktionary – Chinese (Mandarin) (中文 edition)",
+   "description": "Chinese (Mandarin) entries of the 中文 Wiktionary edition (kaikki.org): definitions in Chinese (Mandarin), synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "zh",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/zh/zh-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh-native.sqlite"
+  },
+  {
+   "id": "wiktionary-fr",
+   "title": "Wiktionary – French (English edition)",
+   "description": "All French entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "fr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/French/kaikki.org-dictionary-French.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr.sqlite"
+  },
+  {
+   "id": "wiktionary-fr-native",
+   "title": "Wiktionary – French (Français edition)",
+   "description": "French entries of the Français Wiktionary edition (kaikki.org): definitions in French, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "fr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/fr/fr-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr-native.sqlite"
+  },
+  {
+   "id": "wiktionary-es",
+   "title": "Wiktionary – Spanish (English edition)",
+   "description": "All Spanish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "es",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Spanish/kaikki.org-dictionary-Spanish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es.sqlite"
+  },
+  {
+   "id": "wiktionary-es-native",
+   "title": "Wiktionary – Spanish (Español edition)",
+   "description": "Spanish entries of the Español Wiktionary edition (kaikki.org): definitions in Spanish, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "es",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/es/es-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es-native.sqlite"
+  },
+  {
+   "id": "wiktionary-pt",
+   "title": "Wiktionary – Portuguese (English edition)",
+   "description": "All Portuguese entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "pt",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Portuguese/kaikki.org-dictionary-Portuguese.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt.sqlite"
+  },
+  {
+   "id": "wiktionary-pt-native",
+   "title": "Wiktionary – Portuguese (Português edition)",
+   "description": "Portuguese entries of the Português Wiktionary edition (kaikki.org): definitions in Portuguese, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "pt",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/pt/pt-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt-native.sqlite"
+  },
+  {
+   "id": "wiktionary-ja",
+   "title": "Wiktionary – Japanese (English edition)",
+   "description": "All Japanese entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ja",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Japanese/kaikki.org-dictionary-Japanese.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja.sqlite"
+  },
+  {
+   "id": "wiktionary-ja-native",
+   "title": "Wiktionary – Japanese (日本語 edition)",
+   "description": "Japanese entries of the 日本語 Wiktionary edition (kaikki.org): definitions in Japanese, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "ja",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/ja/ja-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja-native.sqlite"
+  },
+  {
+   "id": "wiktionary-ar",
+   "title": "Wiktionary – Arabic (English edition)",
+   "description": "All Arabic entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ar",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Arabic/kaikki.org-dictionary-Arabic.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ar.sqlite"
+  },
+  {
+   "id": "wiktionary-bg",
+   "title": "Wiktionary – Bulgarian (English edition)",
+   "description": "All Bulgarian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "bg",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Bulgarian/kaikki.org-dictionary-Bulgarian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-bg.sqlite"
+  },
+  {
+   "id": "wiktionary-ca",
+   "title": "Wiktionary – Catalan (English edition)",
+   "description": "All Catalan entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ca",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Catalan/kaikki.org-dictionary-Catalan.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ca.sqlite"
+  },
+  {
+   "id": "wiktionary-cs",
+   "title": "Wiktionary – Czech (English edition)",
+   "description": "All Czech entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "cs",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Czech/kaikki.org-dictionary-Czech.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-cs.sqlite"
+  },
+  {
+   "id": "wiktionary-cs-native",
+   "title": "Wiktionary – Czech (Čeština edition)",
+   "description": "Czech entries of the Čeština Wiktionary edition (kaikki.org): definitions in Czech, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "cs",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/cs/cs-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-cs-native.sqlite"
+  },
+  {
+   "id": "wiktionary-da",
+   "title": "Wiktionary – Danish (English edition)",
+   "description": "All Danish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "da",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Danish/kaikki.org-dictionary-Danish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-da.sqlite"
+  },
+  {
+   "id": "wiktionary-el",
+   "title": "Wiktionary – Greek (English edition)",
+   "description": "All Greek entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "el",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Greek/kaikki.org-dictionary-Greek.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-el.sqlite"
+  },
+  {
+   "id": "wiktionary-el-native",
+   "title": "Wiktionary – Greek (Ελληνικά edition)",
+   "description": "Greek entries of the Ελληνικά Wiktionary edition (kaikki.org): definitions in Greek, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "el",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/el/el-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-el-native.sqlite"
+  },
+  {
+   "id": "wiktionary-eo",
+   "title": "Wiktionary – Esperanto (English edition)",
+   "description": "All Esperanto entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "eo",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Esperanto/kaikki.org-dictionary-Esperanto.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-eo.sqlite"
+  },
+  {
+   "id": "wiktionary-et",
+   "title": "Wiktionary – Estonian (English edition)",
+   "description": "All Estonian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "et",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Estonian/kaikki.org-dictionary-Estonian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-et.sqlite"
+  },
+  {
+   "id": "wiktionary-fa",
+   "title": "Wiktionary – Persian (English edition)",
+   "description": "All Persian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "fa",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Persian/kaikki.org-dictionary-Persian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fa.sqlite"
+  },
+  {
+   "id": "wiktionary-fi",
+   "title": "Wiktionary – Finnish (English edition)",
+   "description": "All Finnish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "fi",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Finnish/kaikki.org-dictionary-Finnish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fi.sqlite"
+  },
+  {
+   "id": "wiktionary-ga",
+   "title": "Wiktionary – Irish (English edition)",
+   "description": "All Irish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ga",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Irish/kaikki.org-dictionary-Irish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ga.sqlite"
+  },
+  {
+   "id": "wiktionary-he",
+   "title": "Wiktionary – Hebrew (English edition)",
+   "description": "All Hebrew entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "he",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Hebrew/kaikki.org-dictionary-Hebrew.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-he.sqlite"
+  },
+  {
+   "id": "wiktionary-hi",
+   "title": "Wiktionary – Hindi (English edition)",
+   "description": "All Hindi entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "hi",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Hindi/kaikki.org-dictionary-Hindi.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-hi.sqlite"
+  },
+  {
+   "id": "wiktionary-hr",
+   "title": "Wiktionary – Croatian (English edition)",
+   "description": "All Croatian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "hr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Croatian/kaikki.org-dictionary-Croatian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-hr.sqlite"
+  },
+  {
+   "id": "wiktionary-hu",
+   "title": "Wiktionary – Hungarian (English edition)",
+   "description": "All Hungarian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "hu",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Hungarian/kaikki.org-dictionary-Hungarian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-hu.sqlite"
+  },
+  {
+   "id": "wiktionary-id",
+   "title": "Wiktionary – Indonesian (English edition)",
+   "description": "All Indonesian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "id",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Indonesian/kaikki.org-dictionary-Indonesian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-id.sqlite"
+  },
+  {
+   "id": "wiktionary-id-native",
+   "title": "Wiktionary – Indonesian (Bahasa Indonesia edition)",
+   "description": "Indonesian entries of the Bahasa Indonesia Wiktionary edition (kaikki.org): definitions in Indonesian, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "id",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/id/id-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-id-native.sqlite"
+  },
+  {
+   "id": "wiktionary-is",
+   "title": "Wiktionary – Icelandic (English edition)",
+   "description": "All Icelandic entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "is",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Icelandic/kaikki.org-dictionary-Icelandic.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-is.sqlite"
+  },
+  {
+   "id": "wiktionary-it",
+   "title": "Wiktionary – Italian (English edition)",
+   "description": "All Italian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "it",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Italian/kaikki.org-dictionary-Italian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-it.sqlite"
+  },
+  {
+   "id": "wiktionary-it-native",
+   "title": "Wiktionary – Italian (Italiano edition)",
+   "description": "Italian entries of the Italiano Wiktionary edition (kaikki.org): definitions in Italian, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "it",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/it/it-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-it-native.sqlite"
+  },
+  {
+   "id": "wiktionary-ko",
+   "title": "Wiktionary – Korean (English edition)",
+   "description": "All Korean entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ko",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Korean/kaikki.org-dictionary-Korean.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ko.sqlite"
+  },
+  {
+   "id": "wiktionary-ko-native",
+   "title": "Wiktionary – Korean (한국어 edition)",
+   "description": "Korean entries of the 한국어 Wiktionary edition (kaikki.org): definitions in Korean, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "ko",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/ko/ko-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ko-native.sqlite"
+  },
+  {
+   "id": "wiktionary-la",
+   "title": "Wiktionary – Latin (English edition)",
+   "description": "All Latin entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "la",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Latin/kaikki.org-dictionary-Latin.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-la.sqlite"
+  },
+  {
+   "id": "wiktionary-lt",
+   "title": "Wiktionary – Lithuanian (English edition)",
+   "description": "All Lithuanian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "lt",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Lithuanian/kaikki.org-dictionary-Lithuanian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-lt.sqlite"
+  },
+  {
+   "id": "wiktionary-lv",
+   "title": "Wiktionary – Latvian (English edition)",
+   "description": "All Latvian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "lv",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Latvian/kaikki.org-dictionary-Latvian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-lv.sqlite"
+  },
+  {
+   "id": "wiktionary-ms",
+   "title": "Wiktionary – Malay (English edition)",
+   "description": "All Malay entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ms",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Malay/kaikki.org-dictionary-Malay.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ms.sqlite"
+  },
+  {
+   "id": "wiktionary-ms-native",
+   "title": "Wiktionary – Malay (Bahasa Melayu edition)",
+   "description": "Malay entries of the Bahasa Melayu Wiktionary edition (kaikki.org): definitions in Malay, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "ms",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/ms/ms-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ms-native.sqlite"
+  },
+  {
+   "id": "wiktionary-nb",
+   "title": "Wiktionary – Norwegian (Bokmål) (English edition)",
+   "description": "All Norwegian (Bokmål) entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "nb",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Norwegian%20Bokm%C3%A5l/kaikki.org-dictionary-Norwegian%20Bokm%C3%A5l.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-nb.sqlite"
+  },
+  {
+   "id": "wiktionary-nl",
+   "title": "Wiktionary – Dutch (English edition)",
+   "description": "All Dutch entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "nl",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Dutch/kaikki.org-dictionary-Dutch.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-nl.sqlite"
+  },
+  {
+   "id": "wiktionary-nl-native",
+   "title": "Wiktionary – Dutch (Nederlands edition)",
+   "description": "Dutch entries of the Nederlands Wiktionary edition (kaikki.org): definitions in Dutch, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "nl",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/nl/nl-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-nl-native.sqlite"
+  },
+  {
+   "id": "wiktionary-pl",
+   "title": "Wiktionary – Polish (English edition)",
+   "description": "All Polish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "pl",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Polish/kaikki.org-dictionary-Polish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pl.sqlite"
+  },
+  {
+   "id": "wiktionary-pl-native",
+   "title": "Wiktionary – Polish (Polski edition)",
+   "description": "Polish entries of the Polski Wiktionary edition (kaikki.org): definitions in Polish, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "pl",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/pl/pl-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pl-native.sqlite"
+  },
+  {
+   "id": "wiktionary-ro",
+   "title": "Wiktionary – Romanian (English edition)",
+   "description": "All Romanian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ro",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Romanian/kaikki.org-dictionary-Romanian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ro.sqlite"
+  },
+  {
+   "id": "wiktionary-ru",
+   "title": "Wiktionary – Russian (English edition)",
+   "description": "All Russian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "ru",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Russian/kaikki.org-dictionary-Russian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ru.sqlite"
+  },
+  {
+   "id": "wiktionary-ru-native",
+   "title": "Wiktionary – Russian (Русский edition)",
+   "description": "Russian entries of the Русский Wiktionary edition (kaikki.org): definitions in Russian, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "ru",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/ru/ru-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ru-native.sqlite"
+  },
+  {
+   "id": "wiktionary-sk",
+   "title": "Wiktionary – Slovak (English edition)",
+   "description": "All Slovak entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "sk",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Slovak/kaikki.org-dictionary-Slovak.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-sk.sqlite"
+  },
+  {
+   "id": "wiktionary-sl",
+   "title": "Wiktionary – Slovene (English edition)",
+   "description": "All Slovene entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "sl",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Slovene/kaikki.org-dictionary-Slovene.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-sl.sqlite"
+  },
+  {
+   "id": "wiktionary-sr",
+   "title": "Wiktionary – Serbian (English edition)",
+   "description": "All Serbian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "sr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Serbian/kaikki.org-dictionary-Serbian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-sr.sqlite"
+  },
+  {
+   "id": "wiktionary-sv",
+   "title": "Wiktionary – Swedish (English edition)",
+   "description": "All Swedish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "sv",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Swedish/kaikki.org-dictionary-Swedish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-sv.sqlite"
+  },
+  {
+   "id": "wiktionary-sw",
+   "title": "Wiktionary – Swahili (English edition)",
+   "description": "All Swahili entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "sw",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Swahili/kaikki.org-dictionary-Swahili.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-sw.sqlite"
+  },
+  {
+   "id": "wiktionary-th",
+   "title": "Wiktionary – Thai (English edition)",
+   "description": "All Thai entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "th",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Thai/kaikki.org-dictionary-Thai.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-th.sqlite"
+  },
+  {
+   "id": "wiktionary-th-native",
+   "title": "Wiktionary – Thai (ไทย edition)",
+   "description": "Thai entries of the ไทย Wiktionary edition (kaikki.org): definitions in Thai, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "th",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/th/th-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-th-native.sqlite"
+  },
+  {
+   "id": "wiktionary-tr",
+   "title": "Wiktionary – Turkish (English edition)",
+   "description": "All Turkish entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "tr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Turkish/kaikki.org-dictionary-Turkish.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-tr.sqlite"
+  },
+  {
+   "id": "wiktionary-tr-native",
+   "title": "Wiktionary – Turkish (Türkçe edition)",
+   "description": "Turkish entries of the Türkçe Wiktionary edition (kaikki.org): definitions in Turkish, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "tr",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/tr/tr-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-tr-native.sqlite"
+  },
+  {
+   "id": "wiktionary-uk",
+   "title": "Wiktionary – Ukrainian (English edition)",
+   "description": "All Ukrainian entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "uk",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Ukrainian/kaikki.org-dictionary-Ukrainian.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-uk.sqlite"
+  },
+  {
+   "id": "wiktionary-vi",
+   "title": "Wiktionary – Vietnamese (English edition)",
+   "description": "All Vietnamese entries of the English Wiktionary via kaikki.org: definitions in English, synonyms/antonyms, translations. Large (hundreds of MB).",
+   "kind": "kaikki",
+   "lang": "vi",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/Vietnamese/kaikki.org-dictionary-Vietnamese.jsonl"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-vi.sqlite"
+  },
+  {
+   "id": "wiktionary-vi-native",
+   "title": "Wiktionary – Vietnamese (Tiếng Việt edition)",
+   "description": "Vietnamese entries of the Tiếng Việt Wiktionary edition (kaikki.org): definitions in Vietnamese, synonyms/antonyms. Large.",
+   "kind": "kaikki-edition",
+   "lang": "vi",
+   "license": "CC BY-SA 4.0 / GFDL",
+   "urls": [
+    "https://kaikki.org/dictionary/downloads/vi/vi-extract.jsonl.gz"
+   ],
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-vi-native.sqlite"
+  },
+  {
+   "id": "freedict-deu-eng",
+   "title": "FreeDict German → English",
+   "description": "FreeDict bilingual word dictionary deu-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": true,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-eng.sqlite",
+   "size": 36864,
+   "entries": 2,
+   "languages": [
+    "de"
+   ],
+   "format": "tei",
+   "source": "/home/claude/omababel/tests/fixtures/deu-eng.tei",
+   "built": 1788459284
+  },
+  {
+   "id": "freedict-eng-deu",
+   "title": "FreeDict English → German",
+   "description": "FreeDict bilingual word dictionary eng-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-deu.sqlite"
+  },
+  {
+   "id": "freedict-deu-fra",
+   "title": "FreeDict German → French",
+   "description": "FreeDict bilingual word dictionary deu-fra (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-fra",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-fra.sqlite"
+  },
+  {
+   "id": "freedict-fra-deu",
+   "title": "FreeDict French → German",
+   "description": "FreeDict bilingual word dictionary fra-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-deu.sqlite"
+  },
+  {
+   "id": "freedict-deu-spa",
+   "title": "FreeDict German → Spanish",
+   "description": "FreeDict bilingual word dictionary deu-spa (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-spa",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-spa.sqlite"
+  },
+  {
+   "id": "freedict-spa-deu",
+   "title": "FreeDict Spanish → German",
+   "description": "FreeDict bilingual word dictionary spa-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "spa-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-deu.sqlite"
+  },
+  {
+   "id": "freedict-deu-por",
+   "title": "FreeDict German → Portuguese",
+   "description": "FreeDict bilingual word dictionary deu-por (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-por",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-por.sqlite"
+  },
+  {
+   "id": "freedict-por-deu",
+   "title": "FreeDict Portuguese → German",
+   "description": "FreeDict bilingual word dictionary por-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "por-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-deu.sqlite"
+  },
+  {
+   "id": "freedict-deu-ita",
+   "title": "FreeDict German → Italian",
+   "description": "FreeDict bilingual word dictionary deu-ita (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-ita",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-ita.sqlite"
+  },
+  {
+   "id": "freedict-ita-deu",
+   "title": "FreeDict Italian → German",
+   "description": "FreeDict bilingual word dictionary ita-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "ita-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-ita-deu.sqlite"
+  },
+  {
+   "id": "freedict-deu-jpn",
+   "title": "FreeDict German → Japanese",
+   "description": "FreeDict bilingual word dictionary deu-jpn (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-jpn",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-jpn.sqlite"
+  },
+  {
+   "id": "freedict-jpn-deu",
+   "title": "FreeDict Japanese → German",
+   "description": "FreeDict bilingual word dictionary jpn-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "jpn-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-jpn-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-fra",
+   "title": "FreeDict English → French",
+   "description": "FreeDict bilingual word dictionary eng-fra (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-fra",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-fra.sqlite"
+  },
+  {
+   "id": "freedict-fra-eng",
+   "title": "FreeDict French → English",
+   "description": "FreeDict bilingual word dictionary fra-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-eng.sqlite"
+  },
+  {
+   "id": "freedict-eng-spa",
+   "title": "FreeDict English → Spanish",
+   "description": "FreeDict bilingual word dictionary eng-spa (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-spa",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-spa.sqlite"
+  },
+  {
+   "id": "freedict-spa-eng",
+   "title": "FreeDict Spanish → English",
+   "description": "FreeDict bilingual word dictionary spa-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "spa-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-eng.sqlite"
+  },
+  {
+   "id": "freedict-eng-por",
+   "title": "FreeDict English → Portuguese",
+   "description": "FreeDict bilingual word dictionary eng-por (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-por",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-por.sqlite"
+  },
+  {
+   "id": "freedict-por-eng",
+   "title": "FreeDict Portuguese → English",
+   "description": "FreeDict bilingual word dictionary por-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "por-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-eng.sqlite"
+  },
+  {
+   "id": "freedict-eng-ita",
+   "title": "FreeDict English → Italian",
+   "description": "FreeDict bilingual word dictionary eng-ita (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-ita",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-ita.sqlite"
+  },
+  {
+   "id": "freedict-ita-eng",
+   "title": "FreeDict Italian → English",
+   "description": "FreeDict bilingual word dictionary ita-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "ita-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-ita-eng.sqlite"
+  },
+  {
+   "id": "freedict-eng-jpn",
+   "title": "FreeDict English → Japanese",
+   "description": "FreeDict bilingual word dictionary eng-jpn (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-jpn",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-jpn.sqlite"
+  },
+  {
+   "id": "freedict-jpn-eng",
+   "title": "FreeDict Japanese → English",
+   "description": "FreeDict bilingual word dictionary jpn-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "jpn-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-jpn-eng.sqlite"
+  },
+  {
+   "id": "freedict-eng-zho",
+   "title": "FreeDict English → Chinese (Mandarin)",
+   "description": "FreeDict bilingual word dictionary eng-zho (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-zho",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-zho.sqlite"
+  },
+  {
+   "id": "freedict-fra-zho",
+   "title": "FreeDict French → Chinese (Mandarin)",
+   "description": "FreeDict bilingual word dictionary fra-zho (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-zho",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-zho.sqlite"
+  },
+  {
+   "id": "freedict-fra-spa",
+   "title": "FreeDict French → Spanish",
+   "description": "FreeDict bilingual word dictionary fra-spa (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-spa",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-spa.sqlite"
+  },
+  {
+   "id": "freedict-spa-fra",
+   "title": "FreeDict Spanish → French",
+   "description": "FreeDict bilingual word dictionary spa-fra (TEI source release).",
+   "kind": "freedict",
+   "pair": "spa-fra",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-fra.sqlite"
+  },
+  {
+   "id": "freedict-fra-por",
+   "title": "FreeDict French → Portuguese",
+   "description": "FreeDict bilingual word dictionary fra-por (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-por",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-por.sqlite"
+  },
+  {
+   "id": "freedict-por-fra",
+   "title": "FreeDict Portuguese → French",
+   "description": "FreeDict bilingual word dictionary por-fra (TEI source release).",
+   "kind": "freedict",
+   "pair": "por-fra",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-fra.sqlite"
+  },
+  {
+   "id": "freedict-spa-por",
+   "title": "FreeDict Spanish → Portuguese",
+   "description": "FreeDict bilingual word dictionary spa-por (TEI source release).",
+   "kind": "freedict",
+   "pair": "spa-por",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-por.sqlite"
+  },
+  {
+   "id": "freedict-por-spa",
+   "title": "FreeDict Portuguese → Spanish",
+   "description": "FreeDict bilingual word dictionary por-spa (TEI source release).",
+   "kind": "freedict",
+   "pair": "por-spa",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-spa.sqlite"
+  },
+  {
+   "id": "freedict-fra-jpn",
+   "title": "FreeDict French → Japanese",
+   "description": "FreeDict bilingual word dictionary fra-jpn (TEI source release).",
+   "kind": "freedict",
+   "pair": "fra-jpn",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-jpn.sqlite"
+  },
+  {
+   "id": "freedict-jpn-fra",
+   "title": "FreeDict Japanese → French",
+   "description": "FreeDict bilingual word dictionary jpn-fra (TEI source release).",
+   "kind": "freedict",
+   "pair": "jpn-fra",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-jpn-fra.sqlite"
+  },
+  {
+   "id": "freedict-eng-rus",
+   "title": "FreeDict English → Russian",
+   "description": "FreeDict bilingual word dictionary eng-rus (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-rus",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-rus.sqlite"
+  },
+  {
+   "id": "freedict-rus-eng",
+   "title": "FreeDict Russian → English",
+   "description": "FreeDict bilingual word dictionary rus-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "rus-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-rus-eng.sqlite"
+  },
+  {
+   "id": "freedict-deu-rus",
+   "title": "FreeDict German → Russian",
+   "description": "FreeDict bilingual word dictionary deu-rus (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-rus",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-rus.sqlite"
+  },
+  {
+   "id": "freedict-rus-deu",
+   "title": "FreeDict Russian → German",
+   "description": "FreeDict bilingual word dictionary rus-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "rus-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-rus-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-nld",
+   "title": "FreeDict English → Dutch",
+   "description": "FreeDict bilingual word dictionary eng-nld (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-nld",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-nld.sqlite"
+  },
+  {
+   "id": "freedict-nld-eng",
+   "title": "FreeDict Dutch → English",
+   "description": "FreeDict bilingual word dictionary nld-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "nld-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-nld-eng.sqlite"
+  },
+  {
+   "id": "freedict-deu-nld",
+   "title": "FreeDict German → Dutch",
+   "description": "FreeDict bilingual word dictionary deu-nld (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-nld",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-nld.sqlite"
+  },
+  {
+   "id": "freedict-nld-deu",
+   "title": "FreeDict Dutch → German",
+   "description": "FreeDict bilingual word dictionary nld-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "nld-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-nld-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-pol",
+   "title": "FreeDict English → Polish",
+   "description": "FreeDict bilingual word dictionary eng-pol (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-pol",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-pol.sqlite"
+  },
+  {
+   "id": "freedict-pol-eng",
+   "title": "FreeDict Polish → English",
+   "description": "FreeDict bilingual word dictionary pol-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "pol-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-pol-eng.sqlite"
+  },
+  {
+   "id": "freedict-deu-pol",
+   "title": "FreeDict German → Polish",
+   "description": "FreeDict bilingual word dictionary deu-pol (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-pol",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-pol.sqlite"
+  },
+  {
+   "id": "freedict-pol-deu",
+   "title": "FreeDict Polish → German",
+   "description": "FreeDict bilingual word dictionary pol-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "pol-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-pol-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-swe",
+   "title": "FreeDict English → Swedish",
+   "description": "FreeDict bilingual word dictionary eng-swe (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-swe",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-swe.sqlite"
+  },
+  {
+   "id": "freedict-swe-eng",
+   "title": "FreeDict Swedish → English",
+   "description": "FreeDict bilingual word dictionary swe-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "swe-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-swe-eng.sqlite"
+  },
+  {
+   "id": "freedict-deu-swe",
+   "title": "FreeDict German → Swedish",
+   "description": "FreeDict bilingual word dictionary deu-swe (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-swe",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-swe.sqlite"
+  },
+  {
+   "id": "freedict-swe-deu",
+   "title": "FreeDict Swedish → German",
+   "description": "FreeDict bilingual word dictionary swe-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "swe-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-swe-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-lat",
+   "title": "FreeDict English → Latin",
+   "description": "FreeDict bilingual word dictionary eng-lat (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-lat",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-lat.sqlite"
+  },
+  {
+   "id": "freedict-lat-eng",
+   "title": "FreeDict Latin → English",
+   "description": "FreeDict bilingual word dictionary lat-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "lat-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-lat-eng.sqlite"
+  },
+  {
+   "id": "freedict-lat-deu",
+   "title": "FreeDict Latin → German",
+   "description": "FreeDict bilingual word dictionary lat-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "lat-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-lat-deu.sqlite"
+  },
+  {
+   "id": "freedict-eng-tur",
+   "title": "FreeDict English → Turkish",
+   "description": "FreeDict bilingual word dictionary eng-tur (TEI source release).",
+   "kind": "freedict",
+   "pair": "eng-tur",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-tur.sqlite"
+  },
+  {
+   "id": "freedict-tur-eng",
+   "title": "FreeDict Turkish → English",
+   "description": "FreeDict bilingual word dictionary tur-eng (TEI source release).",
+   "kind": "freedict",
+   "pair": "tur-eng",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-tur-eng.sqlite"
+  },
+  {
+   "id": "freedict-deu-tur",
+   "title": "FreeDict German → Turkish",
+   "description": "FreeDict bilingual word dictionary deu-tur (TEI source release).",
+   "kind": "freedict",
+   "pair": "deu-tur",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-tur.sqlite"
+  },
+  {
+   "id": "freedict-tur-deu",
+   "title": "FreeDict Turkish → German",
+   "description": "FreeDict bilingual word dictionary tur-deu (TEI source release).",
+   "kind": "freedict",
+   "pair": "tur-deu",
+   "license": "GPL (see dictionary header)",
+   "urls": [],
+   "types": [
+    "translator",
+    "dictionary"
+   ],
+   "default": false,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-tur-deu.sqlite"
+  },
+  {
+   "id": "cedict",
+   "title": "CC-CEDICT (Chinese → English)",
+   "description": "MDBG's CC-CEDICT: ~120k Chinese words with pinyin and English definitions (from github.com/edvardsr/cc-cedict).",
+   "kind": "cedict",
+   "lang": "zh",
+   "license": "CC BY-SA 4.0",
+   "urls": [
+    "https://raw.githubusercontent.com/edvardsr/cc-cedict/main/data/all.js",
+    "https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz"
+   ],
+   "types": [
+    "dictionary",
+    "translator"
+   ],
+   "default": true,
+   "installed": true,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/cedict.sqlite",
+   "size": 36864,
+   "entries": 4,
+   "languages": [
+    "zh"
+   ],
+   "format": "cedict",
+   "source": "/home/claude/omababel/tests/fixtures/cedict-sample.u8",
+   "built": 1788459284
+  },
+  {
+   "id": "ecdict",
+   "title": "ECDICT (English ↔ Chinese)",
+   "description": "skywind3000/ECDICT: 770k English headwords with IPA, English definitions, Chinese translations and inflections (66 MB).",
+   "kind": "ecdict",
+   "lang": "en",
+   "license": "MIT",
+   "urls": [
+    "https://raw.githubusercontent.com/skywind3000/ECDICT/master/ecdict.csv"
+   ],
+   "types": [
+    "dictionary",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/ecdict.sqlite"
+  },
+  {
+   "id": "unihan",
+   "title": "Unihan (CJK characters)",
+   "description": "Unicode Unihan database: readings and definitions for ~98k Han characters (Mandarin, Cantonese, Japanese, Korean).",
+   "kind": "unihan",
+   "lang": "zh",
+   "license": "Unicode License v3",
+   "urls": [
+    "https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip"
+   ],
+   "types": [
+    "dictionary",
+    "translator"
+   ],
+   "default": true,
+   "installed": false,
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/unihan.sqlite"
+  }
+ ]
+}

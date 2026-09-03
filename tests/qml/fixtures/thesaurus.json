@@ -1,0 +1,156 @@
+{
+ "mode": "thesaurus",
+ "query": "house",
+ "lang": "en",
+ "lang2": "",
+ "results": [
+  {
+   "source": {
+    "id": "merriam-webster-thesaurus",
+    "name": "Merriam-Webster Thesaurus",
+    "type": "thesaurus",
+    "driver": "mw",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": false,
+   "error": "Merriam-Webster thesaurus: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0
+  },
+  {
+   "source": {
+    "id": "thesaurus-com",
+    "name": "Thesaurus.com",
+    "type": "thesaurus",
+    "driver": "thesauruscom",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": false,
+   "error": "Thesaurus.com: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0
+  },
+  {
+   "source": {
+    "id": "mini-en-thes",
+    "name": "Mini English synonyms",
+    "type": "thesaurus",
+    "driver": "local",
+    "kind": "local",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "synonyms": [
+    "home",
+    "dwelling",
+    "residence",
+    "chamber",
+    "accommodate",
+    "lodge"
+   ],
+   "antonyms": [
+    "evict"
+   ],
+   "url": "",
+   "count": 7,
+   "ms": 6
+  }
+ ],
+ "skipped": [
+  {
+   "id": "wiktionary-de-thesaurus",
+   "name": "Wiktionary synonyms (German, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-de"
+  },
+  {
+   "id": "wiktionary-de-native-thesaurus",
+   "name": "Wiktionary synonyms (German edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-de-native"
+  },
+  {
+   "id": "wiktionary-en-thesaurus",
+   "name": "Wiktionary synonyms (English, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-en"
+  },
+  {
+   "id": "wiktionary-zh-thesaurus",
+   "name": "Wiktionary synonyms (Chinese (Mandarin), English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-zh"
+  },
+  {
+   "id": "wiktionary-zh-native-thesaurus",
+   "name": "Wiktionary synonyms (Chinese (Mandarin) edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-zh-native"
+  },
+  {
+   "id": "wiktionary-fr-thesaurus",
+   "name": "Wiktionary synonyms (French, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-fr"
+  },
+  {
+   "id": "wiktionary-fr-native-thesaurus",
+   "name": "Wiktionary synonyms (French edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-fr-native"
+  },
+  {
+   "id": "wiktionary-es-thesaurus",
+   "name": "Wiktionary synonyms (Spanish, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-es"
+  },
+  {
+   "id": "wiktionary-es-native-thesaurus",
+   "name": "Wiktionary synonyms (Spanish edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-es-native"
+  },
+  {
+   "id": "wiktionary-pt-thesaurus",
+   "name": "Wiktionary synonyms (Portuguese, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-pt"
+  },
+  {
+   "id": "wiktionary-pt-native-thesaurus",
+   "name": "Wiktionary synonyms (Portuguese edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-pt-native"
+  },
+  {
+   "id": "wiktionary-ja-thesaurus",
+   "name": "Wiktionary synonyms (Japanese, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-ja"
+  },
+  {
+   "id": "wiktionary-ja-native-thesaurus",
+   "name": "Wiktionary synonyms (Japanese edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-ja-native"
+  }
+ ],
+ "consolidated": {
+  "synonyms": [
+   "accommodate",
+   "chamber",
+   "dwelling",
+   "home",
+   "lodge",
+   "residence"
+  ],
+  "antonyms": [
+   "evict"
+  ],
+  "antonym_count_raw": 1
+ }
+}

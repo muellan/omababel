@@ -1,0 +1,804 @@
+import QtQuick
+import QtQuick.Controls
+import Quickshell
+import Quickshell.Wayland
+import qs.Commons
+import qs.Ui
+
+// omababel – dictionary, thesaurus and translation panel for Omarchy.
+//
+//   omarchy-shell shell toggle muellan.omababel '{}'
+//   omarchy-shell shell summon muellan.omababel '{"query": "Haus", "mode": "lookup", "lang": "de"}'
+//
+// All searching happens in backend/omababel.py (plain Python 3, stdlib only);
+// this file is the UI: mode toggle, language selectors, search field with
+// history, results, and the preferences panel with the source editor.
+Item {
+  id: root
+
+  property var shell: null
+  property var manifest: null
+  property bool opened: false
+
+  readonly property string pluginId: (manifest && manifest.id) ? manifest.id : "muellan.omababel"
+  readonly property string helperPath: decodeURIComponent(Qt.resolvedUrl("backend/omababel.py").toString().replace(/^file:\/\//, ""))
+
+  // --- state mirrored from the backend
+  property bool stateLoaded: false
+  property var languages: []
+  property var sources: []
+  property var drivers: []
+  property var history: []
+  property var datasets: []
+  property var localStatus: ({})
+
+  // --- search state
+  property string mode: "lookup"            // lookup | thesaurus | translate
+  property string lang: "de"
+  property string lang2: "en"
+  property var result: null
+  property bool searching: false
+  property int searchSeq: 0
+  property string lastQuery: ""
+  property string status: ""
+  property bool statusError: false
+  property bool prefsOpen: false
+  property var pendingPayload: null
+
+  // --- exposed for tests / IPC callers
+  readonly property alias searchInput: searchField
+  readonly property alias prefsView: prefs
+  readonly property alias historyView: historyPopup
+  readonly property alias resultsView: resultsView
+
+  // --- look
+  readonly property color background: Color.menu.background
+  readonly property color foreground: Color.menu.text
+  readonly property color accent: Color.accent
+  readonly property color muted: Qt.darker(foreground, 1.45)
+  readonly property string fontFamily: Style.font.family
+  readonly property int cardWidth: Math.min(Style.space(980), panel.width - Style.gapsOut * 2)
+  readonly property int cardHeight: Math.min(Style.space(740), panel.height - Style.gapsOut * 2)
+
+  readonly property var modeOptions: [
+    {value: "lookup", label: "Lookup", icon: "󰗚"},
+    {value: "thesaurus", label: "Thesaurus", icon: "󰉹"},
+    {value: "translate", label: "Translate", icon: "󰗊"}
+  ]
+
+  // ================================================================ lifecycle
+  function open(payloadJson) {
+    var payload = {}
+    try { payload = payloadJson ? JSON.parse(payloadJson) : {} } catch (e) { payload = {} }
+    if (typeof payload !== "object" || payload === null) payload = {}
+    root.opened = true
+    root.prefsOpen = false
+    if (!root.stateLoaded) {
+      root.pendingPayload = payload
+      root.loadState()
+    } else {
+      root.applyPayload(payload)
+      // pick up history / sources changed by the CLI while we were closed
+      backend.call("state.get", {}, function(reply) { if (reply.ok) root.applyState(reply.data, false) })
+    }
+    Qt.callLater(function() { searchField.forceActiveFocus(); searchField.selectAll() })
+  }
+
+  function close() {
+    root.opened = false
+    historyPopup.close()
+  }
+
+  function dismiss() {
+    root.opened = false
+    historyPopup.close()
+    if (root.shell && typeof root.shell.hide === "function") root.shell.hide(root.pluginId)
+  }
+
+  function toggle() { root.opened ? root.dismiss() : root.open("{}") }
+
+  // Callable through IPC: omarchy-shell shell call muellan.omababel search '{"query":"Haus"}'
+  function search(arg) {
+    var payload = {}
+    try { payload = typeof arg === "string" ? JSON.parse(arg || "{}") : (arg || {}) } catch (e) { payload = {query: String(arg)} }
+    if (!root.opened) root.open("{}")
+    root.applyPayload(payload)
+    return "ok"
+  }
+
+  function applyPayload(payload) {
+    if (!payload) return
+    if (payload.mode && ["lookup", "thesaurus", "translate"].indexOf(payload.mode) >= 0) root.mode = payload.mode
+    if (payload.lang) root.lang = String(payload.lang)
+    if (payload.lang2) root.lang2 = String(payload.lang2)
+    if (payload.query !== undefined && String(payload.query).trim() !== "") {
+      searchField.text = String(payload.query).trim()
+      root.runSearch(searchField.text)
+    }
+  }
+
+  // ==================================================================== state
+  function loadState() {
+    backend.call("state.get", {}, function(reply) {
+      if (!reply.ok) {
+        root.setStatus("Backend unavailable: " + reply.error.message, true)
+        return
+      }
+      root.applyState(reply.data, true)
+      root.stateLoaded = true
+      var payload = root.pendingPayload
+      root.pendingPayload = null
+      if (payload) root.applyPayload(payload)
+      root.refreshLocalStatus()
+    })
+  }
+
+  function applyState(data, applyPrefs) {
+    root.languages = data.languages || []
+    root.sources = data.sources || []
+    root.drivers = data.drivers || []
+    root.history = data.history || []
+    if (applyPrefs && data.prefs) {
+      root.mode = data.prefs.mode || "lookup"
+      root.lang = data.prefs.lang || "de"
+      root.lang2 = data.prefs.lang2 || "en"
+    }
+  }
+
+  function refreshLocalStatus() {
+    backend.call("sources.status", {}, function(reply) {
+      if (reply.ok) root.localStatus = reply.data.status || ({})
+    })
+  }
+
+  function refreshDatasets() {
+    backend.call("data.list", {}, function(reply) {
+      if (reply.ok) root.datasets = reply.data.datasets || []
+    })
+  }
+
+  function savePrefs() {
+    backend.call("prefs.set", {values: {mode: root.mode, lang: root.lang, lang2: root.lang2}}, null)
+  }
+
+  function langName(code) {
+    for (var i = 0; i < root.languages.length; i++) if (root.languages[i].value === code) return root.languages[i].label
+    return code
+  }
+
+  function setStatus(text, isError) {
+    root.status = text
+    root.statusError = !!isError
+  }
+
+  // =================================================================== search
+  function runSearch(query) {
+    query = String(query || "").trim()
+    if (query === "") return
+    if (root.mode === "translate" && root.lang === root.lang2) {
+      root.setStatus("Choose two different languages to translate.", true)
+      return
+    }
+    historyPopup.close()
+    root.lastQuery = query
+    root.searching = true
+    root.setStatus("Searching " + query + "…", false)
+    var seq = ++root.searchSeq
+    var params = {mode: root.mode, query: query, lang: root.lang, lang2: root.lang2}
+    backend.dropPending("search")
+    backend.call("search", params, function(reply) {
+      if (seq !== root.searchSeq) return   // superseded
+      root.searching = false
+      if (!reply.ok) {
+        root.result = null
+        root.setStatus(reply.error.message, true)
+        return
+      }
+      root.result = reply.data
+      root.rememberHistory(query)
+      var rs = reply.data.results || []
+      var okCount = 0, errCount = 0, hits = 0, ms = 0
+      for (var i = 0; i < rs.length; i++) {
+        if (rs[i].ok) okCount++; else errCount++
+        hits += rs[i].count || 0
+        ms = Math.max(ms, rs[i].ms || 0)
+      }
+      var text = rs.length === 0
+        ? "No source available for " + root.langName(root.lang) + (root.mode === "translate" ? " → " + root.langName(root.lang2) : "") + "."
+        : hits + (hits === 1 ? " result" : " results") + " from " + okCount + (okCount === 1 ? " source" : " sources")
+          + (errCount ? " · " + errCount + " failed" : "") + " · " + ms + " ms"
+      root.setStatus(text, errCount > 0 && okCount === 0)
+      resultsView.scrollToTop()
+    })
+  }
+
+  function rememberHistory(query) {
+    var key = query.toLowerCase()
+    var next = [{query: query, mode: root.mode, lang: root.lang, lang2: root.lang2}]
+    for (var i = 0; i < root.history.length && next.length < 1000; i++) {
+      if (String(root.history[i].query).toLowerCase() !== key) next.push(root.history[i])
+    }
+    root.history = next
+  }
+
+  function searchWord(word) {
+    word = String(word || "").trim()
+    if (!word) return
+    searchField.text = word
+    root.runSearch(word)
+  }
+
+  function copyText(text) {
+    if (!text) return
+    backend.call("copy", {text: text}, function(reply) {
+      if (reply.ok) root.setStatus("Copied: " + (text.length > 60 ? text.slice(0, 57) + "…" : text), false)
+      else root.setStatus(reply.error.message, true)
+    })
+  }
+
+  function setMode(m) {
+    if (root.mode === m) return
+    root.mode = m
+    root.savePrefs()
+    if (searchField.text.trim() !== "") root.runSearch(searchField.text)
+    searchField.forceActiveFocus()
+  }
+
+  function setLang(code, secondary) {
+    if (secondary) root.lang2 = code; else root.lang = code
+    root.savePrefs()
+    if (searchField.text.trim() !== "" && (!secondary || root.mode === "translate")) root.runSearch(searchField.text)
+  }
+
+  function swapLangs() {
+    var a = root.lang
+    root.lang = root.lang2
+    root.lang2 = a
+    root.savePrefs()
+    if (root.mode === "translate" && searchField.text.trim() !== "") root.runSearch(searchField.text)
+  }
+
+  // ============================================================= preferences
+  function openPrefs() {
+    root.prefsOpen = true
+    prefs.tab = "sources"
+    root.refreshLocalStatus()
+  }
+
+  function closePrefs() {
+    root.prefsOpen = false
+    prefs.editing = null
+    Qt.callLater(function() { searchField.forceActiveFocus() })
+  }
+
+  function afterSourcesChanged(reply) {
+    if (!reply.ok) { prefs.message = reply.error.message; prefs.messageError = true; return }
+    root.sources = reply.data.sources || root.sources
+    root.refreshLocalStatus()
+  }
+
+  // ================================================================ children
+  ObBackend {
+    id: backend
+    helperPath: root.helperPath
+    onFailed: function(message) { if (!root.prefsOpen) root.setStatus(message, true) }
+  }
+
+  ObInstaller {
+    id: installer
+    helperPath: root.helperPath
+    onFinished: function(reply) {
+      root.refreshDatasets()
+      root.refreshLocalStatus()
+      if (reply.ok) {
+        prefs.message = "Installed " + installer.datasetId + " (" + (reply.data.dataset.entries || 0).toLocaleString() + " entries)."
+        prefs.messageError = false
+      } else {
+        prefs.message = "Install failed: " + (reply.error ? reply.error.message : "unknown error")
+        prefs.messageError = true
+      }
+    }
+  }
+
+  PanelWindow {
+    id: panel
+    visible: root.opened
+    anchors { top: true; bottom: true; left: true; right: true }
+    color: "transparent"
+    WlrLayershell.namespace: "omababel"
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    exclusionMode: ExclusionMode.Ignore
+
+    Rectangle { anchors.fill: parent; color: Color.menu.scrim }
+    MouseArea { anchors.fill: parent; onClicked: root.dismiss() }
+
+    Shortcut { sequence: "Ctrl+1"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("lookup") }
+    Shortcut { sequence: "Ctrl+2"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("thesaurus") }
+    Shortcut { sequence: "Ctrl+3"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("translate") }
+    Shortcut { sequence: "Ctrl+S"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.swapLangs() }
+    Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: { searchField.forceActiveFocus(); searchField.selectAll() } }
+    Shortcut { sequence: "Ctrl+,"; context: Qt.WindowShortcut; enabled: root.opened; onActivated: root.prefsOpen ? root.closePrefs() : root.openPrefs() }
+    Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: historyPopup.opened ? historyPopup.close() : historyPopup.openWith(searchField.text) }
+
+    BorderSurface {
+      id: card
+      width: root.cardWidth
+      height: root.cardHeight
+      anchors.centerIn: parent
+      radius: Style.cornerRadius
+      color: root.background
+      borderSpec: Border.surfaceSpec("menu", "border", Color.menu.border, Math.max(1, Style.space(2)))
+      padding: Style.spacing.panelPadding
+
+      MouseArea { anchors.fill: parent; onClicked: {} }
+
+      Keys.priority: Keys.BeforeItem
+      Keys.onPressed: function(event) {
+        if (event.key === Qt.Key_Escape) {
+          if (historyPopup.opened) historyPopup.close()
+          else if (root.prefsOpen) root.closePrefs()
+          else root.dismiss()
+          event.accepted = true
+        }
+      }
+
+      Column {
+        id: content
+        anchors.fill: parent
+        anchors.topMargin: card.contentTopInset
+        anchors.rightMargin: card.contentRightInset
+        anchors.bottomMargin: card.contentBottomInset
+        anchors.leftMargin: card.contentLeftInset
+        spacing: Style.spacing.md
+
+        // ------------------------------------------------------ header row
+        Item {
+          id: headerRow
+          width: parent.width
+          height: Math.max(titleText.implicitHeight, gearButton.implicitHeight)
+
+          Row {
+            spacing: Style.spacing.md
+            anchors.verticalCenter: parent.verticalCenter
+            Text {
+              textFormat: Text.PlainText
+              text: "󰗊"
+              color: root.accent
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.heading
+              anchors.verticalCenter: parent.verticalCenter
+            }
+            Text {
+              id: titleText
+              textFormat: Text.PlainText
+              text: root.prefsOpen ? "omababel · preferences" : "omababel"
+              color: root.foreground
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.heading
+              font.bold: true
+              anchors.verticalCenter: parent.verticalCenter
+            }
+          }
+
+          Row {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Style.spacing.xs
+            Button {
+              id: gearButton
+              iconText: root.prefsOpen ? "󰁍" : "󰒓"
+              text: root.prefsOpen ? "Back" : ""
+              tooltipText: root.prefsOpen ? "Back to search (Esc)" : "Preferences (Ctrl+,)"
+              foreground: root.foreground
+              accent: root.accent
+              onClicked: root.prefsOpen ? root.closePrefs() : root.openPrefs()
+            }
+            Button {
+              iconText: "󰅖"
+              tooltipText: "Close (Esc)"
+              foreground: root.foreground
+              accent: root.accent
+              onClicked: root.dismiss()
+            }
+          }
+        }
+
+        // ------------------------------------------------- mode + languages
+        Item {
+          id: controlsRow
+          visible: !root.prefsOpen
+          width: parent.width
+          height: visible ? Math.max(modeGroup.implicitHeight, langPicker.implicitHeight) : 0
+
+          ButtonGroup {
+            id: modeGroup
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            options: root.modeOptions
+            value: root.mode
+            foreground: root.foreground
+            accent: root.accent
+            onChanged: function(v) { root.setMode(v) }
+          }
+
+          Row {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: Style.spacing.sm
+
+            SearchableDropdown {
+              id: langPicker
+              width: Style.space(190)
+              showLabel: false
+              options: root.languages
+              value: root.lang
+              placeholderText: "Language…"
+              foreground: root.foreground
+              accent: root.accent
+              onChanged: function(v) { root.setLang(v, false) }
+            }
+            Button {
+              iconText: "󰓡"
+              tooltipText: root.mode === "translate" ? "Swap languages (Ctrl+S)" : "Swap with the secondary language"
+              foreground: root.foreground
+              accent: root.accent
+              onClicked: root.swapLangs()
+            }
+            Item {
+              width: Style.space(190)
+              height: langPicker2.implicitHeight
+              opacity: root.mode === "translate" ? 1 : 0.4
+              SearchableDropdown {
+                id: langPicker2
+                anchors.fill: parent
+                showLabel: false
+                enabled: root.mode === "translate"
+                options: root.languages
+                value: root.lang2
+                placeholderText: "Target language…"
+                foreground: root.foreground
+                accent: root.accent
+                onChanged: function(v) { root.setLang(v, true) }
+              }
+              ToolTip {
+                visible: root.mode !== "translate" && langHover.hovered
+                text: "Target language – only used in translate mode"
+                delay: 500
+              }
+              HoverHandler { id: langHover }
+            }
+          }
+        }
+
+        // -------------------------------------------------------- search row
+        Item {
+          id: searchRow
+          visible: !root.prefsOpen
+          width: parent.width
+          height: visible ? searchField.implicitHeight : 0
+
+          TextField {
+            id: searchField
+            anchors.left: parent.left
+            anchors.right: historyButton.left
+            anchors.rightMargin: Style.spacing.sm
+            font.pixelSize: Style.font.title
+            placeholderText: root.mode === "translate"
+              ? "Text to translate from " + root.langName(root.lang) + " to " + root.langName(root.lang2) + "…"
+              : (root.mode === "thesaurus" ? "Find synonyms and antonyms in " : "Look up in ") + root.langName(root.lang) + "…"
+            foreground: root.foreground
+            accent: root.accent
+            onAccepted: {
+              if (historyPopup.opened && historyPopup.currentIndex >= 0) historyPopup.pickCurrent()
+              else root.runSearch(text)
+            }
+            onTextEdited: if (historyPopup.opened) historyPopup.filter(text)
+            Keys.priority: Keys.BeforeItem
+            Keys.onPressed: function(event) {
+              if (event.key === Qt.Key_Down) {
+                if (!historyPopup.opened) historyPopup.openWith(searchField.text)
+                else historyPopup.move(1)
+                event.accepted = true
+              } else if (event.key === Qt.Key_Up) {
+                if (historyPopup.opened) historyPopup.move(-1)
+                event.accepted = true
+              } else if (event.key === Qt.Key_Escape && historyPopup.opened) {
+                historyPopup.close()
+                event.accepted = true
+              } else if (event.key === Qt.Key_Tab && historyPopup.opened) {
+                historyPopup.close()
+              }
+            }
+          }
+
+          Button {
+            id: historyButton
+            anchors.right: parent.right
+            anchors.verticalCenter: searchField.verticalCenter
+            iconText: historyPopup.opened ? "󰅃" : "󰅀"
+            tooltipText: "Search history (↓ / Ctrl+H)"
+            bordered: true
+            foreground: root.foreground
+            accent: root.accent
+            onClicked: historyPopup.opened ? historyPopup.close() : historyPopup.openWith("")
+          }
+
+          // ----------------------------------------------- history popup
+          Popup {
+            id: historyPopup
+            x: 0
+            y: searchField.height + Style.spacing.xxs
+            width: searchRow.width
+            property var rows: []
+            property int currentIndex: -1
+            readonly property var popupBorderSpec: Border.localOrSurfaceSpec("popups", "border", Color.popups.border, Color.popups.border, Style.normalBorderWidth)
+            implicitHeight: Math.min(Style.spacing.popupRowHeight * 12, Math.max(Style.spacing.popupRowHeight, historyList.contentHeight) + footer.height) + topPadding + bottomPadding
+            padding: Style.spacing.hairline
+            leftPadding: Border.left(popupBorderSpec) + Style.spacing.hairline
+            rightPadding: Border.right(popupBorderSpec) + Style.spacing.hairline
+            topPadding: Border.top(popupBorderSpec) + Style.spacing.hairline
+            bottomPadding: Border.bottom(popupBorderSpec) + Style.spacing.hairline
+            focus: false
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+            modal: false
+
+            background: BorderSurface {
+              color: Color.popups.background
+              borderSpec: historyPopup.popupBorderSpec
+              radius: Style.cornerRadius
+            }
+
+            function openWith(prefix) {
+              filter(prefix)
+              currentIndex = -1
+              open()
+              searchField.forceActiveFocus()
+            }
+            function filter(prefix) {
+              var p = String(prefix || "").toLowerCase()
+              var out = []
+              for (var i = 0; i < root.history.length; i++) {
+                var q = String(root.history[i].query)
+                if (!p || q.toLowerCase().indexOf(p) >= 0) out.push(root.history[i])
+              }
+              rows = out
+              if (currentIndex >= rows.length) currentIndex = rows.length - 1
+            }
+            function move(delta) {
+              if (rows.length === 0) return
+              currentIndex = Math.max(0, Math.min(rows.length - 1, currentIndex + delta))
+              historyList.positionViewAtIndex(currentIndex, ListView.Contain)
+            }
+            function pickCurrent() {
+              if (currentIndex < 0 || currentIndex >= rows.length) return
+              pick(rows[currentIndex])
+            }
+            function pick(row) {
+              close()
+              searchField.text = row.query
+              if (row.mode && ["lookup", "thesaurus", "translate"].indexOf(row.mode) >= 0) root.mode = row.mode
+              if (row.lang) root.lang = row.lang
+              if (row.lang2) root.lang2 = row.lang2
+              root.runSearch(row.query)
+            }
+            function removeRow(row) {
+              backend.call("history.remove", {query: row.query}, function(reply) {
+                if (!reply.ok) return
+                root.history = root.history.filter(function(h) { return h.query !== row.query })
+                filter(searchField.text)
+              })
+            }
+
+            contentItem: Column {
+              spacing: 0
+              ListView {
+                id: historyList
+                width: parent.width
+                height: Math.min(Style.spacing.popupRowHeight * 11, Math.max(Style.spacing.popupRowHeight, contentHeight))
+                clip: true
+                model: historyPopup.rows
+                currentIndex: historyPopup.currentIndex
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                Text {
+                  visible: historyPopup.rows.length === 0
+                  anchors.centerIn: parent
+                  textFormat: Text.PlainText
+                  text: root.history.length === 0 ? "No searches yet" : "No history entry matches"
+                  color: root.muted
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.body
+                }
+
+                delegate: Rectangle {
+                  id: hRow
+                  required property var modelData
+                  required property int index
+                  width: historyList.width
+                  height: Style.spacing.popupRowHeight
+                  color: index === historyPopup.currentIndex ? Style.hoverFillFor(root.foreground, root.accent) : "transparent"
+                  Row {
+                    anchors.left: parent.left
+                    anchors.leftMargin: Style.spacing.controlPaddingX
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: Style.spacing.md
+                    Text {
+                      textFormat: Text.PlainText
+                      text: hRow.modelData.query
+                      color: root.foreground
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.body
+                      elide: Text.ElideRight
+                      width: Math.min(implicitWidth, historyList.width - Style.space(220))
+                    }
+                    Text {
+                      textFormat: Text.PlainText
+                      text: (hRow.modelData.mode || "") + (hRow.modelData.lang ? " · " + hRow.modelData.lang : "")
+                        + (hRow.modelData.mode === "translate" && hRow.modelData.lang2 ? "→" + hRow.modelData.lang2 : "")
+                      color: root.muted
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                      anchors.verticalCenter: parent.verticalCenter
+                    }
+                  }
+                  Button {
+                    anchors.right: parent.right
+                    anchors.rightMargin: Style.spacing.xs
+                    anchors.verticalCenter: parent.verticalCenter
+                    iconText: "󰅖"
+                    tooltipText: "Remove from history"
+                    foreground: root.muted
+                    accent: root.accent
+                    verticalPadding: 0
+                    onClicked: historyPopup.removeRow(hRow.modelData)
+                  }
+                  MouseArea {
+                    anchors.fill: parent
+                    anchors.rightMargin: Style.space(36)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onPositionChanged: historyPopup.currentIndex = hRow.index
+                    onClicked: historyPopup.pick(hRow.modelData)
+                  }
+                }
+              }
+              Item {
+                id: footer
+                width: parent.width
+                height: root.history.length > 0 ? Style.spacing.popupRowHeight : 0
+                visible: root.history.length > 0
+                Text {
+                  anchors.left: parent.left
+                  anchors.leftMargin: Style.spacing.controlPaddingX
+                  anchors.verticalCenter: parent.verticalCenter
+                  textFormat: Text.PlainText
+                  text: root.history.length + " of max. 1000 entries"
+                  color: root.muted
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+                Button {
+                  anchors.right: parent.right
+                  anchors.rightMargin: Style.spacing.xs
+                  anchors.verticalCenter: parent.verticalCenter
+                  text: "Clear history"
+                  fontSize: Style.font.caption
+                  verticalPadding: 0
+                  foreground: root.muted
+                  accent: root.accent
+                  onClicked: backend.call("history.clear", {}, function(reply) {
+                    if (reply.ok) { root.history = []; historyPopup.filter("") }
+                  })
+                }
+              }
+            }
+          }
+        }
+
+        // ---------------------------------------------------------- results
+        ObResults {
+          id: resultsView
+          visible: !root.prefsOpen
+          width: parent.width
+          height: content.height - headerRow.height - controlsRow.height - searchRow.height - statusRow.height - content.spacing * 4
+          result: root.result
+          mode: root.mode
+          searching: root.searching
+          foreground: root.foreground
+          accent: root.accent
+          fontFamily: root.fontFamily
+          onSearchWord: function(w) { root.searchWord(w) }
+          onCopyText: function(t) { root.copyText(t) }
+        }
+
+        // ------------------------------------------------------ preferences
+        ObPrefs {
+          id: prefs
+          visible: root.prefsOpen
+          width: parent.width
+          height: content.height - headerRow.height - statusRow.height - content.spacing * 2
+          sources: root.sources
+          drivers: root.drivers
+          languages: root.languages
+          datasets: root.datasets
+          localStatus: root.localStatus
+          installer: installer
+          foreground: root.foreground
+          accent: root.accent
+          fontFamily: root.fontFamily
+          onSaveSource: function(source, clearKey) {
+            backend.call("sources.save", {source: source, clear_key: clearKey}, function(reply) {
+              root.afterSourcesChanged(reply)
+              if (reply.ok) { prefs.editing = null; prefs.tab = "sources"; prefs.message = "Saved " + source.name + "."; prefs.messageError = false }
+            })
+          }
+          onDeleteSource: function(id) { backend.call("sources.delete", {id: id}, root.afterSourcesChanged) }
+          onEnableSource: function(id, enabled) { backend.call("sources.enable", {id: id, enabled: enabled}, root.afterSourcesChanged) }
+          onMoveSource: function(id, delta) { backend.call("sources.move", {id: id, delta: delta}, root.afterSourcesChanged) }
+          onResetSources: backend.call("sources.reset", {}, function(reply) {
+            root.afterSourcesChanged(reply)
+            if (reply.ok) { prefs.message = "Sources reset to the built-in defaults."; prefs.messageError = false }
+          })
+          onRefreshDatasets: root.refreshDatasets()
+          onInstallDataset: function(id) {
+            if (installer.running) { prefs.message = "An install is already running."; prefs.messageError = true; return }
+            prefs.message = ""
+            installer.install(id)
+          }
+          onRemoveDataset: function(id) {
+            backend.call("data.remove", {id: id}, function(reply) {
+              root.refreshDatasets()
+              root.refreshLocalStatus()
+              prefs.message = reply.ok ? "Removed " + id + "." : reply.error.message
+              prefs.messageError = !reply.ok
+            })
+          }
+          onTestSource: function(id) {
+            prefs.message = "Testing " + id + "…"
+            prefs.messageError = false
+            backend.call("sources.test", {id: id}, function(reply) {
+              if (!reply.ok) { prefs.message = reply.error.message; prefs.messageError = true; return }
+              var rs = reply.data.results || []
+              if (rs.length === 0) { prefs.message = "Test: source not applicable (not installed or no language match)."; prefs.messageError = true; return }
+              var r = rs[0]
+              prefs.message = r.ok
+                ? "Test OK: '" + reply.data.query + "' → " + r.count + " result(s) in " + r.ms + " ms"
+                : "Test failed: " + r.error
+              prefs.messageError = !r.ok
+            })
+          }
+        }
+
+        // ------------------------------------------------------- status row
+        Item {
+          id: statusRow
+          width: parent.width
+          height: statusText.implicitHeight
+          Text {
+            id: statusText
+            anchors.left: parent.left
+            anchors.right: hintText.left
+            anchors.rightMargin: Style.spacing.md
+            textFormat: Text.PlainText
+            text: root.status
+            color: root.statusError ? Color.urgent : root.muted
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+            elide: Text.ElideRight
+          }
+          Text {
+            id: hintText
+            anchors.right: parent.right
+            textFormat: Text.PlainText
+            text: root.prefsOpen ? "Esc: back" : "Ctrl+click: look up · Alt+click: copy · Ctrl+1/2/3: mode · Ctrl+,: preferences"
+            color: root.muted
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+        }
+      }
+    }
+  }
+}

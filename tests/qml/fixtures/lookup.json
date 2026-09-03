@@ -1,0 +1,177 @@
+{
+ "mode": "lookup",
+ "query": "Haus",
+ "lang": "de",
+ "lang2": "",
+ "results": [
+  {
+   "source": {
+    "id": "duden",
+    "name": "Duden",
+    "type": "dictionary",
+    "driver": "duden",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": false,
+   "error": "Duden: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 0
+  },
+  {
+   "source": {
+    "id": "mini-de",
+    "name": "Mini German",
+    "type": "dictionary",
+    "driver": "local",
+    "kind": "local",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "entries": [
+    {
+     "headword": "Haus",
+     "pos": "Substantiv",
+     "pronunciation": "haʊs",
+     "lang": "de",
+     "senses": [
+      {
+       "gloss": "Gebäude, das Menschen zum Wohnen dient",
+       "examples": [
+        "ein großes Haus"
+       ],
+       "synonyms": [
+        "Gebäude",
+        "Bau",
+        "Anwesen"
+       ],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "gloss_html": "<a href=\"w:Geb%C3%A4ude\">Gebäude</a>, <a href=\"w:das\">das</a> <a href=\"w:Menschen\">Menschen</a> <a href=\"w:zum\">zum</a> <a href=\"w:Wohnen\">Wohnen</a> <a href=\"w:dient\">dient</a>",
+       "examples_html": [
+        "<a href=\"w:ein\">ein</a> <a href=\"w:gro%C3%9Fes\">großes</a> <a href=\"w:Haus\">Haus</a>"
+       ],
+       "synonyms_html": "<a href=\"w:Geb%C3%A4ude\">Gebäude</a>, <a href=\"w:Bau\">Bau</a>, <a href=\"w:Anwesen\">Anwesen</a>",
+       "antonyms_html": ""
+      },
+      {
+       "gloss": "Familie, Geschlecht",
+       "examples": [],
+       "synonyms": [
+        "Dynastie"
+       ],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "gloss_html": "<a href=\"w:Familie\">Familie</a>, <a href=\"w:Geschlecht\">Geschlecht</a>",
+       "examples_html": [],
+       "synonyms_html": "<a href=\"w:Dynastie\">Dynastie</a>",
+       "antonyms_html": ""
+      }
+     ],
+     "extra": {},
+     "url": "",
+     "headword_html": "<a href=\"w:Haus\">Haus</a>",
+     "extra_html": []
+    }
+   ],
+   "url": "",
+   "count": 1,
+   "ms": 10
+  }
+ ],
+ "skipped": [
+  {
+   "id": "wiktionary-de",
+   "name": "Wiktionary (German, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-de"
+  },
+  {
+   "id": "wiktionary-de-native",
+   "name": "Wiktionary (German edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-de-native"
+  },
+  {
+   "id": "wiktionary-en",
+   "name": "Wiktionary (English, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-en"
+  },
+  {
+   "id": "wiktionary-zh",
+   "name": "Wiktionary (Chinese (Mandarin), English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-zh"
+  },
+  {
+   "id": "wiktionary-zh-native",
+   "name": "Wiktionary (Chinese (Mandarin) edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-zh-native"
+  },
+  {
+   "id": "wiktionary-fr",
+   "name": "Wiktionary (French, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-fr"
+  },
+  {
+   "id": "wiktionary-fr-native",
+   "name": "Wiktionary (French edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-fr-native"
+  },
+  {
+   "id": "wiktionary-es",
+   "name": "Wiktionary (Spanish, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-es"
+  },
+  {
+   "id": "wiktionary-es-native",
+   "name": "Wiktionary (Spanish edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-es-native"
+  },
+  {
+   "id": "wiktionary-pt",
+   "name": "Wiktionary (Portuguese, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-pt"
+  },
+  {
+   "id": "wiktionary-pt-native",
+   "name": "Wiktionary (Portuguese edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-pt-native"
+  },
+  {
+   "id": "wiktionary-ja",
+   "name": "Wiktionary (Japanese, English edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-ja"
+  },
+  {
+   "id": "wiktionary-ja-native",
+   "name": "Wiktionary (Japanese edition)",
+   "reason": "not installed",
+   "dataset": "wiktionary-ja-native"
+  },
+  {
+   "id": "ecdict",
+   "name": "ECDICT",
+   "reason": "not installed",
+   "dataset": "ecdict"
+  },
+  {
+   "id": "unihan",
+   "name": "Unihan characters",
+   "reason": "not installed",
+   "dataset": "unihan"
+  }
+ ]
+}

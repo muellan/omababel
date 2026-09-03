@@ -1,0 +1,378 @@
+{
+ "status": {
+  "wiktionary-de": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-de",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de.sqlite"
+  },
+  "wiktionary-de-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-de",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de.sqlite"
+  },
+  "wiktionary-de-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-de",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de.sqlite"
+  },
+  "wiktionary-de-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-de-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de-native.sqlite"
+  },
+  "wiktionary-de-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-de-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-de-native.sqlite"
+  },
+  "wiktionary-en": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-en",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-en.sqlite"
+  },
+  "wiktionary-en-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-en",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-en.sqlite"
+  },
+  "wiktionary-en-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-en",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-en.sqlite"
+  },
+  "wiktionary-zh": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-zh",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh.sqlite"
+  },
+  "wiktionary-zh-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-zh",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh.sqlite"
+  },
+  "wiktionary-zh-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-zh",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh.sqlite"
+  },
+  "wiktionary-zh-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-zh-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh-native.sqlite"
+  },
+  "wiktionary-zh-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-zh-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-zh-native.sqlite"
+  },
+  "wiktionary-fr": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-fr",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr.sqlite"
+  },
+  "wiktionary-fr-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-fr",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr.sqlite"
+  },
+  "wiktionary-fr-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-fr",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr.sqlite"
+  },
+  "wiktionary-fr-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-fr-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr-native.sqlite"
+  },
+  "wiktionary-fr-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-fr-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-fr-native.sqlite"
+  },
+  "wiktionary-es": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-es",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es.sqlite"
+  },
+  "wiktionary-es-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-es",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es.sqlite"
+  },
+  "wiktionary-es-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-es",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es.sqlite"
+  },
+  "wiktionary-es-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-es-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es-native.sqlite"
+  },
+  "wiktionary-es-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-es-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-es-native.sqlite"
+  },
+  "wiktionary-pt": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-pt",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt.sqlite"
+  },
+  "wiktionary-pt-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-pt",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt.sqlite"
+  },
+  "wiktionary-pt-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-pt",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt.sqlite"
+  },
+  "wiktionary-pt-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-pt-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt-native.sqlite"
+  },
+  "wiktionary-pt-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-pt-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-pt-native.sqlite"
+  },
+  "wiktionary-ja": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-ja",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja.sqlite"
+  },
+  "wiktionary-ja-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-ja",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja.sqlite"
+  },
+  "wiktionary-ja-translator": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-ja",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja.sqlite"
+  },
+  "wiktionary-ja-native": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-ja-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja-native.sqlite"
+  },
+  "wiktionary-ja-native-thesaurus": {
+   "installed": false,
+   "error": "run: omababel data install wiktionary-ja-native",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/wiktionary-ja-native.sqlite"
+  },
+  "freedict-deu-eng": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-eng.sqlite",
+   "entries": 2,
+   "languages": [
+    "de"
+   ],
+   "format": "tei",
+   "source": "/home/claude/omababel/tests/fixtures/deu-eng.tei",
+   "title": "FreeDict German → English",
+   "license": "GPL (see dictionary header)",
+   "built": 1788459284,
+   "installed": true
+  },
+  "freedict-eng-deu": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-deu",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-deu.sqlite"
+  },
+  "freedict-deu-fra": {
+   "installed": false,
+   "error": "run: omababel data install freedict-deu-fra",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-fra.sqlite"
+  },
+  "freedict-fra-deu": {
+   "installed": false,
+   "error": "run: omababel data install freedict-fra-deu",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-deu.sqlite"
+  },
+  "freedict-deu-spa": {
+   "installed": false,
+   "error": "run: omababel data install freedict-deu-spa",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-spa.sqlite"
+  },
+  "freedict-spa-deu": {
+   "installed": false,
+   "error": "run: omababel data install freedict-spa-deu",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-deu.sqlite"
+  },
+  "freedict-deu-por": {
+   "installed": false,
+   "error": "run: omababel data install freedict-deu-por",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-por.sqlite"
+  },
+  "freedict-por-deu": {
+   "installed": false,
+   "error": "run: omababel data install freedict-por-deu",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-deu.sqlite"
+  },
+  "freedict-eng-fra": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-fra",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-fra.sqlite"
+  },
+  "freedict-fra-eng": {
+   "installed": false,
+   "error": "run: omababel data install freedict-fra-eng",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-fra-eng.sqlite"
+  },
+  "freedict-eng-spa": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-spa",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-spa.sqlite"
+  },
+  "freedict-spa-eng": {
+   "installed": false,
+   "error": "run: omababel data install freedict-spa-eng",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-spa-eng.sqlite"
+  },
+  "freedict-eng-por": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-por",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-por.sqlite"
+  },
+  "freedict-por-eng": {
+   "installed": false,
+   "error": "run: omababel data install freedict-por-eng",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-por-eng.sqlite"
+  },
+  "freedict-eng-jpn": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-jpn",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-jpn.sqlite"
+  },
+  "freedict-jpn-eng": {
+   "installed": false,
+   "error": "run: omababel data install freedict-jpn-eng",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-jpn-eng.sqlite"
+  },
+  "freedict-deu-jpn": {
+   "installed": false,
+   "error": "run: omababel data install freedict-deu-jpn",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-deu-jpn.sqlite"
+  },
+  "freedict-jpn-deu": {
+   "installed": false,
+   "error": "run: omababel data install freedict-jpn-deu",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-jpn-deu.sqlite"
+  },
+  "freedict-eng-zho": {
+   "installed": false,
+   "error": "run: omababel data install freedict-eng-zho",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/freedict-eng-zho.sqlite"
+  },
+  "cedict": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/cedict.sqlite",
+   "entries": 4,
+   "languages": [
+    "zh"
+   ],
+   "format": "cedict",
+   "source": "/home/claude/omababel/tests/fixtures/cedict-sample.u8",
+   "title": "CC-CEDICT (Chinese → English)",
+   "license": "CC BY-SA 4.0",
+   "built": 1788459284,
+   "installed": true
+  },
+  "cedict-translator": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/cedict.sqlite",
+   "entries": 4,
+   "languages": [
+    "zh"
+   ],
+   "format": "cedict",
+   "source": "/home/claude/omababel/tests/fixtures/cedict-sample.u8",
+   "title": "CC-CEDICT (Chinese → English)",
+   "license": "CC BY-SA 4.0",
+   "built": 1788459284,
+   "installed": true
+  },
+  "ecdict": {
+   "installed": false,
+   "error": "run: omababel data install ecdict",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/ecdict.sqlite"
+  },
+  "ecdict-translator": {
+   "installed": false,
+   "error": "run: omababel data install ecdict",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/ecdict.sqlite"
+  },
+  "unihan": {
+   "installed": false,
+   "error": "run: omababel data install unihan",
+   "path": "/tmp/omababel-fixtures-cn4diyer/data/unihan.sqlite"
+  },
+  "mini-en": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/cache/mini-en-69626b419e473895.sqlite",
+   "entries": 4,
+   "languages": [
+    "en"
+   ],
+   "format": "json",
+   "source": "/tmp/omababel-fixtures-cn4diyer/data/mini-en.json",
+   "title": "Mini English synonyms",
+   "license": null,
+   "built": 1788459284,
+   "installed": true
+  },
+  "mini-en-thes": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/cache/mini-en-69626b419e473895.sqlite",
+   "entries": 4,
+   "languages": [
+    "en"
+   ],
+   "format": "json",
+   "source": "/tmp/omababel-fixtures-cn4diyer/data/mini-en.json",
+   "title": "Mini English synonyms",
+   "license": null,
+   "built": 1788459284,
+   "installed": true
+  },
+  "mini-de": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/cache/mini-de-79f357f3511ca6f0.sqlite",
+   "entries": 2,
+   "languages": [
+    "de"
+   ],
+   "format": "json",
+   "source": "/tmp/omababel-fixtures-cn4diyer/data/mini-de.json",
+   "title": "Mini German",
+   "license": null,
+   "built": 1788459284,
+   "installed": true
+  },
+  "mini-de-thes": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/cache/mini-de-79f357f3511ca6f0.sqlite",
+   "entries": 2,
+   "languages": [
+    "de"
+   ],
+   "format": "json",
+   "source": "/tmp/omababel-fixtures-cn4diyer/data/mini-de.json",
+   "title": "Mini German",
+   "license": null,
+   "built": 1788459284,
+   "installed": true
+  },
+  "mini-trans": {
+   "path": "/tmp/omababel-fixtures-cn4diyer/cache/mini-en-69626b419e473895.sqlite",
+   "entries": 4,
+   "languages": [
+    "en"
+   ],
+   "format": "json",
+   "source": "/tmp/omababel-fixtures-cn4diyer/data/mini-en.json",
+   "title": "Mini English synonyms",
+   "license": null,
+   "built": 1788459284,
+   "installed": true
+  }
+ }
+}

@@ -1,0 +1,3 @@
+# GitHub unihan-database review layout
+U+3400 㐀	kDefinition	(same as 丘) hillock or mound
+U+4E2D 中	kDefinition	central; center, middle

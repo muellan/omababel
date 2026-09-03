@@ -1,0 +1,18 @@
+[
+  {"word": "house", "lang": "en", "pos": "noun", "pron": "haʊs",
+   "senses": [
+     {"gloss": "a building for human habitation", "examples": ["a house on the hill"], "synonyms": ["home", "dwelling", "residence"], "antonyms": []},
+     {"gloss": "a legislative assembly", "synonyms": ["chamber"], "antonyms": []}
+   ],
+   "translations": {"de": ["Haus", "Gebäude"], "fr": ["maison"]},
+   "forms": ["houses"], "extra": {"etymology": "From Old English hūs."}},
+  {"word": "house", "lang": "en", "pos": "verb",
+   "senses": [{"gloss": "to provide with a house", "synonyms": ["accommodate", "lodge"], "antonyms": ["evict"]}],
+   "translations": {"de": ["unterbringen"]}},
+  {"word": "big", "lang": "en", "pos": "adj",
+   "senses": [{"gloss": "of great size", "synonyms": ["large", "huge", "Large"], "antonyms": ["small", "little"]}],
+   "translations": {"de": ["groß"]}, "forms": ["bigger", "biggest"]},
+  {"word": "small", "lang": "en", "pos": "adj",
+   "senses": [{"gloss": "of little size", "synonyms": ["little", "tiny"], "antonyms": ["big", "large"]}],
+   "translations": {"de": ["klein"]}}
+]

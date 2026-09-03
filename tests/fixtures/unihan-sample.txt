@@ -1,0 +1,9 @@
+# Unihan_Readings.txt sample (canonical layout)
+U+4E2D	kCantonese	zung1 zung3
+U+4E2D	kDefinition	central; center, middle; in the midst of; hit (target); attain
+U+4E2D	kJapaneseKun	NAKA UCHI ATARU
+U+4E2D	kJapaneseOn	CHUU
+U+4E2D	kMandarin	zhōng
+U+56FD	kDefinition	nation, country, nation-state
+U+56FD	kMandarin	guó
+U+56FD	kTraditionalVariant	U+570B

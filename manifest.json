@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "muellan.omababel",
+  "name": "Omababel",
+  "version": "1.0.0",
+  "author": "André Müller",
+  "license": "MIT",
+  "description": "Dictionary, thesaurus and translation panel.",
+  "icon": "accessories-dictionary",
+  "kinds": ["panel"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "panel": "Omababel.qml"
+  }
+}

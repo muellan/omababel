@@ -1,0 +1,138 @@
+"""Packaging checks: manifest (same rules as `omarchy plugin validate`),
+no symlinks, LICENSE/README present, QML files structurally sane."""
+
+import json
+import os
+import re
+import unittest
+from pathlib import Path
+
+from helpers import ROOT
+
+
+class ManifestTest(unittest.TestCase):
+    def setUp(self):
+        self.manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
+
+    def test_schema(self):
+        m = self.manifest
+        self.assertEqual(m["schemaVersion"], 1)
+        for field in ("id", "name", "version", "kinds", "entryPoints"):
+            self.assertIn(field, m)
+        self.assertRegex(m["id"], r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+        self.assertFalse(m["id"].startswith("omarchy."))
+        self.assertNotIn("..", m["id"])
+        self.assertEqual(m["id"], "muellan.omababel")
+        self.assertIsInstance(m["kinds"], list)
+        self.assertTrue(m["kinds"])
+        self.assertEqual(m["kinds"], ["panel"])
+        self.assertTrue(m.get("keepLoaded"))
+        self.assertEqual(m.get("license"), "MIT")
+
+    def test_entry_points_exist_and_are_safe(self):
+        eps = self.manifest["entryPoints"]
+        self.assertIsInstance(eps, dict)
+        self.assertIn("panel", eps)
+        for kind, rel in eps.items():
+            self.assertFalse(rel.startswith("/"))
+            self.assertNotIn("..", rel)
+            self.assertTrue((ROOT / rel).is_file(), rel)
+
+    def test_no_symlinks_in_plugin(self):
+        for path in ROOT.rglob("*"):
+            if ".git" in path.parts:
+                continue
+            self.assertFalse(path.is_symlink(), f"symlink found: {path}")
+
+    def test_license_and_readme(self):
+        lic = (ROOT / "LICENSE").read_text(encoding="utf-8")
+        self.assertIn("MIT License", lic)
+        self.assertIn("Permission is hereby granted, free of charge", lic)
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for needle in ("omarchy plugin add", "muellan.omababel", "omarchy-shell shell toggle muellan.omababel",
+                       "## Install", "## Adding your own sources", "## License", "omababel data install"):
+            self.assertIn(needle, readme, needle)
+
+    def test_backend_is_stdlib_only(self):
+        stdlib_ok = {"__future__", "annotations", "argparse", "concurrent", "csv", "gzip", "hashlib", "html", "io", "json",
+                     "lzma", "os", "pathlib", "random", "re", "shutil", "socket", "sqlite3", "subprocess", "sys",
+                     "tarfile", "tempfile", "time", "traceback", "typing", "unicodedata", "urllib", "xml",
+                     "zipfile", "zlib", "ob"}
+        import ast
+        for py in (ROOT / "backend").rglob("*.py"):
+            tree = ast.parse(py.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                names = []
+                if isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
+                    names = [node.module]
+                for name in names:
+                    top = name.split(".")[0]
+                    self.assertIn(top, stdlib_ok, f"{py.name}: third-party import '{top}'")
+
+    def test_bin_wrapper(self):
+        wrapper = ROOT / "bin" / "omababel"
+        self.assertTrue(wrapper.is_file())
+        self.assertTrue(os.access(wrapper, os.X_OK))
+        self.assertTrue(wrapper.read_text(encoding="utf-8").startswith("#!/bin/bash"))
+
+
+class QmlStructureTest(unittest.TestCase):
+    def qml_files(self):
+        return sorted(ROOT.glob("*.qml"))
+
+    def strip(self, text):
+        """Remove string literals and comments (single pass, so a // inside
+        a URL string or a quote inside a comment cannot confuse the count)."""
+        out = []
+        i, n = 0, len(text)
+        while i < n:
+            ch = text[i]
+            if ch in "\"'":
+                j = i + 1
+                while j < n and text[j] != ch:
+                    j += 2 if text[j] == "\\" else 1
+                out.append(ch + ch)
+                i = j + 1
+            elif text.startswith("//", i) and (i == 0 or text[i - 1] != "\\"):   # not the \/\/ of a regex
+                j = text.find("\n", i)
+                i = n if j < 0 else j
+            elif text.startswith("/*", i):
+                j = text.find("*/", i + 2)
+                i = n if j < 0 else j + 2
+            else:
+                out.append(ch)
+                i += 1
+        return "".join(out)
+
+    def test_braces_balanced(self):
+        for f in self.qml_files():
+            src = self.strip(f.read_text(encoding="utf-8"))
+            for open_ch, close_ch in (("{", "}"), ("(", ")"), ("[", "]")):
+                self.assertEqual(src.count(open_ch), src.count(close_ch), f"{f.name}: unbalanced {open_ch}{close_ch}")
+
+    def test_panel_contract(self):
+        src = (ROOT / "Omababel.qml").read_text(encoding="utf-8")
+        for needle in ("property var shell", "property var manifest", "property bool opened",
+                       "function open(", "function close(", "function dismiss(", "function toggle(",
+                       "PanelWindow", "WlrLayershell.keyboardFocus", "backend/omababel.py"):
+            self.assertIn(needle, src, needle)
+        # spec: three modes, two language selectors, history, preferences
+        for needle in ('"lookup"', '"thesaurus"', '"translate"', "langPicker2", "historyPopup", "ObPrefs", "ObResults"):
+            self.assertIn(needle, src, needle)
+
+    def test_components_referenced_exist(self):
+        names = {f.stem for f in self.qml_files()}
+        for f in self.qml_files():
+            src = self.strip(f.read_text(encoding="utf-8"))
+            for used in set(re.findall(r"\b(Ob[A-Z]\w*)\s*\{", src)):
+                self.assertIn(used, names, f"{f.name} uses unknown component {used}")
+
+    def test_no_stray_hyprland_import(self):
+        for f in self.qml_files():
+            self.assertNotIn("Quickshell.Hyprland", f.read_text(encoding="utf-8"), f.name)
+
+
+if __name__ == "__main__":
+    unittest.main()

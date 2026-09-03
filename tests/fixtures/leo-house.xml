@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml><sectionlist>
+<section sctName="subst" sctTitle="Substantive" sctSelected="on">
+  <entry><side hc="0" lang="en"><words><word>house</word></words><repr><b>house</b></repr></side><side hc="1" lang="de"><words><word>Haus</word></words><repr>das <b>Haus</b>  Pl.: die Häuser</repr></side></entry>
+  <entry><side hc="0" lang="en"><words><word>building</word></words></side><side hc="1" lang="de"><words><word>Gebäude</word></words></side></entry>
+</section>
+<section sctName="verb" sctTitle="Verben">
+  <entry><side hc="0" lang="en"><words><word>to house</word></words><repr>to <b>house</b> | <b>housed</b>, <b>housed</b> |</repr></side><side hc="1" lang="de"><repr>unterbringen | brachte unter, untergebracht |</repr></side></entry>
+</section>
+<section sctName="empty"><entry><side lang="en"><words><word>x</word></words></side></entry></section>
+</sectionlist></xml>

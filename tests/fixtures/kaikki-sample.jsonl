@@ -1,0 +1,6 @@
+{"word": "Haus", "lang": "German", "lang_code": "de", "pos": "noun", "senses": [{"glosses": ["house"], "examples": [{"text": "ein Haus bauen"}], "synonyms": [{"word": "Gebäude"}], "tags": ["neuter"]}, {"glosses": ["home"]}], "synonyms": [{"word": "Bau"}], "antonyms": [], "translations": [], "forms": [{"form": "Häuser", "tags": ["plural"]}, {"form": "Häuser", "tags": ["table-tags"]}], "sounds": [{"ipa": "/haʊ̯s/"}], "etymology_text": "From Middle High German hūs."}
+{"word": "house", "lang": "English", "lang_code": "en", "pos": "noun", "senses": [{"glosses": ["A structure built or serving as an abode of human beings."], "synonyms": [{"word": "home"}], "antonyms": [{"word": "office"}]}], "translations": [{"lang_code": "de", "word": "Haus", "sense": "abode"}, {"lang_code": "fr", "word": "maison"}, {"lang_code": "de", "word": "Gebäude"}]}
+{"word": "casa", "lang": "Spanish", "lang_code": "es", "pos": "noun", "senses": [{"glosses": ["house"]}]}
+{"word": "broken", "lang": "English", "lang_code": "en", "pos": "adj", "senses": [{"raw_glosses": ["fallback gloss"]}]}
+{"word": "nosense", "lang": "English", "lang_code": "en", "pos": "noun", "senses": []}
+not json

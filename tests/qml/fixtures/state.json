@@ -1,0 +1,2048 @@
+{
+ "version": "1.0.0",
+ "sources": [
+  {
+   "id": "duden",
+   "name": "Duden",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "duden",
+   "url": "https://www.duden.de/rechtschreibung/{slug}",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "merriam-webster",
+   "name": "Merriam-Webster",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "mw",
+   "url": "https://www.merriam-webster.com/dictionary/{word}",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "merriam-webster-thesaurus",
+   "name": "Merriam-Webster Thesaurus",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "mw",
+   "url": "https://www.merriam-webster.com/thesaurus/{word}",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "oed",
+   "name": "Oxford English Dictionary",
+   "enabled": false,
+   "type": "dictionary",
+   "driver": "oed",
+   "url": "https://www.oed.com/search/dictionary/?scope=Entries&q={word}",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "Subscription site; free access only returns search snippets. Enter an OED Researcher API credential (app_id:app_key) for full entries.",
+   "kind": "remote",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "thesaurus-com",
+   "name": "Thesaurus.com",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "thesauruscom",
+   "url": "https://www.thesaurus.com/browse/{word}",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "leo",
+   "name": "LEO",
+   "enabled": true,
+   "type": "translator",
+   "driver": "leo",
+   "url": "https://dict.leo.org/",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "google-translate",
+   "name": "Google Translate",
+   "enabled": true,
+   "type": "translator",
+   "driver": "google",
+   "url": "https://translate.googleapis.com/translate_a/single",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "text",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "deepl",
+   "name": "DeepL",
+   "enabled": true,
+   "type": "translator",
+   "driver": "deepl",
+   "url": "https://www.deepl.com/translator",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "text",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-de",
+   "name": "Wiktionary (German, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-de.sqlite",
+   "format": "",
+   "dataset": "wiktionary-de",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-de-thesaurus",
+   "name": "Wiktionary synonyms (German, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-de.sqlite",
+   "format": "",
+   "dataset": "wiktionary-de",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-de-translator",
+   "name": "Wiktionary translations (German)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-de.sqlite",
+   "format": "",
+   "dataset": "wiktionary-de",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-de-native",
+   "name": "Wiktionary (German edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-de-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-de-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-de-native-thesaurus",
+   "name": "Wiktionary synonyms (German edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-de-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-de-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-en",
+   "name": "Wiktionary (English, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-en.sqlite",
+   "format": "",
+   "dataset": "wiktionary-en",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-en-thesaurus",
+   "name": "Wiktionary synonyms (English, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-en.sqlite",
+   "format": "",
+   "dataset": "wiktionary-en",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-en-translator",
+   "name": "Wiktionary translations (English)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-en.sqlite",
+   "format": "",
+   "dataset": "wiktionary-en",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-zh",
+   "name": "Wiktionary (Chinese (Mandarin), English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-zh.sqlite",
+   "format": "",
+   "dataset": "wiktionary-zh",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-zh-thesaurus",
+   "name": "Wiktionary synonyms (Chinese (Mandarin), English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-zh.sqlite",
+   "format": "",
+   "dataset": "wiktionary-zh",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-zh-translator",
+   "name": "Wiktionary translations (Chinese (Mandarin))",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-zh.sqlite",
+   "format": "",
+   "dataset": "wiktionary-zh",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-zh-native",
+   "name": "Wiktionary (Chinese (Mandarin) edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-zh-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-zh-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-zh-native-thesaurus",
+   "name": "Wiktionary synonyms (Chinese (Mandarin) edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-zh-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-zh-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-fr",
+   "name": "Wiktionary (French, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-fr.sqlite",
+   "format": "",
+   "dataset": "wiktionary-fr",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "fr"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-fr-thesaurus",
+   "name": "Wiktionary synonyms (French, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-fr.sqlite",
+   "format": "",
+   "dataset": "wiktionary-fr",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "fr"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-fr-translator",
+   "name": "Wiktionary translations (French)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-fr.sqlite",
+   "format": "",
+   "dataset": "wiktionary-fr",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-fr-native",
+   "name": "Wiktionary (French edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-fr-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-fr-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "fr"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-fr-native-thesaurus",
+   "name": "Wiktionary synonyms (French edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-fr-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-fr-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "fr"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-es",
+   "name": "Wiktionary (Spanish, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-es.sqlite",
+   "format": "",
+   "dataset": "wiktionary-es",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "es"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-es-thesaurus",
+   "name": "Wiktionary synonyms (Spanish, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-es.sqlite",
+   "format": "",
+   "dataset": "wiktionary-es",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "es"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-es-translator",
+   "name": "Wiktionary translations (Spanish)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-es.sqlite",
+   "format": "",
+   "dataset": "wiktionary-es",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-es-native",
+   "name": "Wiktionary (Spanish edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-es-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-es-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "es"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-es-native-thesaurus",
+   "name": "Wiktionary synonyms (Spanish edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-es-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-es-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "es"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-pt",
+   "name": "Wiktionary (Portuguese, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-pt.sqlite",
+   "format": "",
+   "dataset": "wiktionary-pt",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "pt"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-pt-thesaurus",
+   "name": "Wiktionary synonyms (Portuguese, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-pt.sqlite",
+   "format": "",
+   "dataset": "wiktionary-pt",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "pt"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-pt-translator",
+   "name": "Wiktionary translations (Portuguese)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-pt.sqlite",
+   "format": "",
+   "dataset": "wiktionary-pt",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-pt-native",
+   "name": "Wiktionary (Portuguese edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-pt-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-pt-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "pt"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-pt-native-thesaurus",
+   "name": "Wiktionary synonyms (Portuguese edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-pt-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-pt-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "pt"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-ja",
+   "name": "Wiktionary (Japanese, English edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-ja.sqlite",
+   "format": "",
+   "dataset": "wiktionary-ja",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "ja"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-ja-thesaurus",
+   "name": "Wiktionary synonyms (Japanese, English edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-ja.sqlite",
+   "format": "",
+   "dataset": "wiktionary-ja",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "ja"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-ja-translator",
+   "name": "Wiktionary translations (Japanese)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-ja.sqlite",
+   "format": "",
+   "dataset": "wiktionary-ja",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-ja-native",
+   "name": "Wiktionary (Japanese edition)",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-ja-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-ja-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "ja"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "wiktionary-ja-native-thesaurus",
+   "name": "Wiktionary synonyms (Japanese edition)",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "wiktionary-ja-native.sqlite",
+   "format": "",
+   "dataset": "wiktionary-ja-native",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "ja"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "freedict-deu-eng",
+   "name": "FreeDict German → English",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-deu-eng.sqlite",
+   "format": "",
+   "dataset": "freedict-deu-eng",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "de",
+     "en"
+    ],
+    [
+     "en",
+     "de"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-deu",
+   "name": "FreeDict English → German",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-deu.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-deu",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "de"
+    ],
+    [
+     "de",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-deu-fra",
+   "name": "FreeDict German → French",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-deu-fra.sqlite",
+   "format": "",
+   "dataset": "freedict-deu-fra",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "de",
+     "fr"
+    ],
+    [
+     "fr",
+     "de"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-fra-deu",
+   "name": "FreeDict French → German",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-fra-deu.sqlite",
+   "format": "",
+   "dataset": "freedict-fra-deu",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "fr",
+     "de"
+    ],
+    [
+     "de",
+     "fr"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-deu-spa",
+   "name": "FreeDict German → Spanish",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-deu-spa.sqlite",
+   "format": "",
+   "dataset": "freedict-deu-spa",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "de",
+     "es"
+    ],
+    [
+     "es",
+     "de"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-spa-deu",
+   "name": "FreeDict Spanish → German",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-spa-deu.sqlite",
+   "format": "",
+   "dataset": "freedict-spa-deu",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "es",
+     "de"
+    ],
+    [
+     "de",
+     "es"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-deu-por",
+   "name": "FreeDict German → Portuguese",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-deu-por.sqlite",
+   "format": "",
+   "dataset": "freedict-deu-por",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "de",
+     "pt"
+    ],
+    [
+     "pt",
+     "de"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-por-deu",
+   "name": "FreeDict Portuguese → German",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-por-deu.sqlite",
+   "format": "",
+   "dataset": "freedict-por-deu",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "pt",
+     "de"
+    ],
+    [
+     "de",
+     "pt"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-fra",
+   "name": "FreeDict English → French",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-fra.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-fra",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "fr"
+    ],
+    [
+     "fr",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-fra-eng",
+   "name": "FreeDict French → English",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-fra-eng.sqlite",
+   "format": "",
+   "dataset": "freedict-fra-eng",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "fr",
+     "en"
+    ],
+    [
+     "en",
+     "fr"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-spa",
+   "name": "FreeDict English → Spanish",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-spa.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-spa",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "es"
+    ],
+    [
+     "es",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-spa-eng",
+   "name": "FreeDict Spanish → English",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-spa-eng.sqlite",
+   "format": "",
+   "dataset": "freedict-spa-eng",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "es",
+     "en"
+    ],
+    [
+     "en",
+     "es"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-por",
+   "name": "FreeDict English → Portuguese",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-por.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-por",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "pt"
+    ],
+    [
+     "pt",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-por-eng",
+   "name": "FreeDict Portuguese → English",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-por-eng.sqlite",
+   "format": "",
+   "dataset": "freedict-por-eng",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "pt",
+     "en"
+    ],
+    [
+     "en",
+     "pt"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-jpn",
+   "name": "FreeDict English → Japanese",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-jpn.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-jpn",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "ja"
+    ],
+    [
+     "ja",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-jpn-eng",
+   "name": "FreeDict Japanese → English",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-jpn-eng.sqlite",
+   "format": "",
+   "dataset": "freedict-jpn-eng",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "ja",
+     "en"
+    ],
+    [
+     "en",
+     "ja"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-deu-jpn",
+   "name": "FreeDict German → Japanese",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-deu-jpn.sqlite",
+   "format": "",
+   "dataset": "freedict-deu-jpn",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "de",
+     "ja"
+    ],
+    [
+     "ja",
+     "de"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-jpn-deu",
+   "name": "FreeDict Japanese → German",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-jpn-deu.sqlite",
+   "format": "",
+   "dataset": "freedict-jpn-deu",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "ja",
+     "de"
+    ],
+    [
+     "de",
+     "ja"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "freedict-eng-zho",
+   "name": "FreeDict English → Chinese (Mandarin)",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "freedict-eng-zho.sqlite",
+   "format": "",
+   "dataset": "freedict-eng-zho",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "zh"
+    ],
+    [
+     "zh",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "cedict",
+   "name": "CC-CEDICT",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "cedict.sqlite",
+   "format": "",
+   "dataset": "cedict",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "cedict-translator",
+   "name": "CC-CEDICT translations",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "cedict.sqlite",
+   "format": "",
+   "dataset": "cedict",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "zh",
+     "en"
+    ],
+    [
+     "en",
+     "zh"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "ecdict",
+   "name": "ECDICT",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "ecdict.sqlite",
+   "format": "",
+   "dataset": "ecdict",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "ecdict-translator",
+   "name": "ECDICT translations",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "ecdict.sqlite",
+   "format": "",
+   "dataset": "ecdict",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [
+    [
+     "en",
+     "zh"
+    ],
+    [
+     "zh",
+     "en"
+    ]
+   ],
+   "has_key": false
+  },
+  {
+   "id": "unihan",
+   "name": "Unihan characters",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "unihan.sqlite",
+   "format": "",
+   "dataset": "unihan",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": true,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "zh",
+    "ja"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "mini-en",
+   "name": "Mini English",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "mini-en.json",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": false,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "mini-en-thes",
+   "name": "Mini English synonyms",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "mini-en.json",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": false,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "en"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "mini-de",
+   "name": "Mini German",
+   "enabled": true,
+   "type": "dictionary",
+   "driver": "local",
+   "url": "",
+   "path": "mini-de.json",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": false,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "mini-de-thes",
+   "name": "Mini German synonyms",
+   "enabled": true,
+   "type": "thesaurus",
+   "driver": "local",
+   "url": "",
+   "path": "mini-de.json",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "builtin": false,
+   "notes": "",
+   "kind": "local",
+   "languages": [
+    "de"
+   ],
+   "pairs": [],
+   "has_key": false
+  },
+  {
+   "id": "mini-trans",
+   "name": "Mini translations",
+   "enabled": true,
+   "type": "translator",
+   "driver": "local",
+   "url": "",
+   "path": "mini-en.json",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "word",
+   "api_key": "",
+   "builtin": false,
+   "notes": "",
+   "kind": "local",
+   "languages": [],
+   "pairs": [],
+   "has_key": false
+  }
+ ],
+ "drivers": [
+  {
+   "driver": "local",
+   "label": "Local file",
+   "kind": "local",
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "description": "A dictionary file in the app's local storage: kaikki/wiktextract JSONL, FreeDict TEI, CC-CEDICT, ECDICT CSV, Unihan, dictd, TSV or an index built by 'omababel data install'.",
+   "default_url": "",
+   "supports_key": false,
+   "key_hint": "",
+   "translation_modes": [
+    "word"
+   ],
+   "languages": []
+  },
+  {
+   "driver": "duden",
+   "label": "Duden",
+   "kind": "remote",
+   "types": [
+    "dictionary"
+   ],
+   "description": "German spelling, meanings, grammar, origin and synonyms from duden.de.",
+   "default_url": "https://www.duden.de/rechtschreibung/{slug}",
+   "supports_key": false,
+   "key_hint": "",
+   "translation_modes": [],
+   "languages": [
+    "de"
+   ]
+  },
+  {
+   "driver": "mw",
+   "label": "Merriam-Webster",
+   "kind": "remote",
+   "types": [
+    "dictionary",
+    "thesaurus"
+   ],
+   "description": "English definitions (and synonyms/antonyms in thesaurus rows) from merriam-webster.com; optional dictionaryapi.com key.",
+   "default_url": "https://www.merriam-webster.com/dictionary/{word}",
+   "supports_key": true,
+   "key_hint": "dictionaryapi.com key (collegiate or thesaurus, optional)",
+   "translation_modes": [],
+   "languages": [
+    "en"
+   ]
+  },
+  {
+   "driver": "oed",
+   "label": "Oxford English Dictionary",
+   "kind": "remote",
+   "types": [
+    "dictionary"
+   ],
+   "description": "OED entries. Free access only yields search snippets; enter an OED Researcher API credential as 'app_id:app_key' for full senses.",
+   "default_url": "https://www.oed.com/search/dictionary/?scope=Entries&q={word}",
+   "supports_key": true,
+   "key_hint": "OED Researcher API 'app_id:app_key' (optional)",
+   "translation_modes": [],
+   "languages": [
+    "en"
+   ]
+  },
+  {
+   "driver": "thesauruscom",
+   "label": "Thesaurus.com",
+   "kind": "remote",
+   "types": [
+    "thesaurus"
+   ],
+   "description": "English synonyms and antonyms from thesaurus.com.",
+   "default_url": "https://www.thesaurus.com/browse/{word}",
+   "supports_key": false,
+   "key_hint": "",
+   "translation_modes": [],
+   "languages": [
+    "en"
+   ]
+  },
+  {
+   "driver": "leo",
+   "label": "LEO (dict.leo.org)",
+   "kind": "remote",
+   "types": [
+    "translator"
+   ],
+   "description": "Word-by-word translations between German and English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish.",
+   "default_url": "https://dict.leo.org/",
+   "supports_key": false,
+   "key_hint": "",
+   "translation_modes": [
+    "word"
+   ],
+   "languages": [
+    "de",
+    "en",
+    "fr",
+    "es",
+    "it",
+    "zh",
+    "ru",
+    "pt",
+    "pl"
+   ]
+  },
+  {
+   "driver": "google",
+   "label": "Google Translate",
+   "kind": "remote",
+   "types": [
+    "translator"
+   ],
+   "description": "Full text translation (any language). Optional Cloud Translation API key; without it the public web endpoint is used.",
+   "default_url": "https://translate.googleapis.com/translate_a/single",
+   "supports_key": true,
+   "key_hint": "Cloud Translation API key (optional)",
+   "translation_modes": [
+    "text",
+    "word"
+   ],
+   "languages": []
+  },
+  {
+   "driver": "deepl",
+   "label": "DeepL",
+   "kind": "remote",
+   "types": [
+    "translator"
+   ],
+   "description": "Full text translation. Uses the official API when a key is set (free keys end in ':fx'), otherwise the web app's endpoint.",
+   "default_url": "https://www.deepl.com/translator",
+   "supports_key": true,
+   "key_hint": "DeepL API key (optional)",
+   "translation_modes": [
+    "text",
+    "word"
+   ],
+   "languages": [
+    "de",
+    "en",
+    "zh",
+    "fr",
+    "es",
+    "pt",
+    "ja",
+    "it",
+    "ru",
+    "pl",
+    "nl",
+    "sv",
+    "da",
+    "nb",
+    "fi",
+    "cs",
+    "sk",
+    "hu",
+    "ro",
+    "bg",
+    "el",
+    "tr",
+    "uk",
+    "ar",
+    "ko",
+    "id",
+    "lt",
+    "lv",
+    "et",
+    "sl"
+   ]
+  },
+  {
+   "driver": "generic",
+   "label": "Custom URL",
+   "kind": "remote",
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "description": "Any web page or JSON API. Use {word} in the URL (plus {from} and {to} for translators); the page's readable text is shown.",
+   "default_url": "https://example.org/dictionary/{word}",
+   "supports_key": true,
+   "key_hint": "Sent as 'Authorization: Bearer <key>' and as {key} in the URL",
+   "translation_modes": [
+    "text",
+    "word"
+   ],
+   "languages": []
+  }
+ ],
+ "languages": [
+  {
+   "value": "de",
+   "label": "German",
+   "native": "Deutsch"
+  },
+  {
+   "value": "en",
+   "label": "English",
+   "native": "English"
+  },
+  {
+   "value": "zh",
+   "label": "Chinese (Mandarin)",
+   "native": "中文"
+  },
+  {
+   "value": "fr",
+   "label": "French",
+   "native": "Français"
+  },
+  {
+   "value": "es",
+   "label": "Spanish",
+   "native": "Español"
+  },
+  {
+   "value": "pt",
+   "label": "Portuguese",
+   "native": "Português"
+  },
+  {
+   "value": "ja",
+   "label": "Japanese",
+   "native": "日本語"
+  },
+  {
+   "value": "ar",
+   "label": "Arabic",
+   "native": "العربية"
+  },
+  {
+   "value": "bg",
+   "label": "Bulgarian",
+   "native": "Български"
+  },
+  {
+   "value": "ca",
+   "label": "Catalan",
+   "native": "Català"
+  },
+  {
+   "value": "hr",
+   "label": "Croatian",
+   "native": "Hrvatski"
+  },
+  {
+   "value": "cs",
+   "label": "Czech",
+   "native": "Čeština"
+  },
+  {
+   "value": "da",
+   "label": "Danish",
+   "native": "Dansk"
+  },
+  {
+   "value": "nl",
+   "label": "Dutch",
+   "native": "Nederlands"
+  },
+  {
+   "value": "eo",
+   "label": "Esperanto",
+   "native": "Esperanto"
+  },
+  {
+   "value": "et",
+   "label": "Estonian",
+   "native": "Eesti"
+  },
+  {
+   "value": "fi",
+   "label": "Finnish",
+   "native": "Suomi"
+  },
+  {
+   "value": "el",
+   "label": "Greek",
+   "native": "Ελληνικά"
+  },
+  {
+   "value": "he",
+   "label": "Hebrew",
+   "native": "עברית"
+  },
+  {
+   "value": "hi",
+   "label": "Hindi",
+   "native": "हिन्दी"
+  },
+  {
+   "value": "hu",
+   "label": "Hungarian",
+   "native": "Magyar"
+  },
+  {
+   "value": "is",
+   "label": "Icelandic",
+   "native": "Íslenska"
+  },
+  {
+   "value": "id",
+   "label": "Indonesian",
+   "native": "Bahasa Indonesia"
+  },
+  {
+   "value": "ga",
+   "label": "Irish",
+   "native": "Gaeilge"
+  },
+  {
+   "value": "it",
+   "label": "Italian",
+   "native": "Italiano"
+  },
+  {
+   "value": "ko",
+   "label": "Korean",
+   "native": "한국어"
+  },
+  {
+   "value": "la",
+   "label": "Latin",
+   "native": "Latina"
+  },
+  {
+   "value": "lv",
+   "label": "Latvian",
+   "native": "Latviešu"
+  },
+  {
+   "value": "lt",
+   "label": "Lithuanian",
+   "native": "Lietuvių"
+  },
+  {
+   "value": "ms",
+   "label": "Malay",
+   "native": "Bahasa Melayu"
+  },
+  {
+   "value": "nb",
+   "label": "Norwegian (Bokmål)",
+   "native": "Norsk bokmål"
+  },
+  {
+   "value": "fa",
+   "label": "Persian",
+   "native": "فارسی"
+  },
+  {
+   "value": "pl",
+   "label": "Polish",
+   "native": "Polski"
+  },
+  {
+   "value": "ro",
+   "label": "Romanian",
+   "native": "Română"
+  },
+  {
+   "value": "ru",
+   "label": "Russian",
+   "native": "Русский"
+  },
+  {
+   "value": "sr",
+   "label": "Serbian",
+   "native": "Српски"
+  },
+  {
+   "value": "sk",
+   "label": "Slovak",
+   "native": "Slovenčina"
+  },
+  {
+   "value": "sl",
+   "label": "Slovene",
+   "native": "Slovenščina"
+  },
+  {
+   "value": "sw",
+   "label": "Swahili",
+   "native": "Kiswahili"
+  },
+  {
+   "value": "sv",
+   "label": "Swedish",
+   "native": "Svenska"
+  },
+  {
+   "value": "th",
+   "label": "Thai",
+   "native": "ไทย"
+  },
+  {
+   "value": "tr",
+   "label": "Turkish",
+   "native": "Türkçe"
+  },
+  {
+   "value": "uk",
+   "label": "Ukrainian",
+   "native": "Українська"
+  },
+  {
+   "value": "vi",
+   "label": "Vietnamese",
+   "native": "Tiếng Việt"
+  }
+ ],
+ "prefs": {
+  "mode": "lookup",
+  "lang": "de",
+  "lang2": "en",
+  "panel_width": 0,
+  "panel_height": 0,
+  "font_scale": 1.0
+ },
+ "history": [
+  {
+   "query": "house",
+   "mode": "translate",
+   "lang": "en",
+   "lang2": "de",
+   "time": 1788459284
+  },
+  {
+   "query": "Haus",
+   "mode": "translate",
+   "lang": "de",
+   "lang2": "en",
+   "time": 1788459284
+  }
+ ],
+ "paths": {
+  "config": "/tmp/omababel-fixtures-cn4diyer/config",
+  "data": "/tmp/omababel-fixtures-cn4diyer/data",
+  "state": "/tmp/omababel-fixtures-cn4diyer/state",
+  "cache": "/tmp/omababel-fixtures-cn4diyer/cache"
+ }
+}

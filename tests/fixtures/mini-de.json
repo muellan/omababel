@@ -1,0 +1,12 @@
+[
+  {"word": "Haus", "lang": "de", "pos": "Substantiv", "pron": "haʊs",
+   "senses": [
+     {"gloss": "Gebäude, das Menschen zum Wohnen dient", "examples": ["ein großes Haus"], "synonyms": ["Gebäude", "Bau", "Anwesen"], "antonyms": []},
+     {"gloss": "Familie, Geschlecht", "synonyms": ["Dynastie"]}
+   ],
+   "translations": {"en": ["house", "home"], "fr": ["maison"]},
+   "forms": ["Häuser", "Hauses"]},
+  {"word": "groß", "lang": "de", "pos": "Adjektiv",
+   "senses": [{"gloss": "von beträchtlicher Ausdehnung", "synonyms": ["riesig", "gewaltig"], "antonyms": ["klein"]}],
+   "translations": {"en": ["big", "large"]}}
+]

@@ -1,0 +1,249 @@
+"""Merriam-Webster – English dictionary and thesaurus.
+
+* With an API key (free at dictionaryapi.com; one key per reference):
+  the Collegiate dictionary or Collegiate thesaurus JSON API.
+* Without one: the public entry pages ``/dictionary/<word>`` and
+  ``/thesaurus/<word>``.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import List, Optional
+
+from .. import http, htmlutil
+from .. import results as R
+from ..htmlutil import Node
+from .base import Source, SourceError, register
+
+DICT_URL = "https://www.merriam-webster.com/dictionary/{word}"
+THES_URL = "https://www.merriam-webster.com/thesaurus/{word}"
+API_DICT = "https://www.dictionaryapi.com/api/v3/references/collegiate/json/{word}?key={key}"
+API_THES = "https://www.dictionaryapi.com/api/v3/references/thesaurus/json/{word}?key={key}"
+
+_TOKEN = re.compile(r"\{[^}]*\}")
+
+
+def strip_tokens(text: str) -> str:
+    """Remove MW API markup tokens like ``{bc}``, ``{it}``, ``{a_link|word}``."""
+    def repl(m: re.Match) -> str:
+        body = m.group(0)[1:-1]
+        if "|" in body:
+            parts = body.split("|")
+            if parts[0] in ("a_link", "d_link", "i_link", "et_link", "mat", "sx", "dxt"):
+                return parts[1]
+        return ""
+    return R.clean(_TOKEN.sub(repl, text))
+
+
+@register
+class MerriamWebster(Source):
+    driver = "mw"
+    label = "Merriam-Webster"
+    kind = "remote"
+    types = ("dictionary", "thesaurus")
+    description = "English definitions (and synonyms/antonyms in thesaurus rows) from merriam-webster.com; optional dictionaryapi.com key."
+    default_url = DICT_URL
+    supports_key = True
+    key_hint = "dictionaryapi.com key (collegiate or thesaurus, optional)"
+    languages = ("en",)
+    order = 11
+
+    # ------------------------------------------------------------- lookup
+    def lookup(self, word: str, lang: str) -> dict:
+        word = word.strip()
+        url = http.fill_template(DICT_URL, word=word)
+        if self.api_key:
+            return {"entries": self._api_lookup(word), "url": url}
+        template = self.url if "{word}" in self.url else DICT_URL
+        try:
+            markup = http.fetch(http.fill_template(template, word=word)).text
+        except http.FetchError as e:
+            if e.status == 404:
+                return {"entries": [], "url": url}
+            raise SourceError(f"Merriam-Webster: {e}")
+        return {"entries": self.parse_dictionary(markup, url), "url": url}
+
+    def thesaurus(self, word: str, lang: str) -> dict:
+        word = word.strip()
+        url = http.fill_template(THES_URL, word=word)
+        if self.api_key:
+            return self._api_thesaurus(word, url)
+        template = self.url if ("{word}" in self.url and "thesaurus" in self.url) else THES_URL
+        try:
+            markup = http.fetch(http.fill_template(template, word=word)).text
+        except http.FetchError as e:
+            if e.status == 404:
+                return R.thesaurus([], [], url=url)
+            raise SourceError(f"Merriam-Webster thesaurus: {e}")
+        syn, ant = self.parse_thesaurus(markup)
+        return R.thesaurus(syn, ant, url=url)
+
+    # ---------------------------------------------------------------- api
+    def _api_get(self, template: str, word: str):
+        try:
+            resp = http.fetch(template.replace("{word}", http.quote(word)).replace("{key}", http.quote(self.api_key)),
+                              headers={"Accept": "application/json"})
+            return resp.json()
+        except http.FetchError as e:
+            raise SourceError(f"Merriam-Webster API: {e}")
+        except ValueError:
+            raise SourceError("Merriam-Webster API: invalid JSON (bad key?)")
+
+    def _api_lookup(self, word: str) -> List[dict]:
+        data = self._api_get(API_DICT, word)
+        return self.parse_api_dictionary(data, word)
+
+    def _api_thesaurus(self, word: str, url: str) -> dict:
+        data = self._api_get(API_THES, word)
+        syn, ant = self.parse_api_thesaurus(data, word)
+        return R.thesaurus(syn, ant, url=url)
+
+    @staticmethod
+    def parse_api_dictionary(data, word: str) -> List[dict]:
+        entries: List[dict] = []
+        if not isinstance(data, list):
+            return entries
+        for item in data:
+            if not isinstance(item, dict):
+                continue  # spelling suggestions come back as bare strings
+            hw = str(item.get("hwi", {}).get("hw", "")).replace("*", "")
+            if word and R.fold(hw) != R.fold(word) and not R.fold(word).startswith(R.fold(hw)):
+                # keep only entries for the looked-up headword family
+                if not hw.startswith(word.lower()):
+                    continue
+            prs = item.get("hwi", {}).get("prs") or []
+            pron = prs[0].get("mw", "") if prs and isinstance(prs[0], dict) else ""
+            senses: List[dict] = []
+            for d in item.get("def") or []:
+                for sseq in d.get("sseq") or []:
+                    for sense_pair in sseq:
+                        if not (isinstance(sense_pair, list) and len(sense_pair) == 2):
+                            continue
+                        kind, body = sense_pair
+                        if kind not in ("sense", "sen", "bs") or not isinstance(body, dict):
+                            if kind == "bs" and isinstance(body, dict):
+                                body = body.get("sense", {})
+                            else:
+                                continue
+                        gloss_parts, examples = [], []
+                        for dt in body.get("dt") or []:
+                            if not (isinstance(dt, list) and len(dt) == 2):
+                                continue
+                            if dt[0] == "text":
+                                gloss_parts.append(strip_tokens(dt[1]))
+                            elif dt[0] == "vis" and isinstance(dt[1], list):
+                                examples.extend(strip_tokens(v.get("t", "")) for v in dt[1] if isinstance(v, dict))
+                        gloss = " ".join(p for p in gloss_parts if p)
+                        if gloss:
+                            senses.append(R.sense(gloss, examples=examples, label=str(body.get("sn", ""))))
+            if not senses:
+                senses = [R.sense(s) for s in item.get("shortdef") or []]
+            if senses:
+                entries.append(R.entry(hw or word, pos=str(item.get("fl", "")), senses=senses,
+                                       pronunciation=pron, lang="en"))
+        return entries
+
+    @staticmethod
+    def parse_api_thesaurus(data, word: str):
+        syn: List[str] = []
+        ant: List[str] = []
+        if isinstance(data, list):
+            for item in data:
+                if not isinstance(item, dict):
+                    continue
+                meta = item.get("meta", {})
+                for group in meta.get("syns") or []:
+                    syn.extend(group)
+                for group in meta.get("ants") or []:
+                    ant.extend(group)
+        return R.dedupe(syn), R.dedupe(ant)
+
+    # -------------------------------------------------------------- scrape
+    @classmethod
+    def parse_dictionary(cls, markup: str, url: str = "") -> List[dict]:
+        doc = htmlutil.parse(markup)
+        containers = doc.find_all(cls="entry-word-section-container")
+        if not containers:
+            containers = [doc]
+        entries: List[dict] = []
+        for c in containers:
+            hw_el = c.find(cls="hword")
+            headword = hw_el.inline_text() if hw_el else ""
+            pos_el = c.find(cls="parts-of-speech") or c.find(cls="fl")
+            pos = pos_el.inline_text() if pos_el else ""
+            pos = re.sub(r"\s*\(\d+ of \d+\)\s*$", "", pos)
+            pr_el = c.find(cls="pr") or c.find(cls="mw")
+            pron = pr_el.inline_text() if pr_el else ""
+            senses: List[dict] = []
+            for dt in c.find_all(cls="dtText"):
+                gloss = dt.inline_text()
+                gloss = re.sub(r"^:\s*", "", gloss)
+                sense_el = dt.closest(cls="sense") or dt.closest("div")
+                label = ""
+                examples: List[str] = []
+                if sense_el is not None:
+                    sn = sense_el.find(cls="sn")
+                    if sn is not None:
+                        label = sn.inline_text()
+                    examples = [e.inline_text() for e in sense_el.find_all(cls="ex-sent")]
+                    if not label:
+                        item = sense_el.closest(cls="vg-sseq-entry-item")
+                        if item is not None:
+                            lab = item.find(cls="vg-sseq-entry-item-label")
+                            if lab is not None:
+                                label = lab.inline_text()
+                if gloss:
+                    senses.append(R.sense(gloss, examples=examples, label=label))
+            if not senses:
+                continue
+            # "Synonyms" box on the dictionary page, if present
+            syn_box = c.find(id="synonyms") or doc.find(id="synonyms")
+            if syn_box is not None and c is containers[0]:
+                syns = [a.inline_text() for a in syn_box.find_all("a")
+                        if "/dictionary/" in a.get("href", "") or "/thesaurus/" in a.get("href", "")]
+                if syns:
+                    senses[0]["synonyms"] = R.dedupe(syns)
+            entries.append(R.entry(headword, pos=pos, senses=senses, pronunciation=pron,
+                                   lang="en", url=url))
+        return entries
+
+    @classmethod
+    def parse_thesaurus(cls, markup: str):
+        doc = htmlutil.parse(markup)
+        syn: List[str] = []
+        ant: List[str] = []
+
+        def words_in(node: Node) -> List[str]:
+            out = [a.inline_text() for a in node.find_all("a")]
+            if not out:
+                out = [li.inline_text() for li in node.find_all("li")]
+            return [w for w in out if w and len(w) < 60]
+
+        for node in doc.elements():
+            cls_ = " ".join(node.classes)
+            if not cls_:
+                continue
+            if re.search(r"\b(synonyms_list|syn-list|synonym-list)\b", cls_):
+                syn.extend(words_in(node))
+            elif re.search(r"\b(antonyms_list|ant-list|antonym-list)\b", cls_) and "near" not in cls_:
+                ant.extend(words_in(node))
+        if not syn:
+            # Newer layout: headings "Synonyms of X" / "Antonyms of X" followed by lists.
+            for h in doc.find_all("h2,h3,p", pred=lambda n: bool(re.match(r"(?i)^(synonyms|antonyms)\b", n.inline_text()))):
+                target = syn if h.inline_text().lower().startswith("syn") else ant
+                sib = h.parent
+                if sib is None:
+                    continue
+                lst = None
+                seen_h = False
+                for ch in sib.children:
+                    if ch is h:
+                        seen_h = True
+                        continue
+                    if seen_h and ch.tag in ("ul", "div", "ol"):
+                        lst = ch
+                        break
+                if lst is not None:
+                    target.extend(words_in(lst))
+        return R.dedupe(syn), R.dedupe(ant)
