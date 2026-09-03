@@ -171,6 +171,12 @@ Item {
     root.statusError = !!isError
   }
 
+  // The kit's dropdowns assign their own `value` when the user picks an
+  // option, which silently breaks a `value: root.lang` binding – so push the
+  // model into the pickers explicitly whenever it changes.
+  onLangChanged: langPicker.value = root.lang
+  onLang2Changed: langPicker2.value = root.lang2
+
   // =================================================================== search
   function runSearch(query) {
     query = String(query || "").trim()
@@ -418,6 +424,10 @@ Item {
             options: root.modeOptions
             value: root.mode
             foreground: root.foreground
+            // An opaque idle fill makes the Button's colour animation pass
+            // through a bright half-opaque grey on hover; the built-ins sit
+            // on a transparent idle fill, so do the same.
+            background: "transparent"
             accent: root.accent
             onChanged: function(v) { root.setMode(v) }
           }
@@ -461,10 +471,9 @@ Item {
                 accent: root.accent
                 onChanged: function(v) { root.setLang(v, true) }
               }
-              ToolTip {
+              ObToolTip {
                 visible: root.mode !== "translate" && langHover.hovered
                 text: "Target language – only used in translate mode"
-                delay: 500
               }
               HoverHandler { id: langHover }
             }
@@ -476,7 +485,12 @@ Item {
           id: searchRow
           visible: !root.prefsOpen
           width: parent.width
-          height: visible ? searchField.implicitHeight : 0
+          height: visible ? searchField.height : 0
+
+          // Fallback fonts for CJK glyphs have taller line boxes than the
+          // theme font; size the field from the font metrics with head room
+          // and pin its height so it never grows with the content.
+          FontMetrics { id: searchMetrics; font: searchField.font }
 
           TextField {
             id: searchField
@@ -484,6 +498,8 @@ Item {
             anchors.right: historyButton.left
             anchors.rightMargin: Style.spacing.sm
             font.pixelSize: Style.font.title
+            height: Math.round(searchMetrics.height * 1.5) + topPadding + bottomPadding
+            verticalAlignment: TextInput.AlignVCenter
             placeholderText: root.mode === "translate"
               ? "Text to translate from " + root.langName(root.lang) + " to " + root.langName(root.lang2) + "…"
               : (root.mode === "thesaurus" ? "Find synonyms and antonyms in " : "Look up in ") + root.langName(root.lang) + "…"

@@ -50,8 +50,11 @@ class ManifestTest(unittest.TestCase):
         self.assertIn("Permission is hereby granted, free of charge", lic)
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         for needle in ("omarchy plugin add", "muellan.omababel", "omarchy-shell shell toggle muellan.omababel",
-                       "## Install", "## Adding your own sources", "## License", "omababel data install"):
+                       "omababel data install"):
             self.assertIn(needle, readme, needle)
+        lowered = readme.lower()
+        for heading in ("## install", "## adding your own sources", "## license"):
+            self.assertIn(heading, lowered, heading)
 
     def test_backend_is_stdlib_only(self):
         stdlib_ok = {"__future__", "annotations", "argparse", "concurrent", "csv", "gzip", "hashlib", "html", "io", "json",
