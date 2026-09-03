@@ -138,6 +138,22 @@ class HistoryTest(TempEnv):
         h.path.write_text("[[[", encoding="utf-8")
         self.assertEqual(History().entries, [])
 
+    def test_limit_from_prefs(self):
+        h = History()
+        for i in range(30):
+            h.add(f"w{i}")
+        self.assertEqual(History().limit, 1000)
+        config.Prefs().update({"history_max": 10})
+        trimmed = History()
+        self.assertEqual(trimmed.limit, 10)
+        self.assertEqual(len(trimmed.entries), 10)
+        self.assertEqual(trimmed.entries[0]["query"], "w29")
+        self.assertEqual(len(History().list()), 10)          # persisted trim
+        config.Prefs().update({"history_max": "abc"})          # ignored
+        self.assertEqual(config.Prefs().data["history_max"], 10)
+        config.Prefs().update({"history_max": 0})              # clamped
+        self.assertEqual(config.Prefs().data["history_max"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

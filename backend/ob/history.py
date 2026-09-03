@@ -10,15 +10,27 @@ from typing import List, Optional
 from .config import _atomic_write
 from .paths import state_dir
 
-MAX_ENTRIES = 1000
+MAX_ENTRIES = 1000          # default; configurable via prefs "history_max"
+MIN_LIMIT = 1
+MAX_LIMIT = 100000
+
+
+def configured_limit() -> int:
+    """The user's history size from prefs.json (``history_max``)."""
+    from .config import Prefs   # local import: config imports history's writer
+    try:
+        value = int(Prefs().data.get("history_max", MAX_ENTRIES))
+    except (TypeError, ValueError):
+        value = MAX_ENTRIES
+    return max(MIN_LIMIT, min(MAX_LIMIT, value))
 
 
 class History:
     FILE = "history.json"
 
-    def __init__(self, path: Optional[Path] = None, limit: int = MAX_ENTRIES):
+    def __init__(self, path: Optional[Path] = None, limit: Optional[int] = None):
         self.path = path or (state_dir() / self.FILE)
-        self.limit = limit
+        self.limit = limit if limit is not None else configured_limit()
         self.entries: List[dict] = []
         self.load()
 
@@ -32,7 +44,10 @@ class History:
             data = []
         rows = data.get("entries") if isinstance(data, dict) else data
         self.entries = [r for r in (rows or []) if isinstance(r, dict) and r.get("query")]
-        self.entries = self.entries[: self.limit]
+        if len(self.entries) > self.limit:
+            # the limit was lowered: drop the oldest entries for good
+            self.entries = self.entries[: self.limit]
+            self.save()
 
     def save(self) -> None:
         _atomic_write(self.path, json.dumps({"version": 1, "entries": self.entries},
@@ -62,7 +77,7 @@ class History:
         self.entries = []
         self.save()
 
-    def list(self, prefix: str = "", limit: int = MAX_ENTRIES) -> List[dict]:
+    def list(self, prefix: str = "", limit: Optional[int] = None) -> List[dict]:
         p = prefix.casefold().strip()
         out = [e for e in self.entries if not p or p in str(e.get("query", "")).casefold()]
-        return out[:limit]
+        return out[: (limit if limit is not None else self.limit)]

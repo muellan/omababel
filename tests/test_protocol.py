@@ -100,6 +100,15 @@ class ProtocolTest(TempEnv):
         self.assertTrue(any(s["id"] == "leo" for s in reply["data"]["sources"]))
         reply, _, _ = self.call("prefs.set", {"values": {"mode": "thesaurus", "lang": "en"}})
         self.assertEqual(reply["data"]["prefs"]["mode"], "thesaurus")
+        self.assertNotIn("history", reply["data"])
+        for q in ("a", "b", "c"):
+            self.call("search", {"mode": "lookup", "query": q, "lang": "en", "only": ["nothing"]})
+        reply, _, _ = self.call("prefs.set", {"values": {"history_max": 2}})
+        self.assertEqual(reply["data"]["history_max"], 2)
+        self.assertEqual([h["query"] for h in reply["data"]["history"]], ["c", "b"])
+        reply, _, _ = self.call("state.get")
+        self.assertEqual(reply["data"]["history_max"], 2)
+        self.assertEqual(len(reply["data"]["history"]), 2)
 
     def test_data_install_streams_progress(self):
         reply, progress, _ = self.call("data.install", {"id": "cedict", "path": str(fixture("cedict-sample.u8"))})

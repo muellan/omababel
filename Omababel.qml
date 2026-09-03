@@ -45,6 +45,12 @@ Item {
   property bool prefsOpen: false
   property var pendingPayload: null
   property string thesaurusSort: "alpha"    // "alpha" | "length" (persisted)
+  property int historyMax: 1000              // configurable in Preferences → History
+  // Ctrl+P / Ctrl+N walk a snapshot of the history taken when the walk
+  // starts, so re-running an entry (which moves it to the top) does not
+  // reshuffle the list under the cursor.
+  property var historyNav: null
+  property int historyNavIndex: -1
 
   // --- exposed for tests / IPC callers
   readonly property alias searchInput: searchField
@@ -145,6 +151,7 @@ Item {
       root.lang2 = data.prefs.lang2 || "en"
       root.thesaurusSort = data.prefs.thesaurus_sort === "length" ? "length" : "alpha"
     }
+    if (data.history_max) root.historyMax = data.history_max
   }
 
   function refreshLocalStatus() {
@@ -167,6 +174,57 @@ Item {
   function setThesaurusSort(mode) {
     root.thesaurusSort = mode === "length" ? "length" : "alpha"
     root.savePrefs()
+  }
+
+  // Clear button / Ctrl+C / Ctrl+Backspace: empty the field and the results.
+  function clearSearch() {
+    historyPopup.close()
+    searchField.text = ""
+    root.clearResults()
+    searchField.forceActiveFocus()
+  }
+
+  // Ctrl+P (older) / Ctrl+N (newer): step through the history and re-run
+  // the entry with its original mode and languages.
+  function historyStep(delta) {
+    if (root.history.length === 0) return
+    if (root.historyNav === null) {
+      root.historyNav = root.history.slice()
+      // the current query (if it is the latest entry) is where we start
+      root.historyNavIndex = (root.lastQuery !== "" && root.historyNav[0].query === root.lastQuery) ? 0 : -1
+    }
+    var next = root.historyNavIndex + delta
+    if (next < 0 || next >= root.historyNav.length) {
+      root.setStatus(delta > 0 ? "Oldest history entry reached." : "Newest history entry reached.", false)
+      return
+    }
+    root.historyNavIndex = next
+    var row = root.historyNav[next]
+    searchField.text = row.query
+    if (row.mode && ["lookup", "thesaurus", "translate"].indexOf(row.mode) >= 0) root.mode = row.mode
+    if (row.lang) root.lang = row.lang
+    if (row.lang2) root.lang2 = row.lang2
+    root.runSearch(row.query, true)
+    root.setStatus("History " + (next + 1) + " / " + root.historyNav.length + ": " + row.query, false)
+  }
+
+  function openLanguagePicker(secondary) {
+    if (secondary && root.mode !== "translate") {
+      root.setStatus("The target language is only used in translate mode (Ctrl+3).", false)
+      return
+    }
+    historyPopup.close()
+    if (secondary) langPicker2.open(); else langPicker.open()
+  }
+
+  function setHistoryMax(value) {
+    backend.call("prefs.set", {values: {history_max: value}}, function(reply) {
+      if (!reply.ok) { prefs.message = reply.error.message; prefs.messageError = true; return }
+      root.historyMax = reply.data.history_max || value
+      root.history = reply.data.history || root.history
+      prefs.message = "History keeps the last " + root.historyMax + " searches."
+      prefs.messageError = false
+    })
   }
 
   // Emptying the field (backspace / clear) drops the results that belonged
@@ -196,9 +254,10 @@ Item {
   onLang2Changed: langPicker2.value = root.lang2
 
   // =================================================================== search
-  function runSearch(query) {
+  function runSearch(query, fromHistoryNav) {
     query = String(query || "").trim()
     if (query === "") return
+    if (!fromHistoryNav) { root.historyNav = null; root.historyNavIndex = -1 }
     if (root.mode === "translate" && root.lang === root.lang2) {
       root.setStatus("Choose two different languages to translate.", true)
       return
@@ -239,7 +298,7 @@ Item {
   function rememberHistory(query) {
     var key = query.toLowerCase()
     var next = [{query: query, mode: root.mode, lang: root.lang, lang2: root.lang2}]
-    for (var i = 0; i < root.history.length && next.length < 1000; i++) {
+    for (var i = 0; i < root.history.length && next.length < root.historyMax; i++) {
       if (String(root.history[i].query).toLowerCase() !== key) next.push(root.history[i])
     }
     root.history = next
@@ -344,6 +403,14 @@ Item {
     Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: { searchField.forceActiveFocus(); searchField.selectAll() } }
     Shortcut { sequence: "Ctrl+,"; context: Qt.WindowShortcut; enabled: root.opened; onActivated: root.prefsOpen ? root.closePrefs() : root.openPrefs() }
     Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: historyPopup.opened ? historyPopup.close() : historyPopup.openWith(searchField.text) }
+    Shortcut { sequence: "Ctrl+C"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.clearSearch() }
+    Shortcut { sequence: "Ctrl+Backspace"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.clearSearch() }
+    Shortcut { sequence: "Ctrl+P"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.historyStep(1) }
+    Shortcut { sequence: "Ctrl+N"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.historyStep(-1) }
+    Shortcut { sequence: "Ctrl+["; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.openLanguagePicker(false) }
+    Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.openLanguagePicker(true) }
+    Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: resultsView.scrollBy(0.5) }
+    Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: resultsView.scrollBy(-0.5) }
 
     BorderSurface {
       id: card
@@ -513,7 +580,7 @@ Item {
           TextField {
             id: searchField
             anchors.left: parent.left
-            anchors.right: historyButton.left
+            anchors.right: clearButton.left
             anchors.rightMargin: Style.spacing.sm
             font.pixelSize: Style.font.title
             height: Math.round(searchMetrics.height * 1.5) + topPadding + bottomPadding
@@ -533,6 +600,13 @@ Item {
             }
             Keys.priority: Keys.BeforeItem
             Keys.onPressed: function(event) {
+              // TextInput claims Ctrl+C (copy) and Ctrl+Backspace (delete
+              // word) before window shortcuts get a chance – intercept here.
+              if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_C || event.key === Qt.Key_Backspace)) {
+                root.clearSearch()
+                event.accepted = true
+                return
+              }
               if (event.key === Qt.Key_Down) {
                 if (!historyPopup.opened) historyPopup.openWith(searchField.text)
                 else historyPopup.move(1)
@@ -547,6 +621,21 @@ Item {
                 historyPopup.close()
               }
             }
+          }
+
+          Button {
+            id: clearButton
+            anchors.right: historyButton.left
+            anchors.rightMargin: Style.spacing.sm
+            anchors.verticalCenter: searchField.verticalCenter
+            iconText: "󰅖"
+            tooltipText: "Clear search and results (Ctrl+C / Ctrl+Backspace)"
+            bordered: true
+            enabled: searchField.text !== "" || root.result !== null
+            opacity: enabled ? 1 : 0.45
+            foreground: root.foreground
+            accent: root.accent
+            onClicked: root.clearSearch()
           }
 
           Button {
@@ -711,7 +800,7 @@ Item {
                   anchors.leftMargin: Style.spacing.controlPaddingX
                   anchors.verticalCenter: parent.verticalCenter
                   textFormat: Text.PlainText
-                  text: root.history.length + " of max. 1000 entries"
+                  text: root.history.length + " of max. " + root.historyMax + " entries"
                   color: root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
@@ -764,6 +853,13 @@ Item {
           datasets: root.datasets
           localStatus: root.localStatus
           installer: installer
+          historyCount: root.history.length
+          historyMax: root.historyMax
+          onHistoryMaxRequested: function(v) { root.setHistoryMax(v) }
+          onClearHistoryRequested: backend.call("history.clear", {}, function(reply) {
+            if (reply.ok) { root.history = []; root.historyNav = null; root.historyNavIndex = -1; prefs.message = "History cleared."; prefs.messageError = false }
+            else { prefs.message = reply.error.message; prefs.messageError = true }
+          })
           foreground: root.foreground
           accent: root.accent
           fontFamily: root.fontFamily
@@ -831,7 +927,7 @@ Item {
             id: hintText
             anchors.right: parent.right
             textFormat: Text.PlainText
-            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+,: preferences"
+            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+P/N: history · Ctrl+D/U: scroll · Ctrl+,: preferences"
             color: root.muted
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption

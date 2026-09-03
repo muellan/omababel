@@ -266,6 +266,7 @@ DEFAULT_PREFS = {
     "lang": "de",
     "lang2": "en",
     "thesaurus_sort": "alpha",
+    "history_max": 1000,
     "panel_width": 0,
     "panel_height": 0,
     "font_scale": 1.0,
@@ -294,6 +295,11 @@ class Prefs:
                 continue
             if k == "thesaurus_sort" and v not in ("alpha", "length"):
                 continue
+            if k == "history_max":
+                try:
+                    v = max(1, min(100000, int(v)))
+                except (TypeError, ValueError):
+                    continue
             self.data[k] = v
         self.save()
         return dict(self.data)

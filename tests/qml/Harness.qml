@@ -130,6 +130,12 @@ Item {
           prefs.cancelEdit()
           harness.check(prefs.tab === "sources" && prefs.editing === null, "cancel returns to list")
           prefs.tab = "data"
+          var requested = -1
+          prefs.historyMaxRequested.connect(function(v) { requested = v })
+          prefs.tab = "history"
+          prefs.historyMaxRequested(250)
+          harness.check(requested === 250, "history max request signal")
+          harness.check(p.historyMax === 1000, "history max default")
           break
         case 10:
           p.closePrefs()
@@ -152,6 +158,33 @@ Item {
           harness.check(p.searching === true && p.searchInput.text === "house", "searchWord updates field + searches")
           p.clearResults()
           harness.check(p.searching === false && p.result === null, "clearResults drops results")
+          p.searchInput.text = "Haus"
+          p.result = harness.readJson(fx + "/lookup.json")
+          p.clearSearch()
+          harness.check(p.searchInput.text === "" && p.result === null, "clearSearch empties field + results")
+          // history walk over a snapshot: house (newest), Haus (older)
+          p.historyStep(1)
+          harness.check(p.searchInput.text === "house" && p.historyNavIndex === 0, "Ctrl+P goes to the newest entry first: " + p.searchInput.text)
+          p.historyStep(1)
+          harness.check(p.searchInput.text === "Haus" && p.historyNavIndex === 1, "Ctrl+P walks to the older entry")
+          p.historyStep(1)
+          harness.check(p.historyNavIndex === 1, "Ctrl+P stops at the oldest entry")
+          p.historyStep(-1)
+          harness.check(p.searchInput.text === "house" && p.historyNavIndex === 0, "Ctrl+N walks back")
+          p.historyStep(-1)
+          harness.check(p.historyNavIndex === 0, "Ctrl+N stops at the newest entry")
+          p.runSearch("fresh")
+          harness.check(p.historyNav === null, "a fresh search resets the history walk")
+          p.result = harness.readJson(fx + "/lookup.json")
+          p.searching = false
+          p.resultsView.scrollBy(0.5)
+          p.resultsView.scrollBy(-0.5)
+          p.mode = "lookup"
+          p.openLanguagePicker(true)
+          harness.check(p.status.indexOf("translate mode") >= 0, "secondary picker refused outside translate mode")
+          p.mode = "translate"
+          p.openLanguagePicker(true)
+          p.openLanguagePicker(false)
           p.setMode("thesaurus")
           harness.check(p.mode === "thesaurus", "mode switch")
           p.swapLangs()

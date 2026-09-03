@@ -94,7 +94,7 @@ omababel data list
   the primary one is active; translate mode also uses the secondary (target)
   language. `Ctrl+S` or the 󰓡 button swaps them.
 - The **history dropdown** (▾, `↓` in the field, or `Ctrl+H`) lists the last
-  1000 searches, filtered by what you typed. `↑`/`↓` walk it, Enter re-runs an
+  searches (1000 by default – see ⚙ → **History**), filtered by what you typed. `↑`/`↓` walk it, Enter re-runs an
   entry with its original mode and languages, × removes one, "Clear history"
   empties it.
 - In the results, a **left click** on any word starts a new search with that
@@ -107,12 +107,35 @@ omababel data list
 - The language selectors list English first, then all other languages
   alphabetically. Emptying the search field clears the results.
 - Every source section has an *open ↗* link to the web page it came from.
+- The **×** button right of the field (or `Ctrl+C` / `Ctrl+Backspace`) clears
+  the field and the results.
+- `Ctrl+P` / `Ctrl+N` step backwards / forwards through the search history and
+  re-run the entry; `Ctrl+[` / `Ctrl+]` open the primary / target language
+  picker; `Ctrl+D` / `Ctrl+U` scroll the results half a page.
 - `Ctrl+,` or ⚙ opens the preferences, `Esc` goes back / closes the panel.
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Search |
+| `Ctrl+1` `Ctrl+2` `Ctrl+3` | Lookup / Thesaurus / Translate mode |
+| `Ctrl+[` `Ctrl+]` | Open the primary / target language picker |
+| `Ctrl+S` | Swap languages |
+| `Ctrl+L` | Focus the search field |
+| `Ctrl+C` `Ctrl+Backspace` | Clear field and results |
+| `↓` `Ctrl+H` | History dropdown |
+| `Ctrl+P` `Ctrl+N` | Previous / next history entry |
+| `Ctrl+D` `Ctrl+U` | Scroll results down / up |
+| `Ctrl+,` | Preferences |
+| `Esc` | Close popup / back / close panel |
 
 
 
 
 ## Sources and Preferences
+
+The preferences have three tabs: **Sources**, **Data** (downloadable
+dictionaries) and **History** (maximum number of remembered searches, plus a
+button to clear the history).
 
 ⚙ → **Sources** lists every search source. Each row can be enabled/disabled
 (disabled sources are not queried), edited, moved, deleted, or tested with a
@@ -226,7 +249,7 @@ Everything is stored in plain files you can edit as well:
 |------|---------|
 | `~/.config/omababel/sources.json` | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted |
 | `~/.config/omababel/prefs.json` | Last mode, languages and thesaurus sort order |
-| `~/.local/state/omababel/history.json` | Search history (max 1000) |
+| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000) |
 | `~/.local/share/omababel/` | Dictionary data and indexes |
 | `~/.cache/omababel/` | Indexes built from raw local files |
 

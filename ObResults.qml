@@ -43,6 +43,12 @@ Item {
 
   function scrollToTop() { flick.contentY = 0 }
 
+  // Ctrl+D / Ctrl+U: move by a fraction of the visible height.
+  function scrollBy(fraction) {
+    var max = Math.max(0, flick.contentHeight - flick.height)
+    flick.contentY = Math.max(0, Math.min(max, flick.contentY + flick.height * fraction))
+  }
+
   function isEmpty() {
     if (!result) return true
     var rs = result.results || []
