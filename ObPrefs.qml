@@ -140,6 +140,14 @@ Item {
     return (st.entries ? st.entries.toLocaleString() + " entries" : "installed")
   }
 
+  // Dropdowns assign their own `value` on selection (breaking the binding
+  // to `editing`), so re-sync them whenever the edited row changes.
+  onEditingChanged: {
+    if (!editing) return
+    driverPicker.value = editing.driver || "generic"
+    formatPicker.value = editing.format || ""
+  }
+
   component FieldLabel: Text {
     textFormat: Text.PlainText
     color: root.muted
@@ -159,17 +167,25 @@ Item {
       width: parent.width
       spacing: Style.spacing.md
       ButtonGroup {
+        id: tabsGroup
+        anchors.verticalCenter: parent.verticalCenter
         options: [{value: "sources", label: "Sources"}, {value: "data", label: "Data"}]
         value: root.tab === "edit" ? "sources" : root.tab
         foreground: root.foreground
+        background: "transparent"
         accent: root.accent
         onChanged: function(v) { root.tab = v; root.message = ""; if (v === "data") root.refreshDatasets() }
       }
       Item { width: Style.spacing.md; height: 1 }
+      // Same height and baseline as the tab chips: the icon is kept at body
+      // size so it cannot make the button taller than its neighbours.
       Button {
         visible: root.tab !== "edit"
+        anchors.verticalCenter: parent.verticalCenter
+        height: tabsGroup.implicitHeight
         text: "Add source"
         iconText: "󰐕"
+        iconSize: Style.font.body
         bordered: true
         foreground: root.foreground
         accent: root.accent
@@ -177,6 +193,8 @@ Item {
       }
       Button {
         visible: root.tab === "sources"
+        anchors.verticalCenter: parent.verticalCenter
+        height: tabsGroup.implicitHeight
         text: "Reset to defaults"
         bordered: true
         foreground: root.foreground
@@ -367,6 +385,7 @@ Item {
               options: [{value: "dictionary", label: "Dictionary"}, {value: "thesaurus", label: "Thesaurus"}, {value: "translator", label: "Translator"}]
               value: root.editing ? root.editing.type : "dictionary"
               foreground: root.foreground
+              background: "transparent"
               accent: root.accent
               onChanged: function(v) { root.setEditField("type", v) }
             }
@@ -378,6 +397,7 @@ Item {
               options: [{value: "remote", label: "Remote (URL)"}, {value: "local", label: "Local file"}]
               value: root.editing ? root.editing.kind : "remote"
               foreground: root.foreground
+              background: "transparent"
               accent: root.accent
               onChanged: function(v) { root.setEditField("kind", v) }
             }
@@ -389,6 +409,7 @@ Item {
           width: parent.width
           spacing: Style.spacing.huge
           Dropdown {
+            id: driverPicker
             label: "Driver"
             width: Style.spacing.dropdownWidth
             options: root.driverOptions("remote", root.editing ? root.editing.type : "")
@@ -441,6 +462,7 @@ Item {
             spacing: Style.spacing.huge
             topPadding: Style.spacing.sm
             Dropdown {
+              id: formatPicker
               label: "Format"
               width: Style.spacing.dropdownWidth
               options: [{value: "", label: "auto-detect"}, {value: "kaikki", label: "kaikki / wiktextract JSONL"},
@@ -495,6 +517,7 @@ Item {
             options: [{value: "word", label: "Word translations (like LEO)"}, {value: "text", label: "Full text service (like Google / DeepL)"}]
             value: root.editing ? root.editing.translation_mode : "word"
             foreground: root.foreground
+            background: "transparent"
             accent: root.accent
             onChanged: function(v) { root.setEditField("translation_mode", v) }
           }

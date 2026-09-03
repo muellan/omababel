@@ -141,6 +141,12 @@ class ThesaurusComTest(unittest.TestCase):
         syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house-dom.html"))
         self.assertEqual((syn, ant), (["home", "dwelling"], ["office"]))
 
+    def test_dom_walk_separates_antonyms(self):
+        # 2026 layout: no data-type attributes, no JSON – only headings.
+        syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house-2026.html"))
+        self.assertEqual(syn, ["apartment", "home", "abode", "household", "clan"])
+        self.assertEqual(ant, ["office"])          # not lumped into synonyms; related words ignored
+
     def test_escaped_json(self):
         markup = 'self.__next_f.push("{\\"synonyms\\":[{\\"term\\":\\"abode\\"}]}")'
         syn, ant = thesauruscom.ThesaurusCom.parse(markup)

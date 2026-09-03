@@ -96,33 +96,58 @@ class ThesaurusCom(Source):
                 break
         return syn, ant
 
-    @staticmethod
-    def _from_dom(markup: str) -> Tuple[List[str], List[str]]:
+    _STOP = re.compile(r"(?i)^(related words|words? (related|nearby)|browse|trending|word of the day|"
+                       r"example sentences|frequently asked|compare|on this page)")
+
+    @classmethod
+    def _from_dom(cls, markup: str) -> Tuple[List[str], List[str]]:
+        """Walk the page in document order.
+
+        thesaurus.com lists every sense as "<pos> / <definition> / Synonyms /
+        <strength> words… / Antonyms / <strength> words…", so a link belongs to
+        whichever "Synonyms" or "Antonyms" label preceded it.  Links before the
+        first such label, in navigation chrome, and everything from "Related
+        Words" on are ignored.
+        """
         doc = htmlutil.parse(markup)
         syn: List[str] = []
         ant: List[str] = []
-
-        def links(node) -> List[str]:
-            return [a.inline_text() for a in node.find_all("a")
-                    if "/browse/" in a.get("href", "") and a.inline_text()]
-
         for node in doc.find_all(attrs={"data-type": "synonym-list"}):
-            syn.extend(links(node))
+            syn.extend(cls._links(node))
         for node in doc.find_all(attrs={"data-type": "antonym-list"}):
-            ant.extend(links(node))
-        if not syn:
-            m = doc.find(id="meanings")
-            if m is not None:
-                syn.extend(links(m))
-        if not ant:
-            a = doc.find(id="antonyms")
-            if a is not None:
-                ant.extend(links(a))
-        if not syn:
-            # Last resort: every browse link outside nav/footer, grouped by
-            # the heading text above it.
-            for a in doc.find_all("a", pred=lambda n: "/browse/" in n.get("href", "")):
-                if a.closest("nav") or a.closest("footer") or a.closest("header"):
+            ant.extend(cls._links(node))
+        if syn or ant:
+            return syn, ant
+
+        target = None
+        for node in doc.elements():
+            if node.tag in ("nav", "footer", "header", "script", "style"):
+                continue
+            if node.closest("nav") or node.closest("footer") or node.closest("header"):
+                continue
+            if node.tag == "a":
+                if target is not None and "/browse/" in node.get("href", ""):
+                    word = node.inline_text()
+                    if word:
+                        target.append(word)
+                continue
+            if node.tag in ("h1", "h2", "h3", "h4", "h5", "h6", "p", "strong", "span", "div", "button"):
+                # Only short label-like texts of leaf-ish elements count.
+                if any(c.tag in ("a", "ul", "ol", "div", "section") for c in node.children):
                     continue
-                syn.append(a.inline_text())
+                label = node.inline_text()
+                if not label or len(label) > 40:
+                    continue
+                low = label.lower()
+                if cls._STOP.match(label):
+                    break
+                if low.startswith("antonym"):
+                    target = ant
+                elif low.startswith("synonym"):
+                    target = syn
         return syn, ant
+
+    @staticmethod
+    def _links(node) -> List[str]:
+        return [a.inline_text() for a in node.find_all("a")
+                if "/browse/" in a.get("href", "") and a.inline_text()]
