@@ -1,0 +1,11 @@
+#!/bin/bash
+# CLI wrapper for the omababel backend.
+#
+#   omababel lookup Haus --lang de
+#   omababel translate "guten Morgen" --from de --to en
+#   omababel data install wiktionary-de
+#
+# Symlink or copy this file somewhere on your PATH, e.g.
+#   ln -s ~/.config/omarchy/plugins/muellan.omababel/bin/omababel ~/.local/bin/omababel
+here="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+exec python3 "$here/../backend/omababel.py" "$@"
