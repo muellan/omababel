@@ -222,6 +222,101 @@ class MerriamWebster(Source):
     _ANTONYM_HEAD = re.compile(r"(?i)^\s*(near\s+)?(antonyms?|opposites?)\b")
     _SYNONYM_HEAD = re.compile(r"(?i)^\s*(synonyms?|similar words|strongest matches?)\b")
     _JUNK_WORD = re.compile(r"(?i)^(definitions?|synonyms?|antonyms?|see more|show more)$")
+    # A box holding a word list.  MW uses the *same* class for the synonym and
+    # the antonym box of a sense, so the class alone can only ever be a hint.
+    _LIST_CLS = re.compile(r"(?i)\b(?:thes-list(?:-content)?|(?:near[-_])?(?:syn|ant)(?:onyms?)?[-_]list)\b")
+    _ANT_CLS = re.compile(r"(?i)\b(?:near[-_])?ant(?:onyms?)?[-_]list\b")
+    _SYN_CLS = re.compile(r"(?i)\bsyn(?:onyms?)?[-_]list\b")
+    # Containers MW wraps one meaning in.
+    _SENSE_CLS = re.compile(r"(?i)\b(?:sense(?:-content)?|thesaurus-entry|sense-\d+)\b")
+
+    @classmethod
+    def _heading_kind(cls, text: str) -> str:
+        if cls._ANTONYM_HEAD.match(text):
+            return "antonyms"
+        if cls._SYNONYM_HEAD.match(text):
+            return "synonyms"
+        return ""
+
+    @staticmethod
+    def _leading_text(node: Node, limit: int = 80) -> str:
+        """The text a node starts with, stopping at the first word list – so a
+        heading is still readable when it shares its element with the words."""
+        out: List[str] = []
+        for child in node.children:
+            if child.tag is None:
+                out.append(child.text)
+            elif child.tag in ("ul", "ol", "dl", "table"):
+                break
+            elif child.tag == "a":
+                break
+            else:
+                out.append(MerriamWebster._leading_text(child, limit))
+            if sum(len(p) for p in out) > limit:
+                break
+        return R.clean("".join(out))[:limit]
+
+    @classmethod
+    def _box_kind(cls, node: Node) -> str:
+        """Kind of a word box from a heading inside it (or the text it starts
+        with).  Only positive evidence is reported – "" means "cannot tell"."""
+        kind = cls._heading_kind(cls._leading_text(node))
+        if kind:
+            return kind
+        for child in node.elements():
+            if child.tag in ("ul", "ol", "li", "a"):
+                continue
+            t = cls._leading_text(child, 60)
+            if t:
+                kind = cls._heading_kind(t)
+                if kind:
+                    return kind
+        return ""
+
+    @classmethod
+    def _words_in(cls, node: Node) -> List[str]:
+        """The words of a box.  MW links every word to /thesaurus/<word>;
+        "Definitions" and friends link back to the dictionary."""
+        anchors = node.find_all("a")
+        words = [a.inline_text() for a in anchors if "/thesaurus/" in a.get("href", "")]
+        if not words:
+            words = [a.inline_text() for a in anchors if "/dictionary/" not in a.get("href", "")]
+        if not words and not anchors:
+            words = [li.inline_text() for li in node.find_all("li")]
+        return [w for w in words if w and len(w) < 60 and not cls._JUNK_WORD.match(w)]
+
+    @classmethod
+    def _repair_groups(cls, groups: List[dict]) -> List[dict]:
+        """Last line of defence against an antonym box read as synonyms.
+
+        MW repeats a sense's antonyms in the entry-wide "Antonyms & Near
+        Antonyms" box, so a group whose synonyms are words another group of the
+        same page already lists as antonyms – and that nothing lists as
+        synonyms – is an antonym box that lost its heading.
+        """
+        if len(groups) < 2:
+            return groups
+        for i, g in enumerate(groups):
+            words = g["synonyms"]
+            if len(words) < 2 or g["antonyms"]:
+                continue
+            others = [o for j, o in enumerate(groups) if j != i]
+            ants = {R.fold(w) for o in others for w in o["antonyms"]}
+            syns = {R.fold(w) for o in others for w in o["synonyms"]}
+            keys = [R.fold(w) for w in words]
+            if not ants or any(k in syns for k in keys):
+                continue
+            if sum(1 for k in keys if k in ants) >= max(2, (len(keys) + 1) // 2):
+                g["antonyms"], g["synonyms"] = words, []
+        # An unlabelled antonyms-only box is MW's entry-wide "Antonyms & Near
+        # Antonyms": it belongs to the meaning above it, not on a card of its own.
+        out: List[dict] = []
+        for g in groups:
+            if not g["synonyms"] and not g["label"] and out and out[-1]["pos"] == g["pos"]:
+                out[-1]["antonyms"] = R.dedupe(out[-1]["antonyms"] + g["antonyms"])
+                continue
+            out.append(g)
+        return [g for g in out if g["synonyms"] or g["antonyms"]]
 
     @classmethod
     def parse_thesaurus_groups(cls, markup: str) -> List[dict]:
@@ -229,87 +324,88 @@ class MerriamWebster(Source):
 
         MW labels a meaning "as in <word>" and then shows a "Synonyms & Similar
         Words" box and an "Antonyms & Near Antonyms" box – *both* carrying the
-        synonym list class, so only their heading tells them apart.  The kind of
-        a box is therefore taken from (in order) a heading inside it, its own
-        leading text, the last standalone heading before it, and only then its
-        class.  Word lists after "Phrases Containing" and friends are page
-        navigation and stop the walk.
+        synonym list class, so the class can never decide which is which.  The
+        kind of a box is therefore taken from, in order: a heading inside it,
+        the heading standing before it, an unambiguous *antonym* class, and its
+        position in the meaning (MW puts the synonyms first).  A box that none
+        of that can place is dropped rather than guessed at – listing antonyms
+        as synonyms is much worse than losing a box.  Word lists after "Phrases
+        Containing" and friends are page navigation and stop the walk.
         """
         doc = htmlutil.parse(markup)
 
-        def words_in(node: Node) -> List[str]:
-            # "Definitions" links back to the dictionary entry – not a word.
-            anchors = [a for a in node.find_all("a") if "/dictionary/" not in a.get("href", "")]
-            out = [a.inline_text() for a in anchors]
-            if not out and not node.find_all("a"):
-                out = [li.inline_text() for li in node.find_all("li")]
-            return [w for w in out if w and len(w) < 60 and not cls._JUNK_WORD.match(w)]
-
-        def heading_kind(text: str) -> str:
-            if cls._ANTONYM_HEAD.match(text):
-                return "antonyms"
-            if cls._SYNONYM_HEAD.match(text):
-                return "synonyms"
-            return ""
-
-        def box_kind(node: Node) -> str:
-            """Heading inside the box, else the text the box starts with."""
-            for child in node.elements():
-                if child.tag not in ("span", "p", "h2", "h3", "h4", "h5", "div", "strong", "em", "label"):
-                    continue
-                t = child.inline_text()
-                if t and len(t) < 60 and not child.find("a"):
-                    kind = heading_kind(t)
-                    if kind:
-                        return kind
-            return heading_kind(node.inline_text()[:60])
-
         groups: List[dict] = []
-        current: Optional[dict] = None
+        current: Optional[dict] = None       # group being filled
+        current_sense = None                 # id() of its sense container
         pending_label = ""
         pending_pos = ""
-        pending_kind = ""        # "Synonyms…" / "Antonyms…" heading seen since the last list
+        pending_kind = ""        # "Synonyms…" / "Antonyms…" heading seen since the last box
         handled = set()
+
+        def sense_of(node: Node):
+            for a in node.ancestors():
+                if a.tag is not None and cls._SENSE_CLS.search(" ".join(a.classes)):
+                    return id(a)
+            return None
+
         for node in doc.elements():
             if any(id(a) in handled for a in node.ancestors()):
                 continue
-            cls_ = " ".join(node.classes)
-            text = node.inline_text() if node.tag in ("p", "span", "h2", "h3", "h4", "div", "strong", "em") else ""
-            if text and len(text) < 80 and not node.find("a") and cls._THES_STOP.match(text):
-                break
-            if text and len(text) < 80 and cls._AS_IN.match(text) and not node.find("a"):
-                pending_label = text
+            classes = " ".join(node.classes)
+            is_box = bool(classes) and bool(cls._LIST_CLS.search(classes))
+            if not is_box:
+                if node.tag not in ("p", "span", "h1", "h2", "h3", "h4", "h5", "div", "strong", "em", "label", "dt"):
+                    continue
+                text = cls._leading_text(node)
+                if not text:
+                    continue
+                if cls._THES_STOP.match(text):
+                    break
+                if cls._AS_IN.match(text):
+                    pending_label = text
+                elif re.match(r"(?i)^synonyms? of\b|^synonyms?\s*\(", text):
+                    m = re.search(r"\(([^)]+)\)", text)
+                    if m:
+                        pending_pos = m.group(1)
+                    # "Synonyms of house" is the entry heading, not a box heading
+                else:
+                    kind = cls._heading_kind(text)
+                    if kind:
+                        pending_kind = kind
                 continue
-            if text and len(text) < 60 and re.match(r"(?i)^synonyms? of\b|^synonyms?\s*\(", text) and not node.find("a"):
-                m = re.search(r"\(([^)]+)\)", text)
-                if m:
-                    pending_pos = m.group(1)
-                continue
-            if text and len(text) < 60 and not node.find("a") and heading_kind(text):
-                pending_kind = heading_kind(text)
-                continue
-            if not cls_:
-                continue
-            is_syn_cls = bool(re.search(r"\b(synonyms_list|syn-list|synonym-list)\b", cls_))
-            is_ant_cls = bool(re.search(r"\b(antonyms_list|ant-list|antonym-list)\b", cls_))
-            if not (is_syn_cls or is_ant_cls):
-                continue
+
             handled.add(id(node))
-            words = words_in(node)
-            kind = box_kind(node) or pending_kind or ("antonyms" if is_ant_cls else "synonyms")
-            pending_kind = ""
+            words = cls._words_in(node)
             if not words:
                 continue
+            sense = sense_of(node)
+            new_sense = current is None or sense != current_sense or (pending_label and pending_label != current["label"])
+            kind = cls._box_kind(node) or pending_kind
+            pending_kind = ""
+            if not kind and cls._ANT_CLS.search(classes):
+                kind = "antonyms"
+            elif not kind and new_sense:
+                kind = "synonyms"                        # MW puts the synonyms first
+            elif not kind and cls._SYN_CLS.search(classes):
+                kind = "antonyms"                        # the second "synonym" box of a meaning
+            if not kind:
+                continue                                 # unplaceable: better dropped than guessed
             if kind == "synonyms":
-                current = R.group(words, [], label=pending_label, pos=pending_pos)
-                groups.append(current)
-                pending_label = ""
+                if new_sense or current["synonyms"]:
+                    current = R.group(words, [], label=pending_label, pos=pending_pos)
+                    current_sense = sense
+                    groups.append(current)
+                    pending_label = ""
+                else:
+                    current["synonyms"] = R.dedupe(current["synonyms"] + words)
             else:
-                if current is None or (pending_label and pending_label != current["label"]):
+                if new_sense:
                     current = R.group([], [], label=pending_label, pos=pending_pos)
+                    current_sense = sense
                     groups.append(current)
                     pending_label = ""
                 current["antonyms"] = R.dedupe(current["antonyms"] + words)
+        groups = cls._repair_groups(groups)
         if not groups:
             # Newer layout: headings "Synonyms of X" / "Antonyms of X" followed by lists.
             syn: List[str] = []
@@ -329,7 +425,7 @@ class MerriamWebster(Source):
                         lst = ch
                         break
                 if lst is not None:
-                    target.extend(words_in(lst))
+                    target.extend(cls._words_in(lst))
             if syn or ant:
                 groups.append(R.group(syn, ant))
         return [g for g in groups if g["synonyms"] or g["antonyms"]]

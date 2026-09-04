@@ -118,6 +118,31 @@ class MerriamWebsterTest(unittest.TestCase):
                           ("noun", "as in family", ["household"], []),
                           ("verb", "as in accommodate", ["lodge"], ["evict"])])
 
+    def test_thesaurus_never_lists_antonyms_as_synonyms(self):
+        """The 'evidence' shape: an entry-wide antonym box carrying the very
+        class MW also uses for synonym boxes, and no heading of its own."""
+        groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-evidence.html"))
+        self.assertEqual([(g["pos"], g["label"], g["synonyms"], g["antonyms"]) for g in groups],
+                         [("noun", "as in proof", ["proof", "testimony", "confirmation"],
+                           ["confutation", "disproof"]),
+                          ("noun", "as in document", ["record", "certificate"], []),
+                          ("verb", "as in show", ["demonstrate", "attest"],
+                           ["confute", "rebut", "disprove"])])
+        # nothing that is an antonym anywhere may show up as a synonym
+        syn = {w.lower() for g in groups for w in g["synonyms"]}
+        for bad in ("confute", "disprove", "rebut", "confutation", "disproof"):
+            self.assertNotIn(bad, syn)
+        # and the page navigation below the entry stays out
+        self.assertNotIn("evident", syn)
+
+    def test_thesaurus_drops_boxes_it_cannot_place(self):
+        markup = ('<div class="sense-content"><p class="as-in">as in proof</p>'
+                  '<div class="thes-list syn-list"><ul><li><a href="/thesaurus/proof">proof</a></li></ul></div>'
+                  '<div class="thes-list rel-list"><ul><li><a href="/thesaurus/hint">hint</a></li></ul></div>'
+                  '</div>')
+        groups = mw.MerriamWebster.parse_thesaurus_groups(markup)
+        self.assertEqual([(g["synonyms"], g["antonyms"]) for g in groups], [(["proof"], [])])
+
     def test_api_parsing(self):
         data = [{"meta": {"id": "house:1"}, "hwi": {"hw": "house", "prs": [{"mw": "ˈhau̇s"}]}, "fl": "noun",
                  "shortdef": ["a building"],
