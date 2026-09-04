@@ -25,6 +25,7 @@ Item {
 
   // --- state mirrored from the backend
   property bool stateLoaded: false
+  property bool stateLoading: false
   property var languages: []
   property var sources: []
   property var drivers: []
@@ -136,8 +137,13 @@ Item {
 
   // ==================================================================== state
   function loadState() {
+    if (root.stateLoading) return
+    root.stateLoading = true
     backend.call("state.get", {}, function(reply) {
+      root.stateLoading = false
       if (!reply.ok) {
+        // A failing backend must never leave the panel unusable: the UI keeps
+        // working with its defaults and the next open retries.
         root.setStatus("Backend unavailable: " + reply.error.message, true)
         return
       }
@@ -151,6 +157,7 @@ Item {
   }
 
   function applyState(data, applyPrefs) {
+    if (!data || typeof data !== "object") return
     root.languages = data.languages || []
     root.sources = data.sources || []
     root.drivers = data.drivers || []
@@ -439,6 +446,12 @@ Item {
   }
 
   // ================================================================ children
+  // The plugin is kept loaded by the shell, so this runs long before the
+  // panel is opened for the first time: the round trip makes python compile
+  // the backend to __pycache__ (which an install or an update invalidates)
+  // while nobody is waiting for it.
+  Component.onCompleted: backend.warmup()
+
   ObBackend {
     id: backend
     helperPath: root.helperPath

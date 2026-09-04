@@ -143,6 +143,48 @@ class QmlStructureTest(unittest.TestCase):
             for used in set(re.findall(r"\b(Ob[A-Z]\w*)\s*\{", src)):
                 self.assertIn(used, names, f"{f.name} uses unknown component {used}")
 
+    def body_of(self, src, marker):
+        """Source of the block that starts at `marker`, by brace counting."""
+        start = src.index(marker)
+        depth, i = 0, src.index("{", start)
+        j = i
+        while j < len(src):
+            if src[j] == "{":
+                depth += 1
+            elif src[j] == "}":
+                depth -= 1
+                if depth == 0:
+                    return src[i:j + 1]
+            j += 1
+        raise AssertionError(f"unterminated block for {marker}")
+
+    def test_backend_never_starts_a_process_from_an_exit_handler(self):
+        """Re-arming a Process from inside its own `onExited` (directly or
+        through a reply callback that issues the next request) crashed the
+        shell on the first open.  Every start goes through `pump()`, which
+        only ever runs from the event loop."""
+        src = self.strip((ROOT / "ObBackend.qml").read_text(encoding="utf-8"))
+        exited = self.body_of(src, "onExited:")
+        self.assertNotIn("running = true", exited)
+        self.assertNotIn("root.pump()", exited)
+        self.assertIn("root.schedule()", exited)
+        self.assertIn("Qt.callLater(root.pump)", self.body_of(src, "function schedule("))
+        pump = self.body_of(src, "function pump(")
+        self.assertIn("if (root.inCallback || root.busy || proc.running) return", pump)
+        # the only place `running` is set
+        self.assertEqual(src.count("proc.running = true"), 1)
+        # the installer defers its `finished` signal for the same reason
+        inst = self.strip((ROOT / "ObInstaller.qml").read_text(encoding="utf-8"))
+        self.assertNotIn("root.finished(reply)", self.body_of(inst, "onExited:"))
+        self.assertIn("Qt.callLater(root.emitFinished)", inst)
+
+    def test_backend_is_warmed_up_when_the_panel_loads(self):
+        """The first open after an install/update used to pay for python's
+        bytecode compilation of the whole backend."""
+        panel = self.strip((ROOT / "Omababel.qml").read_text(encoding="utf-8"))
+        self.assertIn("Component.onCompleted: backend.warmup()", panel)
+        self.assertIn("function warmup()", (ROOT / "ObBackend.qml").read_text(encoding="utf-8"))
+
     def test_no_stray_hyprland_import(self):
         for f in self.qml_files():
             self.assertNotIn("Quickshell.Hyprland", f.read_text(encoding="utf-8"), f.name)

@@ -18,6 +18,15 @@ Item {
   signal progress(var event)
   signal finished(var reply)
 
+  // Last reply, handed to `finished` from the event loop (see onExited).
+  property var reply: null
+
+  function emitFinished() {
+    var r = root.reply
+    root.reply = null
+    if (r) root.finished(r)
+  }
+
   function install(id, extraParams) {
     if (proc.running) return false
     datasetId = id
@@ -81,12 +90,16 @@ Item {
     onExited: function(code, status) {
       var reply = null
       try { reply = JSON.parse(proc.lastLine) } catch (e) { reply = null }
-      if (!reply || reply.event === "progress") {
+      if (!reply || typeof reply !== "object" || reply.event === "progress") {
         reply = {ok: false, error: {code: "helper_failed", message: "Installer exited with code " + code}}
       }
       root.phase = reply.ok ? "done" : "error"
       if (!reply.ok) root.message = reply.error ? reply.error.message : "install failed"
-      root.finished(reply)
+      // Handlers of `finished` start further backend processes; emitting the
+      // signal from the event loop instead of from inside the exit handler
+      // keeps them from re-arming a Process that is still being reaped.
+      root.reply = reply
+      Qt.callLater(root.emitFinished)
     }
   }
 }
