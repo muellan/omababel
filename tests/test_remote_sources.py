@@ -96,7 +96,7 @@ class MerriamWebsterTest(unittest.TestCase):
     def test_parse_thesaurus(self):
         syn, ant = mw.MerriamWebster.parse_thesaurus(read_fixture("mw-thes-house.html"))
         self.assertEqual(syn, ["home", "dwelling", "residence"])
-        self.assertEqual(ant, ["evict"])           # near antonyms ignored
+        self.assertEqual(ant, ["office", "evict"])   # MW groups near antonyms with antonyms
         syn, ant = mw.MerriamWebster.parse_thesaurus(read_fixture("mw-thes-new.html"))
         self.assertEqual((syn, ant), (["home", "abode"], ["evict"]))
         # antonym boxes share the synonym list class; the box heading decides,
@@ -105,6 +105,13 @@ class MerriamWebsterTest(unittest.TestCase):
         self.assertEqual([(g["label"], g["synonyms"], g["antonyms"]) for g in groups],
                          [("as in home", ["home", "abode"], ["office", "workplace"]),
                           ("as in family", ["household"], [])])
+        # real-page shapes: nested headings, a sense without an "as in" label, a
+        # heading that sits before its box, and trailing page navigation
+        groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-deep.html"))
+        self.assertEqual([(g["label"], g["synonyms"], g["antonyms"]) for g in groups],
+                         [("as in home", ["home", "abode"], ["office"]),
+                          ("", ["household"], ["individual", "stranger"]),
+                          ("as in accommodate", ["lodge"], ["evict"])])
         groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-senses.html"))
         self.assertEqual([(g["pos"], g["label"], g["synonyms"], g["antonyms"]) for g in groups],
                          [("noun", "as in home", ["home", "abode"], ["office"]),
@@ -166,6 +173,14 @@ class ThesaurusComTest(unittest.TestCase):
         self.assertEqual([(g["pos"], g["label"]) for g in groups], [("noun", "human habitat"), ("noun", "family, ancestry")])
         self.assertEqual(groups[0]["antonyms"], ["office"])
         self.assertEqual(groups[1]["antonyms"], [])
+
+    def test_definitions_tab_is_not_a_word(self):
+        # thesaurus.com links its Definitions tab to dictionary.com, whose URLs
+        # share the /browse/ shape – it used to end up as a card of its own.
+        groups = thesauruscom.ThesaurusCom.parse_groups(read_fixture("thesaurus-house-junk.html"))
+        self.assertEqual([(g["synonyms"], g["antonyms"]) for g in groups], [(["apartment"], ["office"])])
+        syn, ant = thesauruscom.ThesaurusCom.parse(read_fixture("thesaurus-house-junk.html"))
+        self.assertEqual((syn, ant), (["apartment"], ["office"]))
 
     def test_escaped_json(self):
         markup = 'self.__next_f.push("{\\"synonyms\\":[{\\"term\\":\\"abode\\"}]}")'
