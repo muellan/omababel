@@ -191,6 +191,37 @@ Item {
           harness.check(p.result !== null, "Ctrl+U keeps the results")
           harness.check(p.panelAction(Qt.Key_D, false) === true, "Ctrl+D handled by the panel")
           harness.check(p.result !== null, "Ctrl+D keeps the results")
+          // card selection + collapsing
+          var view = p.resultsView
+          harness.check(view.cardCount === p.result.results.length, "one card per source")
+          harness.check(view.selectedCard === 0, "first card selected for a new result list")
+          p.panelAction(Qt.Key_J, false)
+          harness.check(view.selectedCard === Math.min(1, view.cardCount - 1), "Ctrl+J selects the next card")
+          for (var j = 0; j < view.cardCount + 2; j++) p.panelAction(Qt.Key_J, false)
+          harness.check(view.selectedCard === view.cardCount - 1, "Ctrl+J stops at the last card")
+          p.panelAction(Qt.Key_K, false)
+          harness.check(view.selectedCard === Math.max(0, view.cardCount - 2), "Ctrl+K selects the previous card")
+          for (var k = 0; k < view.cardCount + 2; k++) p.panelAction(Qt.Key_K, false)
+          harness.check(view.selectedCard === 0, "Ctrl+K stops at the first card")
+          p.panelAction(Qt.Key_I, false)
+          harness.check(view.isCollapsed(0) === true, "Ctrl+I collapses the selected card")
+          p.panelAction(Qt.Key_O, false)
+          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands the selected card")
+          p.panelAction(Qt.Key_I, true)
+          harness.check(view.isCollapsed(0) && view.isCollapsed(view.cardCount - 1), "Ctrl+Shift+I collapses all")
+          p.panelAction(Qt.Key_O, true)
+          harness.check(!view.isCollapsed(0) && !view.isCollapsed(1), "Ctrl+Shift+O expands all")
+          // sorting shortcuts only bite in thesaurus mode
+          p.mode = "lookup"
+          harness.check(p.panelAction(Qt.Key_A, false) === false, "Ctrl+A left to the text field outside thesaurus mode")
+          p.mode = "thesaurus"
+          p.result = harness.readJson(fx + "/thesaurus.json")
+          harness.check(view.cardCount === p.result.consolidated.groups.length + 1, "group cards plus the overview")
+          harness.check(p.panelAction(Qt.Key_Z, false) === true, "Ctrl+Z sorts by length")
+          harness.check(p.thesaurusSort === "length", "length sort applied")
+          harness.check(p.panelAction(Qt.Key_A, false) === true, "Ctrl+A sorts alphabetically")
+          harness.check(p.thesaurusSort === "alpha", "alphabetical sort applied")
+          p.mode = "lookup"
           p.result = harness.readJson(fx + "/lookup.json")
           p.searching = false
           p.resultsView.scrollBy(0.5)

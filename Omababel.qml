@@ -240,6 +240,22 @@ Item {
     case Qt.Key_BracketLeft: root.openLanguagePicker(false); return true
     case Qt.Key_BracketRight: root.openLanguagePicker(true); return true
     case Qt.Key_L: searchField.forceActiveFocus(); searchField.selectAll(); return true
+    case Qt.Key_J: resultsView.stepCard(1); return true
+    case Qt.Key_K: resultsView.stepCard(-1); return true
+    case Qt.Key_I:
+      if (shift) resultsView.setAllCollapsed(true); else resultsView.collapseSelected(true)
+      return true
+    case Qt.Key_O:
+      if (shift) resultsView.setAllCollapsed(false); else resultsView.collapseSelected(false)
+      return true
+    // Sorting only exists in thesaurus mode; elsewhere Ctrl+A / Ctrl+Z keep
+    // their text-field meaning (select all / undo).
+    case Qt.Key_A:
+      if (root.mode !== "thesaurus") return false
+      root.setThesaurusSort("alpha"); return true
+    case Qt.Key_Z:
+      if (root.mode !== "thesaurus") return false
+      root.setThesaurusSort("length"); return true
     case Qt.Key_1: root.setMode("lookup"); return true
     case Qt.Key_2: root.setMode("thesaurus"); return true
     case Qt.Key_3: root.setMode("translate"); return true
@@ -451,6 +467,14 @@ Item {
     Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_BracketRight, false) }
     Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_D, false) }
     Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_U, false) }
+    Shortcut { sequence: "Ctrl+J"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_J, false) }
+    Shortcut { sequence: "Ctrl+K"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_K, false) }
+    Shortcut { sequence: "Ctrl+I"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_I, false) }
+    Shortcut { sequence: "Ctrl+O"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_O, false) }
+    Shortcut { sequence: "Ctrl+Shift+I"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_I, true) }
+    Shortcut { sequence: "Ctrl+Shift+O"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_O, true) }
+    Shortcut { sequence: "Ctrl+A"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_A, false) }
+    Shortcut { sequence: "Ctrl+Z"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_Z, false) }
 
     BorderSurface {
       id: card
@@ -968,7 +992,7 @@ Item {
             id: hintText
             anchors.right: parent.right
             textFormat: Text.PlainText
-            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+P/N: history · Ctrl+D/U: scroll · Ctrl+,: preferences"
+            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+P/N: history · Ctrl+D/J/K/U: scroll · Ctrl+,: preferences"
             color: root.muted
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption
