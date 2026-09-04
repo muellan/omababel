@@ -224,6 +224,23 @@ Item {
           prefs.commitEdit()      // emits saveSource -> backend stub (no reply); must not throw
           prefs.startEdit(p.sources[0])
           harness.check(prefs.editing.id === p.sources[0].id && !prefs.editingNew, "edit existing row")
+          // every field belongs to the row being edited: typing into one must
+          // not leak into the next source, and the key field always starts
+          // empty (the secret lives in the keyring, not in the UI)
+          harness.check(prefs.nameInput.text === p.sources[0].name,
+                        "name field initialised from the row: " + prefs.nameInput.text)
+          prefs.keyInput.text = "sk-typed-secret"
+          prefs.nameInput.text = "edited name"
+          prefs.startEdit(p.sources[1])
+          harness.check(prefs.keyInput.text === "", "the key field does not leak to the next source: "
+                        + prefs.keyInput.text)
+          harness.check(prefs.nameInput.text === p.sources[1].name,
+                        "the name field follows the row: " + prefs.nameInput.text)
+          harness.check(prefs.langInput.text === (p.sources[1].languages || []).join(", "),
+                        "the languages field follows the row: " + prefs.langInput.text)
+          prefs.startNew()
+          harness.check(prefs.keyInput.text === "" && prefs.nameInput.text === "",
+                        "a new row starts with empty fields")
           prefs.cancelEdit()
           harness.check(prefs.tab === "sources" && prefs.editing === null, "cancel returns to list")
           prefs.tab = "data"

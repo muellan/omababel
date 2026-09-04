@@ -85,6 +85,7 @@ Item {
     editingNew = true
     message = ""
     tab = "edit"
+    loadEditorFields()
     Qt.callLater(function() { nameField.forceActiveFocus() })
   }
 
@@ -95,7 +96,31 @@ Item {
     editingNew = false
     message = ""
     tab = "edit"
+    loadEditorFields()
     Qt.callLater(function() { nameField.forceActiveFocus() })
+  }
+
+  // Typing into a TextField replaces its `text` binding with the typed
+  // value, so a field the user has touched would keep that value when the
+  // editor moves to another source.  Every field is therefore *assigned*
+  // from the row being edited whenever the editor opens.  The API key field
+  // starts empty by definition: the secret lives in the keyring and is never
+  // handed to the UI, so an empty field means "keep whatever is stored".
+  function loadEditorFields() {
+    var e = root.editing || ({})
+    nameField.text = e.name || ""
+    urlField.text = e.url || ""
+    aiEndpointField.text = e.url || ""
+    pathField.text = e.path || ""
+    modelField.text = e.model || ""
+    commandField.text = e.command || ""
+    langField.text = (e.languages || []).join(", ")
+    pairsField.text = (e.pairs || []).map(function(p) { return p[0] + "-" + p[1] }).join(", ")
+    keyField.text = ""
+    keyEnvField.text = e.api_key_env || ""
+    keyCmdField.text = e.api_key_cmd || ""
+    notesField.text = e.notes || ""
+    clearKeyCheck.checked_ = false
   }
 
   function cancelEdit() {
@@ -385,7 +410,7 @@ Item {
           TextField {
             id: nameField
             width: parent.width
-            text: root.editing ? root.editing.name : ""
+            text: ""
             placeholderText: "e.g. Wordnik"
             foreground: root.foreground
             accent: root.accent
@@ -513,7 +538,7 @@ Item {
               TextField {
                 id: modelField
                 width: parent.width
-                text: root.editing ? (root.editing.model || "") : ""
+                text: ""
                 placeholderText: root.editing && root.aiPreset(root.editing.service || "claude")
                   ? root.aiPreset(root.editing.service || "claude").model : ""
                 foreground: root.foreground
@@ -528,7 +553,7 @@ Item {
                 id: commandField
                 width: parent.width
                 enabled: !(root.editing && root.editing.transport === "api")
-                text: root.editing ? (root.editing.command || "") : ""
+                text: ""
                 placeholderText: root.editing && root.aiPreset(root.editing.service || "claude")
                   ? root.aiPreset(root.editing.service || "claude").command : ""
                 foreground: root.foreground
@@ -545,7 +570,7 @@ Item {
             TextField {
               id: aiEndpointField
               width: parent.width
-              text: root.editing ? (root.editing.url || "") : ""
+              text: ""
               placeholderText: "https://…"
               foreground: root.foreground
               accent: root.accent
@@ -561,7 +586,7 @@ Item {
           TextField {
             id: urlField
             width: parent.width
-            text: root.editing ? root.editing.url : ""
+            text: ""
             placeholderText: "https://example.org/dictionary/{word}"
             foreground: root.foreground
             accent: root.accent
@@ -576,7 +601,7 @@ Item {
           TextField {
             id: pathField
             width: parent.width
-            text: root.editing ? root.editing.path : ""
+            text: ""
             placeholderText: "my-dictionary.tsv"
             foreground: root.foreground
             accent: root.accent
@@ -610,7 +635,7 @@ Item {
             TextField {
               id: langField
               width: parent.width
-              text: root.editing && root.editing.languages ? root.editing.languages.join(", ") : ""
+              text: ""
               placeholderText: "de, en"
               foreground: root.foreground
               accent: root.accent
@@ -624,7 +649,7 @@ Item {
             TextField {
               id: pairsField
               width: parent.width
-              text: root.editing && root.editing.pairs ? root.editing.pairs.map(function(p) { return p[0] + "-" + p[1] }).join(", ") : ""
+              text: ""
               placeholderText: "de-en, en-de"
               foreground: root.foreground
               accent: root.accent
@@ -720,7 +745,7 @@ Item {
           TextField {
             id: keyEnvField
             width: parent.width
-            text: root.editing ? (root.editing.api_key_env || "") : ""
+            text: ""
             placeholderText: "e.g. DEEPL_API_KEY"
             foreground: root.foreground
             accent: root.accent
@@ -729,7 +754,7 @@ Item {
           TextField {
             id: keyCmdField
             width: parent.width
-            text: root.editing ? (root.editing.api_key_cmd || "") : ""
+            text: ""
             placeholderText: "e.g. pass show omababel/deepl"
             foreground: root.foreground
             accent: root.accent
@@ -743,7 +768,7 @@ Item {
           TextField {
             id: notesField
             width: parent.width
-            text: root.editing ? root.editing.notes : ""
+            text: ""
             foreground: root.foreground
             accent: root.accent
           }
