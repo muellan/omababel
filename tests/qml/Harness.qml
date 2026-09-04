@@ -235,6 +235,18 @@ Item {
           var separators = harness.collect(p.prefsView, "notInstalledLabel").filter(function(x) { return x.visible })
           harness.check(separators.length === (installedSeen > 0 ? 1 : 0),
                         "one separator between the two halves: " + separators.length)
+          if (separators.length) {
+            var sepLabel = separators[0].children[0]
+            var caption = harness.collect(p.prefsView, "filterSummary")[0]
+            // the label reads at button size, not at the caption size the
+            // rest of the metadata uses
+            harness.check(sepLabel.font.pixelSize > caption.font.pixelSize,
+                          "the separator label is larger than a caption: "
+                          + sepLabel.font.pixelSize + " vs " + caption.font.pixelSize)
+            harness.check(separators[0].parent.height > sepLabel.implicitHeight * 1.2,
+                          "the two halves are set apart: " + separators[0].parent.height
+                          + " around a " + sepLabel.implicitHeight + " label")
+          }
           prefs8.tab = "sources"
           break
         case 9:

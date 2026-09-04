@@ -1327,6 +1327,9 @@ Item {
         id: dataCol
         width: dataFlick.width - Style.spacing.md
         spacing: Style.spacing.sm
+        // Same distance to the buttons above as the main panel leaves
+        // between its mode row and the search field.
+        topPadding: Style.spacing.md
 
         Text {
           width: parent.width
@@ -1336,6 +1339,7 @@ Item {
           color: root.muted
           font.family: root.fontFamily
           font.pixelSize: Style.font.bodySmall
+          bottomPadding: Style.spacing.md
         }
 
         BorderSurface {
@@ -1414,10 +1418,11 @@ Item {
             width: parent.width
             spacing: Style.spacing.sm
 
-            // One line between what is installed and what is not.
+            // One line between what is installed and what is not, with
+            // twice the air around it that a row gets.
             Item {
               width: parent.width
-              height: visible ? Style.spacing.md * 2 : 0
+              height: visible ? Style.spacing.md * 4 : 0
               visible: dsEntry.index === root.installedCount() && dsEntry.index > 0
               Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
@@ -1439,7 +1444,7 @@ Item {
                   text: "not installed"
                   color: root.muted
                   font.family: root.fontFamily
-                  font.pixelSize: Style.font.caption
+                  font.pixelSize: Style.font.body
                 }
               }
             }
