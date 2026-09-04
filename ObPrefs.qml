@@ -33,10 +33,29 @@ Item {
   readonly property alias langInput: langField
   readonly property alias keyInput: keyField
 
+  // --- source list: filters, selection, drag and drop
+  property string filterEnabled: "all"      // all | enabled | disabled
+  property string filterType: "all"         // all | dictionary | thesaurus | translator
+  property string filterGroup: "all"        // all | ai | web | local | wiktionary | freedict | key | nokey
+  property var selectedIds: []
+  property int lastClickedIndex: -1
+  property bool dragging: false
+  property int dropIndex: -1
+  property real dragPointY: 0
+  property real autoScrollStep: 0
+
+  readonly property var visibleSources: root.filterSources()
+  // Rows may only be reordered when the shown set is complete enough for a
+  // new order to mean anything: every source, or every enabled one.
+  readonly property bool canReorder: root.filterType === "all" && root.filterGroup === "all"
+                                     && (root.filterEnabled === "all" || root.filterEnabled === "enabled")
+
   signal saveSource(var source, bool clearKey)
   signal deleteSource(string id)
   signal enableSource(string id, bool enabled)
   signal moveSource(string id, int delta)
+  signal moveSources(var ids, int delta)
+  signal reorderSources(var ids, string beforeId)
   signal resetSources()
   signal installDataset(string id)
   signal removeDataset(string id)
@@ -45,6 +64,132 @@ Item {
   signal closeRequested()
   signal historyMaxRequested(int value)
   signal clearHistoryRequested()
+
+  // ------------------------------------------------------------- filtering
+  function matchesGroup(row) {
+    switch (root.filterGroup) {
+    case "ai": return row.driver === "ai"
+    case "web": return row.kind !== "local" && row.driver !== "ai"
+    case "local": return row.kind === "local"
+    case "wiktionary": return String(row.dataset || row.id).indexOf("wiktionary") >= 0
+    case "freedict": return String(row.dataset || row.id).indexOf("freedict") >= 0
+    case "key": return !!row.has_key
+    case "nokey": return !row.has_key
+    default: return true
+    }
+  }
+
+  function filterSources() {
+    var out = []
+    for (var i = 0; i < root.sources.length; i++) {
+      var row = root.sources[i]
+      if (root.filterEnabled === "enabled" && !row.enabled) continue
+      if (root.filterEnabled === "disabled" && row.enabled) continue
+      if (root.filterType !== "all" && row.type !== root.filterType) continue
+      if (!root.matchesGroup(row)) continue
+      out.push(row)
+    }
+    return out
+  }
+
+  function resetFilters() {
+    root.filterEnabled = "all"
+    root.filterType = "all"
+    root.filterGroup = "all"
+  }
+
+  // ------------------------------------------------------------- selection
+  function isSelected(id) { return root.selectedIds.indexOf(id) >= 0 }
+
+  function clearSelection() {
+    root.selectedIds = []
+    root.lastClickedIndex = -1
+  }
+
+  // Ctrl adds or removes one row, Shift takes the range from the last click,
+  // a plain click selects just this one – the way a file manager does it.
+  function selectRow(index, ctrl, shift) {
+    var visible = root.visibleSources
+    if (index < 0 || index >= visible.length) return
+    var id = visible[index].id
+    if (shift && root.lastClickedIndex >= 0) {
+      var from = Math.min(root.lastClickedIndex, index)
+      var to = Math.max(root.lastClickedIndex, index)
+      var range = []
+      for (var i = from; i <= to; i++) range.push(visible[i].id)
+      root.selectedIds = ctrl ? root.selectedIds.filter(function(x) { return range.indexOf(x) < 0 }).concat(range) : range
+      return
+    }
+    if (ctrl) {
+      root.selectedIds = root.isSelected(id)
+        ? root.selectedIds.filter(function(x) { return x !== id })
+        : root.selectedIds.concat([id])
+    } else {
+      root.selectedIds = [id]
+    }
+    root.lastClickedIndex = index
+  }
+
+  // What a row action applies to: the selection when the row is part of it,
+  // otherwise just that row.
+  function selectionFor(id) {
+    return root.isSelected(id) && root.selectedIds.length > 1 ? root.selectedIds.slice() : [id]
+  }
+
+  function moveSelection(id, delta) {
+    if (!root.canReorder) return
+    root.moveSources(root.selectionFor(id), delta)
+  }
+
+  // --------------------------------------------------------- drag and drop
+  function dropIndexAt(y) {
+    var visible = root.visibleSources
+    for (var i = 0; i < visible.length; i++) {
+      var item = sourceRepeater.itemAt(i)
+      if (!item) continue
+      if (y < item.y + item.height / 2) return i
+    }
+    return visible.length
+  }
+
+  function dropLineY() {
+    var i = Math.max(0, root.dropIndex)
+    var item = sourceRepeater.itemAt(Math.min(i, root.visibleSources.length - 1))
+    if (!item) return 0
+    return i >= root.visibleSources.length ? item.y + item.height : Math.max(0, item.y - Style.spacing.xs / 2)
+  }
+
+  // The row the block lands in front of, resolved in the *full* list: with
+  // only the enabled rows shown, dropping at the end of the list means "after
+  // the last enabled row", not "at the very end".
+  function beforeIdFor(index) {
+    var visible = root.visibleSources
+    var moving = root.selectedIds
+    for (var i = index; i < visible.length; i++) {
+      if (moving.indexOf(visible[i].id) < 0) return visible[i].id
+    }
+    // past the last visible row: take the next row of the full list
+    var lastVisible = visible.length ? visible[visible.length - 1].id : ""
+    var seen = false
+    for (var j = 0; j < root.sources.length; j++) {
+      if (seen && moving.indexOf(root.sources[j].id) < 0) return root.sources[j].id
+      if (root.sources[j].id === lastVisible) seen = true
+    }
+    return ""
+  }
+
+  function finishDrag() {
+    var target = root.dropIndex
+    root.cancelDrag()
+    if (target < 0 || root.selectedIds.length === 0) return
+    root.reorderSources(root.selectedIds.slice(), root.beforeIdFor(target))
+  }
+
+  function cancelDrag() {
+    root.dragging = false
+    root.dropIndex = -1
+    root.autoScrollStep = 0
+  }
 
   // AI services offered by the "ai" driver, as reported by the backend.
   function aiServices() {
@@ -254,16 +399,115 @@ Item {
       }
     }
 
-    Text {
-      id: msgText
+    // The status of the last action (a source test, an install, a save).  It
+    // sits outside the scrolling list on purpose: a test result that scrolls
+    // away with the list is a test result one never reads.
+    BorderSurface {
+      id: msgStrip
       visible: root.message !== ""
       width: parent.width
-      textFormat: Text.PlainText
-      wrapMode: Text.WordWrap
-      text: root.message
-      color: root.messageError ? Color.urgent : root.muted
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.bodySmall
+      implicitHeight: msgText.implicitHeight + Style.spacing.sm * 2
+      radius: Style.cornerRadius
+      color: Util.alpha(root.messageError ? Color.urgent : root.accent, 0.10)
+      borderSpec: Border.flat(Util.alpha(root.messageError ? Color.urgent : root.accent, 0.45),
+                              Math.max(1, Style.normalBorderWidth))
+
+      Text {
+        id: msgText
+        objectName: "prefsStatus"
+        x: Style.spacing.sm
+        y: Style.spacing.sm
+        width: parent.width - Style.spacing.sm * 2 - dismiss.width
+        textFormat: Text.PlainText
+        wrapMode: Text.WordWrap
+        text: root.message
+        color: root.messageError ? Color.urgent : root.foreground
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.bodySmall
+      }
+      Button {
+        id: dismiss
+        anchors.right: parent.right
+        anchors.rightMargin: Style.spacing.xs
+        anchors.verticalCenter: parent.verticalCenter
+        iconText: "󰅖"
+        iconSize: Style.font.body
+        tooltipText: "Dismiss"
+        foreground: root.foreground
+        accent: root.accent
+        onClicked: root.message = ""
+      }
+    }
+
+    // ------------------------------------------------------ filter bar
+    // Always visible above the list: which sources are shown, and whether
+    // the shown set is complete enough to reorder in.
+    Flow {
+      id: filterBar
+      visible: root.tab === "sources"
+      width: parent.width
+      spacing: Style.spacing.md
+
+      ButtonGroup {
+        options: [{value: "all", label: "All"}, {value: "enabled", label: "Enabled"},
+                  {value: "disabled", label: "Disabled"}]
+        value: root.filterEnabled
+        foreground: root.foreground
+        background: "transparent"
+        accent: root.accent
+        onChanged: function(v) { root.filterEnabled = v; root.clearSelection() }
+      }
+      ButtonGroup {
+        options: [{value: "all", label: "All"}, {value: "dictionary", label: "Dictionary"},
+                  {value: "thesaurus", label: "Thesaurus"}, {value: "translator", label: "Translation"}]
+        value: root.filterType
+        foreground: root.foreground
+        background: "transparent"
+        accent: root.accent
+        onChanged: function(v) { root.filterType = v; root.clearSelection() }
+      }
+      Dropdown {
+        id: groupPicker
+        showLabel: false
+        width: Style.spacing.dropdownWidth
+        options: [{value: "all", label: "All sources"}, {value: "ai", label: "AI services"},
+                  {value: "web", label: "Web sources"}, {value: "local", label: "Local dictionaries"},
+                  {value: "wiktionary", label: "Wiktionary"}, {value: "freedict", label: "FreeDict"},
+                  {value: "nokey", label: "Without a stored key"}, {value: "key", label: "With a stored key"}]
+        value: root.filterGroup
+        foreground: root.foreground
+        accent: root.accent
+        onChanged: function(v) { root.filterGroup = v; root.clearSelection() }
+      }
+      Text {
+        objectName: "filterSummary"
+        anchors.verticalCenter: parent.verticalCenter
+        textFormat: Text.PlainText
+        text: root.visibleSources.length === root.sources.length
+          ? root.sources.length + " sources"
+          : root.visibleSources.length + " of " + root.sources.length + " sources"
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+      }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: !root.canReorder
+        textFormat: Text.PlainText
+        text: "· reordering needs all (or all enabled) sources shown"
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+      }
+      Text {
+        anchors.verticalCenter: parent.verticalCenter
+        visible: root.canReorder && root.selectedIds.length > 0
+        textFormat: Text.PlainText
+        text: "· " + root.selectedIds.length + " selected – drag to reorder"
+        color: root.accent
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+      }
     }
 
     // ------------------------------------------------------- source list
@@ -271,12 +515,26 @@ Item {
       id: listFlick
       visible: root.tab === "sources"
       width: parent.width
-      height: layout.height - tabsRow.height - (root.message !== "" ? msgText.height + layout.spacing : 0) - layout.spacing
+      height: layout.height - tabsRow.height - filterBar.height
+              - (root.message !== "" ? msgStrip.height + layout.spacing : 0) - layout.spacing * 2
       contentWidth: width
       contentHeight: listCol.implicitHeight
       clip: true
       boundsBehavior: Flickable.StopAtBounds
       ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+      // Dragging near an edge scrolls the list, so a row can be dragged
+      // further than one screenful.
+      Timer {
+        id: autoScroll
+        interval: 16
+        repeat: true
+        running: root.dragging && root.autoScrollStep !== 0
+        onTriggered: {
+          var next = listFlick.contentY + root.autoScrollStep
+          listFlick.contentY = Math.max(0, Math.min(Math.max(0, listFlick.contentHeight - listFlick.height), next))
+        }
+      }
 
       Column {
         id: listCol
@@ -284,18 +542,71 @@ Item {
         spacing: Style.spacing.xs
 
         Repeater {
-          model: root.sources
+          id: sourceRepeater
+          model: root.visibleSources
           delegate: BorderSurface {
             id: row
             required property var modelData
             required property int index
+            readonly property bool selected: root.isSelected(modelData.id)
             width: parent.width
             implicitHeight: rowContent.implicitHeight + Style.spacing.sm * 2
             radius: Style.cornerRadius
-            color: rowHover.hovered ? Style.hoverFillFor(root.foreground, root.accent) : "transparent"
-            borderSpec: Border.controlSpec("normal", root.foreground, root.accent)
+            color: row.selected ? Util.alpha(root.accent, 0.16)
+              : (rowHover.hovered ? Style.hoverFillFor(root.foreground, root.accent) : "transparent")
+            borderSpec: row.selected
+              ? Border.flat(Util.alpha(root.accent, 0.6), Math.max(1, Style.normalBorderWidth))
+              : Border.controlSpec("normal", root.foreground, root.accent)
             opacity: row.modelData.enabled ? 1 : 0.6
             HoverHandler { id: rowHover }
+
+            // Selection and dragging.  Declared before the content, so the
+            // switches and buttons on top keep their own clicks.
+            MouseArea {
+              anchors.fill: parent
+              acceptedButtons: Qt.LeftButton
+              property real pressY: 0
+              property bool collapseOnRelease: false
+
+              onPressed: function(mouse) {
+                pressY = mouse.y
+                collapseOnRelease = false
+                var ctrl = (mouse.modifiers & Qt.ControlModifier) !== 0
+                var shift = (mouse.modifiers & Qt.ShiftModifier) !== 0
+                if (ctrl || shift) {
+                  root.selectRow(row.index, ctrl, shift)
+                } else if (row.selected) {
+                  collapseOnRelease = true     // keep the block draggable
+                } else {
+                  root.selectRow(row.index, false, false)
+                }
+              }
+
+              onPositionChanged: function(mouse) {
+                if (!pressed) return
+                var inList = mapToItem(listFlick, mouse.x, mouse.y)
+                if (!root.dragging) {
+                  if (!root.canReorder || Math.abs(mouse.y - pressY) < Style.space(6)) return
+                  if (!row.selected) root.selectRow(row.index, false, false)
+                  root.dragging = true
+                }
+                root.dragPointY = inList.y
+                root.autoScrollStep = inList.y < Style.space(28) ? -Style.space(10)
+                  : (inList.y > listFlick.height - Style.space(28) ? Style.space(10) : 0)
+                root.dropIndex = root.dropIndexAt(mapToItem(listCol, mouse.x, mouse.y).y)
+              }
+
+              onReleased: {
+                if (root.dragging) {
+                  root.finishDrag()
+                } else if (collapseOnRelease) {
+                  root.selectRow(row.index, false, false)
+                }
+                collapseOnRelease = false
+              }
+              onCanceled: root.cancelDrag()
+              onDoubleClicked: root.startEdit(row.modelData)
+            }
 
             Row {
               id: rowContent
@@ -304,6 +615,16 @@ Item {
               width: parent.width - Style.spacing.sm * 2
               spacing: Style.spacing.md
 
+              // Drag handle: the whole row drags, but a handle says so.
+              Text {
+                anchors.verticalCenter: parent.verticalCenter
+                textFormat: Text.PlainText
+                text: "󰇙"
+                visible: root.canReorder
+                color: row.selected ? root.accent : root.muted
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.body
+              }
               ToggleSwitch {
                 id: rowSwitch
                 anchors.verticalCenter: parent.verticalCenter
@@ -313,7 +634,7 @@ Item {
                 onToggled: root.enableSource(row.modelData.id, !row.modelData.enabled)
               }
               Column {
-                width: parent.width - rowSwitch.width - actions.width - parent.spacing * 2
+                width: parent.width - rowSwitch.width - actions.width - parent.spacing * 3 - Style.space(20)
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Style.spacing.xxs
                 Row {
@@ -322,7 +643,7 @@ Item {
                     id: rowName
                     textFormat: Text.PlainText
                     text: row.modelData.name
-                    color: root.foreground
+                    color: row.selected ? root.accent : root.foreground
                     font.family: root.fontFamily
                     font.pixelSize: Style.font.body
                     font.bold: true
@@ -345,7 +666,11 @@ Item {
                   textFormat: Text.PlainText
                   text: row.modelData.kind === "local"
                     ? row.modelData.path + "  —  " + root.localInfo(row.modelData)
-                    : row.modelData.url
+                    : (row.modelData.driver === "ai"
+                       ? (root.aiPreset(row.modelData.service || "claude")
+                          ? root.aiPreset(row.modelData.service || "claude").label : "AI service")
+                         + " · " + (row.modelData.transport === "api" ? "HTTP API" : "signed-in CLI")
+                       : row.modelData.url)
                   color: root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.caption
@@ -367,13 +692,44 @@ Item {
                 }
                 Button { iconText: "󰙨"; tooltipText: "Test with a sample word"; foreground: root.foreground; accent: root.accent; onClicked: root.testSource(row.modelData.id) }
                 Button { iconText: "󰏫"; tooltipText: "Edit"; foreground: root.foreground; accent: root.accent; onClicked: root.startEdit(row.modelData) }
-                Button { iconText: "󰁝"; tooltipText: "Move up"; foreground: root.foreground; accent: root.accent; onClicked: root.moveSource(row.modelData.id, -1) }
-                Button { iconText: "󰁅"; tooltipText: "Move down"; foreground: root.foreground; accent: root.accent; onClicked: root.moveSource(row.modelData.id, 1) }
+                Button {
+                  iconText: "󰁝"
+                  enabled: root.canReorder
+                  tooltipText: root.canReorder
+                    ? (root.selectionFor(row.modelData.id).length > 1 ? "Move the selection up" : "Move up")
+                    : "Show all (or all enabled) sources to reorder"
+                  foreground: root.foreground
+                  accent: root.accent
+                  onClicked: root.moveSelection(row.modelData.id, -1)
+                }
+                Button {
+                  iconText: "󰁅"
+                  enabled: root.canReorder
+                  tooltipText: root.canReorder
+                    ? (root.selectionFor(row.modelData.id).length > 1 ? "Move the selection down" : "Move down")
+                    : "Show all (or all enabled) sources to reorder"
+                  foreground: root.foreground
+                  accent: root.accent
+                  onClicked: root.moveSelection(row.modelData.id, 1)
+                }
                 Button { iconText: "󰆴"; tooltipText: "Delete"; foreground: root.foreground; accent: root.accent; onClicked: root.deleteSource(row.modelData.id) }
               }
             }
           }
         }
+      }
+
+      // Where the dragged block would land.
+      Rectangle {
+        objectName: "dropIndicator"
+        parent: listCol.parent
+        visible: root.dragging && root.dropIndex >= 0
+        x: listCol.x
+        y: root.dropLineY()
+        width: listCol.width
+        height: Math.max(2, Style.space(2))
+        color: root.accent
+        radius: height / 2
       }
     }
 

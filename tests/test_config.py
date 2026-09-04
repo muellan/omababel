@@ -153,6 +153,28 @@ class SourcesConfigTest(TempEnv):
         third = config.SourcesConfig()
         self.assertEqual(third.sources[0]["id"], "duden")
 
+    def test_moving_and_reordering_a_block_of_sources(self):
+        cfg = config.SourcesConfig()
+        ids = [s["id"] for s in cfg.sources]
+        # a selection moves as a block and keeps its order
+        self.assertTrue(cfg.move([ids[3], ids[4]], -1))
+        self.assertEqual([s["id"] for s in cfg.sources][:5],
+                         [ids[0], ids[1], ids[3], ids[4], ids[2]])
+        self.assertTrue(cfg.move([ids[3], ids[4]], 1))
+        self.assertEqual([s["id"] for s in cfg.sources][:5], ids[:5])
+        self.assertFalse(cfg.move([ids[0]], -1))          # already first
+        self.assertFalse(cfg.move([], 1))
+        # a drag puts the block in front of a row, in list order
+        self.assertTrue(cfg.reorder([ids[5], ids[1]], ids[0]))
+        self.assertEqual([s["id"] for s in cfg.sources][:3], [ids[1], ids[5], ids[0]])
+        # ... or at the end when nothing follows
+        self.assertTrue(cfg.reorder([ids[1]], ""))
+        self.assertEqual(cfg.sources[-1]["id"], ids[1])
+        self.assertFalse(cfg.reorder(["nope"], ""))
+        # the order survives a reload
+        self.assertEqual([s["id"] for s in config.SourcesConfig().sources],
+                         [s["id"] for s in cfg.sources])
+
     def test_corrupt_file_recovers(self):
         cfg = config.SourcesConfig()
         cfg.path.write_text("{not json", encoding="utf-8")

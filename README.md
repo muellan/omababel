@@ -141,7 +141,23 @@ button to clear the history).
 
 ⚙ → **Sources** lists every search source. Each row can be enabled/disabled
 (disabled sources are not queried), edited, moved, deleted, or tested with a
-sample word. **Add source** creates a new one. A source has:
+sample word. **Add source** creates a new one.
+
+The **filter bar** above the list narrows it down by state (all / enabled /
+disabled), by type (all / dictionary / thesaurus / translation) and by kind
+(AI services, web sources, local dictionaries, Wiktionary, FreeDict, with or
+without a stored key). The result of the last action — a test, an install, a
+save — sits in its own strip above the list and stays there while the list
+scrolls.
+
+**Reordering** decides which source answers first. Click selects a row,
+`Ctrl+click` adds or removes one, `Shift+click` takes a range, and the
+selection can then be dragged with the mouse or moved with the ↑/↓ buttons as
+a block. Because an order only means something when the whole list is on
+screen, dragging is only offered while all sources — or at least all enabled
+ones — are shown; the filter bar says so when it is not.
+
+A source has:
 
 | Field            | Meaning                                                                                                                                       |
 |------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|

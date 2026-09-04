@@ -1075,7 +1075,11 @@ Item {
           }
           onDeleteSource: function(id) { backend.call("sources.delete", {id: id}, root.afterSourcesChanged) }
           onEnableSource: function(id, enabled) { backend.call("sources.enable", {id: id, enabled: enabled}, root.afterSourcesChanged) }
-          onMoveSource: function(id, delta) { backend.call("sources.move", {id: id, delta: delta}, root.afterSourcesChanged) }
+          onMoveSource: function(id, delta) { backend.call("sources.move", {ids: [id], delta: delta}, root.afterSourcesChanged) }
+          onMoveSources: function(ids, delta) { backend.call("sources.move", {ids: ids, delta: delta}, root.afterSourcesChanged) }
+          onReorderSources: function(ids, beforeId) {
+            backend.call("sources.reorder", {ids: ids, before: beforeId}, root.afterSourcesChanged)
+          }
           onResetSources: backend.call("sources.reset", {}, function(reply) {
             root.afterSourcesChanged(reply)
             if (reply.ok) { prefs.message = "Sources reset to the built-in defaults."; prefs.messageError = false }

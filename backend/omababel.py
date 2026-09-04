@@ -164,7 +164,16 @@ def op_sources_enable(params: dict) -> dict:
 
 def op_sources_move(params: dict) -> dict:
     cfg = SourcesConfig()
-    ok = cfg.move(str(params.get("id") or ""), int(params.get("delta") or 0))
+    ids = params.get("ids") or [params.get("id") or ""]
+    ok = cfg.move([str(x) for x in ids if x], int(params.get("delta") or 0))
+    return {"moved": ok, "sources": cfg.public()}
+
+
+def op_sources_reorder(params: dict) -> dict:
+    """Drag and drop: put `ids` in front of `before` (or at the end)."""
+    cfg = SourcesConfig()
+    ids = [str(x) for x in (params.get("ids") or []) if x]
+    ok = cfg.reorder(ids, str(params.get("before") or ""))
     return {"moved": ok, "sources": cfg.public()}
 
 
@@ -261,6 +270,7 @@ OPS: Dict[str, Callable[[dict], dict]] = {
     "sources.delete": op_sources_delete,
     "sources.enable": op_sources_enable,
     "sources.move": op_sources_move,
+    "sources.reorder": op_sources_reorder,
     "sources.reset": op_sources_reset,
     "sources.status": op_sources_status,
     "sources.test": op_sources_test,

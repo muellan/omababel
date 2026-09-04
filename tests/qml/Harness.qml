@@ -16,7 +16,7 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
-  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 6, 7, 8, 9, 55, 56, 10, 11, 12, 13, 14]
   function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
 
@@ -260,6 +260,83 @@ Item {
           prefs.historyMaxRequested(250)
           harness.check(requested === 250, "history max request signal")
           harness.check(p.historyMax === 1000, "history max default")
+          break
+        case 55:
+          // the sources filter bar
+          var prefs55 = p.prefsView
+          prefs55.tab = "sources"
+          prefs55.resetFilters()
+          harness.check(prefs55.visibleSources.length === p.sources.length, "no filter shows every source")
+          harness.check(prefs55.canReorder, "reordering is allowed with everything shown")
+          prefs55.filterEnabled = "enabled"
+          harness.check(prefs55.visibleSources.length > 0, "some sources are enabled")
+          for (var e = 0; e < prefs55.visibleSources.length; e++)
+            harness.check(prefs55.visibleSources[e].enabled, "only enabled sources shown")
+          harness.check(prefs55.canReorder, "reordering is allowed with all enabled sources shown")
+          prefs55.filterEnabled = "disabled"
+          harness.check(!prefs55.canReorder, "reordering is refused with a partial list")
+          prefs55.filterEnabled = "all"
+          prefs55.filterType = "thesaurus"
+          for (var t = 0; t < prefs55.visibleSources.length; t++)
+            harness.check(prefs55.visibleSources[t].type === "thesaurus", "only thesaurus sources shown")
+          harness.check(!prefs55.canReorder, "a type filter blocks reordering")
+          prefs55.filterType = "all"
+          prefs55.filterGroup = "ai"
+          harness.check(prefs55.visibleSources.length === 3, "three AI sources: " + prefs55.visibleSources.length)
+          for (var a = 0; a < prefs55.visibleSources.length; a++)
+            harness.check(prefs55.visibleSources[a].driver === "ai", "only AI sources shown")
+          prefs55.filterGroup = "local"
+          for (var l = 0; l < prefs55.visibleSources.length; l++)
+            harness.check(prefs55.visibleSources[l].kind === "local", "only local sources shown")
+          prefs55.filterGroup = "wiktionary"
+          harness.check(prefs55.visibleSources.length > 0, "wiktionary rows found")
+          prefs55.filterGroup = "nokey"
+          for (var n = 0; n < prefs55.visibleSources.length; n++)
+            harness.check(!prefs55.visibleSources[n].has_key, "only keyless sources shown")
+          prefs55.resetFilters()
+          harness.check(prefs55.visibleSources.length === p.sources.length, "filters reset")
+          break
+        case 56:
+          // multi-select, bulk move and drag reordering
+          var prefs56 = p.prefsView
+          prefs56.resetFilters()
+          prefs56.clearSelection()
+          prefs56.selectRow(0, false, false)
+          harness.check(prefs56.selectedIds.length === 1, "a plain click selects one row")
+          prefs56.selectRow(2, true, false)
+          harness.check(prefs56.selectedIds.length === 2, "ctrl+click adds a row")
+          prefs56.selectRow(2, true, false)
+          harness.check(prefs56.selectedIds.length === 1, "ctrl+click again removes it")
+          prefs56.selectRow(0, false, false)
+          prefs56.selectRow(3, false, true)
+          harness.check(prefs56.selectedIds.length === 4, "shift+click takes the range: " + prefs56.selectedIds.length)
+          // a row action applies to the selection when the row is part of it
+          harness.check(prefs56.selectionFor(p.sources[0].id).length === 4, "the action covers the selection")
+          harness.check(prefs56.selectionFor(p.sources[9].id).length === 1, "a row outside it acts alone")
+          var moved = null
+          prefs56.moveSources.connect(function(ids, delta) { moved = {ids: ids, delta: delta} })
+          prefs56.moveSelection(p.sources[0].id, -1)
+          harness.check(moved !== null && moved.ids.length === 4 && moved.delta === -1,
+                        "the whole selection moves as a block")
+          // a drag drops the block in front of the row it was released over
+          var dropped = null
+          prefs56.reorderSources.connect(function(ids, beforeId) { dropped = {ids: ids, before: beforeId} })
+          prefs56.clearSelection()
+          prefs56.selectRow(1, false, false)
+          prefs56.dragging = true
+          prefs56.dropIndex = 5
+          prefs56.finishDrag()
+          harness.check(dropped !== null, "the drag ends in a reorder")
+          harness.check(dropped.ids.length === 1 && dropped.ids[0] === p.sources[1].id, "the dragged row is the selected one")
+          harness.check(dropped.before === p.sources[5].id,
+                        "dropped in front of the row it was released over: " + dropped.before)
+          harness.check(!prefs56.dragging && prefs56.dropIndex === -1, "the drag state is cleared")
+          // dropping past the end means "last"
+          prefs56.dragging = true
+          prefs56.dropIndex = p.sources.length
+          prefs56.finishDrag()
+          harness.check(dropped.before === "", "dropping past the last row appends")
+          prefs56.clearSelection()
           break
         case 10:
           p.closePrefs()

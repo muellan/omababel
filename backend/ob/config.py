@@ -356,16 +356,48 @@ class SourcesConfig:
         self.save()
         return True
 
-    def move(self, source_id: str, delta: int) -> bool:
-        existing = self.get(source_id)
-        if existing is None:
+    def move(self, source_ids, delta: int) -> bool:
+        """Shift one row or a whole selection by `delta` places.
+
+        A selection moves as a block and keeps its internal order, so moving
+        three rows up by one puts them, still together, one place above where
+        they were.  A `delta` past either end lands at that end.
+        """
+        if isinstance(source_ids, str):
+            source_ids = [source_ids]
+        wanted = {str(x) for x in source_ids or []}
+        moving = [s for s in self.sources if s["id"] in wanted]
+        if not moving or not delta:
             return False
-        idx = self.sources.index(existing)
-        new = max(0, min(len(self.sources) - 1, idx + delta))
-        if new == idx:
+        rest = [s for s in self.sources if s["id"] not in wanted]
+        first = self.sources.index(moving[0])
+        idx = sum(1 for s in self.sources[:first] if s["id"] not in wanted)
+        target = max(0, min(len(rest), idx + int(delta)))
+        if target == idx:
             return False
-        self.sources.pop(idx)
-        self.sources.insert(new, existing)
+        self.sources = rest[:target] + moving + rest[target:]
+        self.save()
+        return True
+
+    def reorder(self, source_ids, before: str = "") -> bool:
+        """Move the given rows (as a block, in list order) in front of
+        `before`, or to the end when `before` is empty – what a drag and
+        drop of a selection means."""
+        wanted = {str(x) for x in source_ids or []}
+        moving = [s for s in self.sources if s["id"] in wanted]
+        if not moving:
+            return False
+        rest = [s for s in self.sources if s["id"] not in wanted]
+        target = len(rest)
+        if before:
+            for i, s in enumerate(rest):
+                if s["id"] == before:
+                    target = i
+                    break
+        new_order = rest[:target] + moving + rest[target:]
+        if [s["id"] for s in new_order] == [s["id"] for s in self.sources]:
+            return False
+        self.sources = new_order
         self.save()
         return True
 
