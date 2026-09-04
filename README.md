@@ -16,11 +16,13 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
   CC-CEDICT, ECDICT, ...), full-text translation services 
   (Google Translate, DeepL, Claude, Gemini, Grok, ...) between the two selected languages.
 
-Searching is done by a bundled, dependency-free Python 3 backend.
-No third-party packages or build steps are required.
-
-
 ![](preview.png)
+
+
+A note on speed: web sources and local dictionaries are usually queried in milliseconds,
+AI queries can take several seconds.
+
+
 
 
 ## Installation
@@ -53,10 +55,26 @@ o.bind("SUPER + SHIFT + ALT + SLASH", "Look up selection",
 Payload keys: `query`, `mode` (`lookup` | `thesaurus` | `translate`),
 `lang`, `lang2` (target language for translate).
 
-Requirements: 
+
+
+### Dependencies
+
+Required: 
   - Omarchy Quattro (`omarchy-shell`)
   - `python3` (part of every Omarchy install)
   - `wl-clipboard` for right-click copying.
+
+Optional: 
+  - `curl-impersonate` for more reliable web source scraping
+
+Searching is done by a bundled, dependency-free Python 3 backend.
+No third-party packages or build steps are required.
+However, web source queries are more reliable when the arch package `curl-impersonate` is also installed
+as it makes it easier for the plugin to pretend to be a browser when scraping websites.
+The package can be installed with:
+```
+omarchy pkg add curl-impersonate
+```
 
 
 
@@ -139,7 +157,7 @@ The preferences have three tabs: **Sources**, **Data** (downloadable
 dictionaries) and **History** (maximum number of remembered searches, plus a
 button to clear the history).
 
-󰒓 → **Sources** lists every search source. Each row can be enabled/disabled
+⚙ → **Sources** lists every search source. Each row can be enabled/disabled
 (disabled sources are not queried), edited, moved, deleted, or tested with a
 sample word. **Add source** creates a new one.
 
