@@ -191,6 +191,32 @@ Item {
     root.autoScrollStep = 0
   }
 
+  // ------------------------------------------------------------ datasets
+  // Installed datasets first, then the rest, both alphabetical: what is
+  // already there is what one comes back to look at.
+  readonly property var sortedDatasets: root.sortDatasets()
+
+  function datasetTitle(ds) { return String((ds && (ds.title || ds.id)) || "") }
+
+  function datasetInstalled(ds) { return !!(ds && ds.installed) }
+
+  function sortDatasets() {
+    var rows = (root.datasets || []).slice()
+    rows.sort(function(a, b) {
+      var ia = root.datasetInstalled(a), ib = root.datasetInstalled(b)
+      if (ia !== ib) return ia ? -1 : 1
+      var ta = root.datasetTitle(a).toLowerCase(), tb = root.datasetTitle(b).toLowerCase()
+      return ta < tb ? -1 : (ta > tb ? 1 : 0)
+    })
+    return rows
+  }
+
+  function installedCount() {
+    var n = 0
+    for (var i = 0; i < (root.datasets || []).length; i++) if (root.datasetInstalled(root.datasets[i])) n++
+    return n
+  }
+
   // AI services offered by the "ai" driver, as reported by the backend.
   function aiServices() {
     var info = driverInfo("ai")
@@ -479,34 +505,37 @@ Item {
         accent: root.accent
         onChanged: function(v) { root.filterGroup = v; root.clearSelection() }
       }
-      Text {
-        objectName: "filterSummary"
-        anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.PlainText
-        text: root.visibleSources.length === root.sources.length
-          ? root.sources.length + " sources"
-          : root.visibleSources.length + " of " + root.sources.length + " sources"
-        color: root.muted
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
-      }
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        visible: !root.canReorder
-        textFormat: Text.PlainText
-        text: "· reordering needs all (or all enabled) sources shown"
-        color: root.muted
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
-      }
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        visible: root.canReorder && root.selectedIds.length > 0
-        textFormat: Text.PlainText
-        text: "· " + root.selectedIds.length + " selected – drag to reorder"
-        color: root.accent
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
+      Row {
+        spacing: Style.spacing.md
+        Text {
+          objectName: "filterSummary"
+          anchors.verticalCenter: parent.verticalCenter
+          textFormat: Text.PlainText
+          text: root.visibleSources.length === root.sources.length
+            ? root.sources.length + " sources"
+            : root.visibleSources.length + " of " + root.sources.length + " sources"
+          color: root.muted
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          visible: !root.canReorder
+          textFormat: Text.PlainText
+          text: "· reordering needs all (or all enabled) sources shown"
+          color: root.muted
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
+        Text {
+          anchors.verticalCenter: parent.verticalCenter
+          visible: root.canReorder && root.selectedIds.length > 0
+          textFormat: Text.PlainText
+          text: "· " + root.selectedIds.length + " selected – drag to reorder"
+          color: root.accent
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+        }
       }
     }
 
@@ -1311,10 +1340,47 @@ Item {
         }
 
         Repeater {
-          model: root.datasets
-          delegate: BorderSurface {
-            id: dsRow
+          model: root.sortedDatasets
+          delegate: Column {
+            id: dsEntry
             required property var modelData
+            required property int index
+            width: parent.width
+            spacing: Style.spacing.sm
+
+            // One line between what is installed and what is not.
+            Item {
+              width: parent.width
+              height: visible ? Style.spacing.md * 2 : 0
+              visible: dsEntry.index === root.installedCount() && dsEntry.index > 0
+              Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                height: Math.max(1, Style.normalBorderWidth)
+                color: Util.alpha(root.foreground, 0.25)
+              }
+              Rectangle {
+                objectName: "notInstalledLabel"
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                width: notInstalledText.implicitWidth + Style.spacing.md
+                height: notInstalledText.implicitHeight
+                color: Color.menu.background
+                Text {
+                  id: notInstalledText
+                  anchors.centerIn: parent
+                  textFormat: Text.PlainText
+                  text: "not installed"
+                  color: root.muted
+                  font.family: root.fontFamily
+                  font.pixelSize: Style.font.caption
+                }
+              }
+            }
+
+            BorderSurface {
+            id: dsRow
+            readonly property var modelData: dsEntry.modelData
             width: parent.width
             implicitHeight: dsContent.implicitHeight + Style.spacing.sm * 2
             radius: Style.cornerRadius
@@ -1383,6 +1449,7 @@ Item {
                   onClicked: root.removeDataset(dsRow.modelData.id)
                 }
               }
+            }
             }
           }
         }

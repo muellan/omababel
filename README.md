@@ -320,6 +320,9 @@ long a service may take.
 
 ### Local Dictionaries (Downloaded on Demand)
 
+⚙ → **Data** lists the installed datasets first, then everything else, both
+halves alphabetical and separated by a line.
+
 Local sources give you offline, key-free lookups and are the only way to get
 dictionaries for many languages. The big dumps are hundreds of MB and carry
 their own licences (CC BY-SA / GPL), so they are **not** in this repository:

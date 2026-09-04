@@ -211,6 +211,31 @@ Item {
         case 8:
           p.datasets = harness.readJson(fx + "/datasets.json").datasets
           p.localStatus = harness.readJson(fx + "/status.json").status
+          // the data list puts what is installed first, both halves
+          // alphabetical, with a line between them
+          var prefs8 = p.prefsView
+          prefs8.tab = "data"
+          var rows = prefs8.sortedDatasets
+          harness.check(rows.length === p.datasets.length, "every dataset is listed")
+          var installedSeen = 0, previous = "", flipped = false
+          for (var d = 0; d < rows.length; d++) {
+            var title = prefs8.datasetTitle(rows[d]).toLowerCase()
+            if (prefs8.datasetInstalled(rows[d])) {
+              harness.check(!flipped, "no installed dataset after a missing one (" + title + ")")
+              installedSeen++
+            } else if (!flipped) {
+              flipped = true
+              previous = ""
+            }
+            harness.check(previous === "" || previous <= title,
+                          "alphabetical within the group: " + previous + " / " + title)
+            previous = title
+          }
+          harness.check(installedSeen === prefs8.installedCount(), "the installed count matches")
+          var separators = harness.collect(p.prefsView, "notInstalledLabel").filter(function(x) { return x.visible })
+          harness.check(separators.length === (installedSeen > 0 ? 1 : 0),
+                        "one separator between the two halves: " + separators.length)
+          prefs8.tab = "sources"
           break
         case 9:
           // preferences editor: validation + field wiring
