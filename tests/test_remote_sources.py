@@ -207,7 +207,8 @@ class LeoTest(unittest.TestCase):
         pairs = leo.Leo.parse_xml(read_fixture("leo-house.xml"), "en", "de")
         self.assertEqual([(p["src"], p["dst"]) for p in pairs],
                          [("house", "das Haus Pl.: die Häuser"), ("building", "Gebäude"),
-                          ("to house | housed, housed |", "unterbringen | brachte unter, untergebracht |")])
+                          # LEO's trailing form separator is dropped
+                          ("to house | housed, housed", "unterbringen | brachte unter, untergebracht")])
         self.assertEqual(pairs[0]["pos"], "Substantive")
         rev = leo.Leo.parse_xml(read_fixture("leo-house.xml"), "de", "en")
         self.assertEqual(rev[0]["src"], "das Haus Pl.: die Häuser")

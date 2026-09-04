@@ -45,7 +45,7 @@ def entry(headword: str, pos: str = "", senses: Optional[List[dict]] = None,
 
 
 def pair(src: str, dst: str, pos: str = "", note: str = "") -> dict:
-    return {"src": clean(src), "dst": clean(dst), "pos": clean(pos), "note": clean(note)}
+    return {"src": phrase(src), "dst": phrase(dst), "pos": phrase(pos), "note": phrase(note)}
 
 
 def translation(mode: str, pairs: Optional[List[dict]] = None, text: str = "",
@@ -53,10 +53,10 @@ def translation(mode: str, pairs: Optional[List[dict]] = None, text: str = "",
     return {
         "mode": mode,
         "pairs": pairs or [],
-        "text": text,
+        "text": strip_bars(text),
         "detected": detected,
         "url": url,
-        "alternatives": alternatives or [],
+        "alternatives": [phrase(a) for a in (alternatives or []) if phrase(a)],
     }
 
 
@@ -94,13 +94,47 @@ def groups_from_senses(entries: Iterable[dict]) -> List[dict]:
 
 
 _WS = re.compile(r"\s+")
+# Zero width / formatting characters that scraped markup drags along.
+_INVISIBLE = re.compile("[­​‌‍⁠﻿]")
+# A hyphen that sits against one word and has whitespace on the other side
+# belongs to the word: "by- product" and "by -product" are "by-product".
+# " - " (space on both sides) is left alone – there it separates.
+_HYPHEN_GAP = re.compile(r"(?<=\w)([-‐‑‒–—])\s+(?=\w)|(?<=\w)\s+([-‐‑‒–—])(?=\w)")
 
 
 def clean(text) -> str:
     if text is None:
         return ""
-    text = str(text).replace("\xa0", " ")
+    text = _INVISIBLE.sub("", str(text).replace("\xa0", " "))
     return _WS.sub(" ", text).strip()
+
+
+# LEO wraps inflected forms in bars ("account for sth. | accounted, accounted |")
+# and leaves an empty pair behind when a column has none of them.
+_BARS = re.compile(r"^[|\s]+|[|\s]+$")
+_BAR_RUN = re.compile(r"\s*\|(\s*\|)+\s*")
+
+
+def strip_bars(text) -> str:
+    """Drop leading/trailing `|` separators (per line, so multi line
+    translations keep their layout)."""
+    if text is None:
+        return ""
+    lines = [_BARS.sub("", _BAR_RUN.sub(" | ", ln)) for ln in str(text).split("\n")]
+    return "\n".join(lines).strip("\n")
+
+
+def phrase(text) -> str:
+    """`clean` for one translation cell: no stray separators at the ends."""
+    return _BARS.sub("", _BAR_RUN.sub(" | ", clean(text)))
+
+
+def word(text) -> str:
+    """`clean` for a single term: also repairs words torn apart at a hyphen."""
+    w = clean(text)
+    if not w:
+        return ""
+    return _HYPHEN_GAP.sub(lambda m: m.group(1) or m.group(2), w)
 
 
 def dedupe(words: Iterable[str]) -> List[str]:
@@ -108,7 +142,7 @@ def dedupe(words: Iterable[str]) -> List[str]:
     seen = set()
     out: List[str] = []
     for w in words:
-        w = clean(w)
+        w = word(w)
         if not w:
             continue
         key = fold(w)

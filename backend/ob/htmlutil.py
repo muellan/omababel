@@ -27,6 +27,16 @@ BLOCK = {
 # Tags whose contents should never contribute to visible text.
 SKIP_TEXT = {"script", "style", "noscript", "template", "svg", "head"}
 
+# Boundary between two inline elements.  A browser inserts nothing there,
+# but many pages rely on the markup alone to separate words, so the
+# boundary is kept as a *soft* separator: it becomes a space unless it
+# would tear a word apart ("by-" + "product" is one word, not two).
+SOFT = "\x00"
+# Characters that bind the two sides of a soft separator together.
+JOINERS = "-‐‑‒–—/'’ʼ"
+# Zero width and formatting characters that must never end up in a word.
+INVISIBLE = "­​‌‍⁠﻿"
+
 
 class Node:
     __slots__ = ("tag", "attrs", "children", "parent", "text")
@@ -141,12 +151,14 @@ class Node:
                 walk(c)
             if n.tag in BLOCK:
                 parts.append(block_sep)
+            elif sep == " ":
+                parts.append(SOFT)
             elif sep:
                 parts.append(sep)
 
         walk(self)
         text = "".join(parts)
-        return clean_text(text) if strip else text
+        return clean_text(text) if strip else resolve_soft(text)
 
     def inline_text(self) -> str:
         """Text with every whitespace run collapsed to one space."""
@@ -158,8 +170,26 @@ class Node:
         return f"<{self.tag} {self.attrs}>"
 
 
+_SOFT_RUN = re.compile(SOFT + "+")
+_SOFT_AFTER_JOINER = re.compile(f"(?<=[{re.escape(JOINERS)}]){SOFT}")
+_SOFT_BEFORE_JOINER = re.compile(f"{SOFT}(?=[{re.escape(JOINERS)}])")
+
+
+def resolve_soft(text: str) -> str:
+    """Turn inline element boundaries into spaces – except where they would
+    split a hyphenated or apostrophised word ("by-" + "product")."""
+    if SOFT not in text:
+        return text
+    text = _SOFT_RUN.sub(SOFT, text)
+    text = _SOFT_AFTER_JOINER.sub("", text)
+    text = _SOFT_BEFORE_JOINER.sub("", text)
+    return text.replace(SOFT, " ")
+
+
 def clean_text(text: str) -> str:
-    text = text.replace("\xa0", " ")
+    text = resolve_soft(text).replace("\xa0", " ")
+    for ch in INVISIBLE:
+        text = text.replace(ch, "")
     lines = [re.sub(r"[ \t\r\f\v]+", " ", ln).strip() for ln in text.split("\n")]
     return "\n".join(ln for ln in lines if ln).strip()
 

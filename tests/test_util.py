@@ -37,6 +37,20 @@ class HtmlUtilTest(unittest.TestCase):
         self.assertIsNone(htmlutil.find_json_blob(markup, "nope"))
         self.assertEqual(htmlutil.find_json_blob('"synonyms":[{"t":1}]', '"synonyms":'), '[{"t":1}]')
 
+    def test_inline_boundaries_do_not_split_hyphenated_words(self):
+        # A browser inserts nothing between two inline elements, so a word
+        # broken across them ("by-" + "product") must stay one word – while
+        # markup that relies on the element boundary still separates.
+        doc = htmlutil.parse("<p><a>by-</a><a>product</a> · <span>cat</span><span>dog</span></p>")
+        self.assertEqual(doc.find("p").inline_text(), "by-product · cat dog")
+        self.assertEqual(htmlutil.parse("<li><b>mother</b>-<b>in</b>-<b>law</b></li>")
+                         .find("li").inline_text(), "mother-in-law")
+        self.assertEqual(htmlutil.parse("<li>a<em>'</em>ight</li>").find("li").inline_text(), "a'ight")
+
+    def test_invisible_characters_are_dropped(self):
+        doc = htmlutil.parse("<li>rap­port​</li>")
+        self.assertEqual(doc.find("li").inline_text(), "rapport")
+
     def test_unclosed_tags_are_tolerated(self):
         doc = htmlutil.parse("<div><p>one<p>two</div><span>after")
         self.assertEqual([p.inline_text() for p in doc.find_all("p")], ["one", "two"])
@@ -47,6 +61,21 @@ class ResultsTest(unittest.TestCase):
     def test_dedupe_and_sort(self):
         self.assertEqual(R.dedupe(["b", " a ", "B", "", "a"]), ["b", "a"])
         self.assertEqual(R.sort_words(["Zebra", "äpfel", "apple", "Apple"]), ["äpfel", "apple", "Zebra"])
+
+    def test_words_torn_at_a_hyphen_are_repaired(self):
+        self.assertEqual(R.dedupe(["by- product", "by -product", "by-product"]), ["by-product"])
+        self.assertEqual(R.word("mother- in- law"), "mother-in-law")
+        # a hyphen with space on both sides separates and is left alone
+        self.assertEqual(R.word("give - and - take"), "give - and - take")
+
+    def test_trailing_bars_are_stripped(self):
+        p = R.pair("to house | housed, housed |", "| unterbringen |", pos="Verbs |")
+        self.assertEqual(p["src"], "to house | housed, housed")
+        self.assertEqual(p["dst"], "unterbringen")
+        self.assertEqual(p["pos"], "Verbs")
+        t = R.translation("text", text="Hallo |\n| Welt |", alternatives=["| hi |"])
+        self.assertEqual(t["text"], "Hallo\nWelt")
+        self.assertEqual(t["alternatives"], ["hi"])
 
     def test_consolidate(self):
         parts = [{"synonyms": ["home", "Dwelling"], "antonyms": ["office"]},
