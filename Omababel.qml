@@ -67,6 +67,8 @@ Item {
   readonly property alias historyView: historyPopup
   readonly property alias resultsView: resultsView
   readonly property alias helpView: help
+  readonly property alias modeSelector: modeGroup
+  readonly property alias langPickerView: langPicker
 
   // --- look
   readonly property color background: Color.menu.background
@@ -611,17 +613,17 @@ Item {
           width: parent.width
           height: visible ? Math.max(modeGroup.implicitHeight, langPicker.implicitHeight) : 0
 
-          ButtonGroup {
+          // The engaged mode is painted in the theme accent (accent text on a
+          // dimmed accent fill); an opaque idle fill would make the Button's
+          // colour animation flash on hover, so the chips rest on a
+          // transparent one like the kit's own buttons.
+          ObModeSelector {
             id: modeGroup
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             options: root.modeOptions
             value: root.mode
             foreground: root.foreground
-            // An opaque idle fill makes the Button's colour animation pass
-            // through a bright half-opaque grey on hover; the built-ins sit
-            // on a transparent idle fill, so do the same.
-            background: "transparent"
             accent: root.accent
             onChanged: function(v) { root.setMode(v) }
           }

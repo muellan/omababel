@@ -16,7 +16,7 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
-  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 54, 6, 7, 8, 9, 10, 11, 12, 13, 14]
   function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
 
@@ -140,6 +140,26 @@ Item {
                         "the long target wraps inside its column (" + dsts[wrapped].contentHeight + ")")
           harness.check(rows[wrapped].height >= dsts[wrapped].contentHeight,
                         "the row grows with the wrapped target")
+          break
+        case 54:
+          // the engaged mode chip is painted in the accent colour.  The test
+          // theme uses the same colour for accent and foreground, so drive a
+          // distinct accent through the selector to see the binding.
+          p.setMode("thesaurus")
+          var chips = harness.collect(p.modeSelector, "modeChip")
+          harness.check(chips.length === 3, "three mode chips: " + chips.length)
+          p.modeSelector.accent = "#ff00ff"
+          var accented = 0, selected = 0
+          for (var c = 0; c < chips.length; c++) {
+            if (chips[c].selected) selected++
+            harness.check(chips[c].selected === (String(chips[c].foreground) === "#ff00ff"),
+                          "the accent marks exactly the engaged chip (chip " + c + ")")
+            if (String(chips[c].foreground) === "#ff00ff") accented++
+          }
+          harness.check(selected === 1, "one chip is engaged: " + selected)
+          harness.check(accented === 1, "exactly one chip carries the accent colour")
+          p.modeSelector.accent = p.accent
+          p.setMode("lookup")
           break
         case 6:
           p.rememberHistory("Haus")
