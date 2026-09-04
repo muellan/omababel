@@ -4,17 +4,17 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
 (Omarchy Quattro and later) that offers three modes:
 
 - **Lookup** - definitions from every dictionary configured for the selected
-  language (Duden, Merriam-Webster, OED, Wiktionary, CC-CEDICT, ECDICT, Unihan, ...),
+  language (Merriam-Webster, Duden, OED, Wiktionary, CC-CEDICT, ECDICT, Unihan, Claude, Gemini, Grok, ...)
   with one clearly separated results section per dictionary.
 
 - **Thesaurus** - synonyms and antonyms from all configured thesauruses for the
-  selected language (Thesaurus.com, Merriam-Webster, Wiktionary, ...), grouped
+  selected language (Thesaurus.com, Merriam-Webster, Wiktionary, Claude, Gemini, Grok, ...), grouped
   by meaning like thesaurus.com does it, plus a merged overview; words can be
   sorted alphabetically or by length.
 
 - **Translate** - word-by-word translations (LEO, FreeDict, Wiktionary,
-  CC-CEDICT, ECDICT, ...) and full-text translation services 
-  (Google Translate, DeepL, ...) between the two selected languages.
+  CC-CEDICT, ECDICT, ...), full-text translation services 
+  (Google Translate, DeepL, Claude, Gemini, Grok, ...) between the two selected languages.
 
 Searching is done by a bundled, dependency-free Python 3 backend.
 No third-party packages or build steps are required.
@@ -139,7 +139,7 @@ The preferences have three tabs: **Sources**, **Data** (downloadable
 dictionaries) and **History** (maximum number of remembered searches, plus a
 button to clear the history).
 
-⚙ → **Sources** lists every search source. Each row can be enabled/disabled
+󰒓 → **Sources** lists every search source. Each row can be enabled/disabled
 (disabled sources are not queried), edited, moved, deleted, or tested with a
 sample word. **Add source** creates a new one.
 
@@ -159,59 +159,57 @@ ones — are shown; the filter bar says so when it is not.
 
 A source has:
 
-| Field            | Meaning                                                                                                                                       |
-|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
-| Enabled          | Off = not used in searches                                                                                                                    |
-| Source type      | `dictionary` (lookup mode), `thesaurus` (thesaurus mode) or `translator` (translate mode)                                                     |
-| Location         | *Remote (URL)* or *Local file*                                                                                                                |
-| Driver           | How the source is read. Remote: Duden, Merriam-Webster, OED, Thesaurus.com, LEO, Google Translate, DeepL or *Custom URL*. Local: *Local file* |
-| URL              | For remote sources. `{word}` is replaced by the query (custom translators may also use `{from}` / `{to}`)                                     |
-| File path        | For local sources, relative to `~/.local/share/omababel/` (absolute paths and `~` work too)                                                   |
-| Format           | Local sources: auto-detected, or force one of kaikki JSONL, FreeDict TEI, dictd, CC-CEDICT, ECDICT CSV, Unihan, TSV, JSON                     |
-| Languages        | Language codes this source serves (`de, en`). Empty = any                                                                                     |
-| Language pairs   | Translators: `de-en, en-de`. Empty = derived from *Languages* (or from the data for local files)                                              |
-| Translation kind | Translators: *word translations* (LEO-style pairs) or *full text service* (Google/DeepL-style)                                                |
+| Field            | Meaning                                                                                                                                                                                        |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Enabled          | Off = not used in searches                                                                                                                                                                     |
+| Source type      | `dictionary` (lookup mode), `thesaurus` (thesaurus mode) or `translator` (translate mode)                                                                                                      |
+| Location         | *Remote (URL)* or *Local file*                                                                                                                                                                 |
+| Driver           | How the source is read. Remote: AI Model, Duden, Merriam-Webster, OED, Thesaurus.com, LEO, Google Translate, DeepL or *Custom URL*. Local: *Local file*                                        |
+| URL              | For remote sources. `{word}` is replaced by the query (custom translators may also use `{from}` / `{to}`)                                                                                      |
+| File path        | For local sources, relative to `~/.local/share/omababel/` (absolute paths and `~` work too)                                                                                                    |
+| Format           | Local sources: auto-detected, or force one of kaikki JSONL, FreeDict TEI, dictd, CC-CEDICT, ECDICT CSV, Unihan, TSV, JSON                                                                      |
+| Languages        | Language codes this source serves (`de, en`). Empty = any                                                                                                                                      |
+| Language pairs   | Translators: `de-en, en-de`. Empty = derived from *Languages* (or from the data for local files)                                                                                               |
+| Translation kind | Translators: *word translations* (LEO-style pairs) or *full text service* (Google/DeepL-style)                                                                                                 |
 | API key          | For paid/keyed services (Google Cloud Translation, DeepL, dictionaryapi.com, OED Researcher API, AI services). Stored in the system keyring, never in a file – see [Credentials](#credentials) |
-| Key from env     | Alternative to the key field: the name of an environment variable holding the key                                                              |
-| Key from command | Alternative to the key field: a command whose output is the key (`pass show omababel/deepl`)                                                   |
-| Service / Access | AI sources only: which service (Claude, ChatGPT, Grok, Gemini, Muse) and whether it is reached through its signed-in CLI or its HTTP API       |
-| Model / Command  | AI sources only: override the service's default model, or the command that is run for the CLI access                                          |
+| Key from env     | Alternative to the key field: the name of an environment variable holding the key                                                                                                              |
+| Key from command | Alternative to the key field: a command whose output is the key (`pass show omababel/deepl`)                                                                                                   |
+| Service / Access | AI sources only: which service (Claude, ChatGPT, Grok, Gemini, Muse) and whether it is reached through its signed-in CLI or its HTTP API                                                       |
+| Model / Command  | AI sources only: override the service's default model, or the command that is run for the CLI access                                                                                           |
 
 
-### Talking to Web Sources Like a Browser
+### Web Sources
 
-The scraped sites (LEO, Duden, Merriam-Webster, Thesaurus.com …) start
-answering `403` to a plain script after a handful of requests. What gives one
-away is a stack of things, not one: the TLS handshake, the set *and the
-order* of the request headers, the absence of cookies, and a request rate no
-human produces. `backend/ob/impersonate.py` is the plugin's own answer, with
-nothing to install:
+Scraped sites (LEO, Duden, Merriam-Webster, Thesaurus.com …) start
+answering `403` to a plain script after a handful of requests.
+To circumwent this the plugin tries to mimick a browser:
 
-| | |
-|---|---|
-| Cookies      | Kept in `~/.cache/omababel/browser-state.json` and replayed – a session cookie is what separates a returning browser from a fresh script |
-| Headers      | Chrome's exact set in Chrome's order (client hints, `Sec-Fetch-*`, `Referer`), sent through `http.client` so the order really is ours |
-| Rate         | One request per host at a time with a minimum gap and jitter; after a 403/429 a backoff (honouring `Retry-After`) that is **written to disk**, so the next lookup does not walk straight back into the block |
-| TLS          | Chrome's cipher list and curve preference, TLS 1.2+, no compression |
-| Real Chrome  | If [curl-impersonate](https://github.com/lwthiker/curl-impersonate) is installed (`curl_chrome131`, `curl-impersonate-chrome`), it is used for hosts that keep refusing – that is a byte-exact Chrome TLS fingerprint |
+|             |                                                                                                                                                                                                                       |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Cookies     | Kept in `~/.cache/omababel/browser-state.json` and replayed – a session cookie is what separates a returning browser from a fresh script                                                                              |
+| Headers     | Chrome's exact set in Chrome's order (client hints, `Sec-Fetch-*`, `Referer`), sent through `http.client` so the order really is ours                                                                                 |
+| Rate        | One request per host at a time with a minimum gap and jitter; after a 403/429 a backoff (honouring `Retry-After`) that is **written to disk**, so the next lookup does not walk straight back into the block          |
+| TLS         | Chrome's cipher list and curve preference, TLS 1.2+, no compression                                                                                                                                                   |
+| Real Chrome | If [curl-impersonate](https://github.com/lwthiker/curl-impersonate) is installed (`curl_chrome131`, `curl-impersonate-chrome`), it is used for hosts that keep refusing – that is a byte-exact Chrome TLS fingerprint |
 
-This is the default for **every** web source. Two honest limits of a
-standard-library-only implementation: `Accept-Encoding` does not advertise
-`br`/`zstd` (python cannot decode either), and ALPN offers `http/1.1` only,
-since the standard library does not speak HTTP/2 – a server that selected
-`h2` would drop us. Installing `curl-impersonate` removes both.
+This is the default for **every** web source. Limitations of the bundled
+Python implementation based solely on the standard library are that
+`Accept-Encoding` does not advertise `br`/`zstd` (python cannot decode either)
+and ALPN offers `http/1.1` only, since the standard library does not speak HTTP/2
+(a server that selected `h2` would refuse). 
+Installing `curl-impersonate` removes both restrictions.
 
 ```bash
 omababel sources unblock          # forget cookies and pauses for every host
 omababel sources unblock dict.leo.org
 ```
 
-| Environment variable | Effect |
-|----------------------|--------|
-| `OMABABEL_IMPERSONATE=0` | Send with plain urllib instead |
-| `OMABABEL_PROFILE=firefox` | Use the Firefox identity |
-| `OMABABEL_HOST_INTERVAL=2` | Minimum seconds between two requests to one host (default 0.8) |
-| `OMABABEL_CURL_IMPERSONATE=/path/to/curl_chrome131` | Where the impersonating curl is |
+| Environment variable                                | Effect                                                         |
+|-----------------------------------------------------|----------------------------------------------------------------|
+| `OMABABEL_IMPERSONATE=0`                            | Send with plain urllib instead                                 |
+| `OMABABEL_PROFILE=firefox`                          | Use the Firefox identity                                       |
+| `OMABABEL_HOST_INTERVAL=2`                          | Minimum seconds between two requests to one host (default 0.8) |
+| `OMABABEL_CURL_IMPERSONATE=/path/to/curl_chrome131` | Where the impersonating curl is                                |
 
 `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` are honoured; an https target is
 tunnelled through the proxy so the handshake is still with the site.
@@ -265,7 +263,7 @@ Never put a key into the URL of a custom source: URLs *are* stored in
 | [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
 | Google Translate                                    | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a Cloud Translation API key and enable it                             |
 | DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
-| AI service                                          | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                              |
+| AI service                                          | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                             |
 
 The web sources are scraped from the public pages (like a browser would).
 Page layouts change; when a source stops returning results, check for a plugin
@@ -280,10 +278,10 @@ Three built-in rows - **AI explanation** (lookup), **AI synonyms and antonyms**
 site. They are **disabled by default**; enable the ones you want in
 ⚙ → Sources. An AI source answers in *any* language.
 
-| Mode      | What it returns                                                       |
-|-----------|-----------------------------------------------------------------------|
-| Lookup    | One succinct explanation of the term, with a part of speech and one example |
-| Thesaurus | Synonyms and antonyms, grouped by meaning, one card per meaning       |
+| Mode      | What it returns                                                                         |
+|-----------|-----------------------------------------------------------------------------------------|
+| Lookup    | One succinct explanation of the term, with a part of speech and one example             |
+| Thesaurus | Synonyms and antonyms, grouped by meaning, one card per meaning                         |
 | Translate | The best meaning-preserving translation, plus alternatives and a note about ambiguities |
 
 **Service**: Claude, ChatGPT, Grok, Gemini or Muse.
@@ -389,16 +387,19 @@ results are presented and copied: word translators show `source → target`
 pairs and a right click copies one side; full-text services show the translated
 text and a right click copies all of it.
 
-Everything is stored in plain files you can edit as well:
 
-| File                                   | Purpose                                                                                                             |
-|----------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+### Where data is stored
+
+| File                                   | Purpose                                                                                                                                      |
+|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `~/.config/omababel/sources.json`      | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted. Contains no credentials |
-| login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                          |
-| `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                       |
-| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                              |
-| `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                         |
-| `~/.cache/omababel/`                   | Indexes built from raw local files                                                                                  |
+| `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                                                |
+|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                                                       |
+| `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                                                  |
+| `~/.cache/omababel/`                   | Indexes built from raw local files                                                                                                           |
+|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                                                   |
 
 `omababel sources reset` restores the built-in list.
 
