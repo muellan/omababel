@@ -47,24 +47,97 @@ Item {
   }
   readonly property int cardCount: root.countCards()
   // cardIndex -> Card item, for scrolling the selection into view.  Not used
-  // in bindings, so it is mutated in place.
+  // in bindings, so it is mutated in place.  Delegates register on creation
+  // and unregister on destruction; `cardAt` falls back to a scan, because a
+  // streamed answer replaces `result` many times and Repeater is free to
+  // reuse the items it already has.
   property var cardItems: ({})
+  // Which answer the card state (selection, folds) belongs to.  A streamed
+  // update carries the same key, so filling a card in does not throw away
+  // what the reader has selected or folded away.
+  property string cardsKey: ""
+
+  // exposed for the test harness
+  readonly property alias contentY: flick.contentY
+  readonly property alias viewHeight: flick.height
+  readonly property alias contentHeight: flick.contentHeight
 
   signal searchWord(string word)
   signal copyText(string text)
   signal installRequested(string dataset)
   signal sortRequested(string mode)
 
-  onResultChanged: root.resetCards()
+  onResultChanged: {
+    var key = root.resultKey()
+    if (key !== root.cardsKey) {
+      root.cardsKey = key
+      root.resetCards()
+    } else {
+      root.keepCardsInRange()      // a source answered: same answer, more cards
+    }
+  }
   onModeChanged: root.resetCards()
+  // Whatever moved the selection – Ctrl+J/K, a click, a new answer – the
+  // selected card is brought into view.
+  onSelectedCardChanged: Qt.callLater(root.showSelected)
+
+  function resultKey() {
+    if (!root.result) return ""
+    return [root.result.mode, root.result.query, root.result.lang, root.result.lang2].join("\u0000")
+  }
 
   function resetCards() {
     root.collapsedCards = ({})
     root.cardItems = ({})
+    root.cardsKey = root.resultKey()
     root.selectedCard = root.countCards() > 0 ? 0 : -1
   }
 
+  // A streamed result only ever adds to the answer: keep the selection and
+  // the folds, just make sure they still point at a card that exists.
+  function keepCardsInRange() {
+    var count = root.countCards()
+    if (count === 0) {
+      root.selectedCard = -1
+      return
+    }
+    if (root.selectedCard < 0) root.selectedCard = 0
+    else if (root.selectedCard >= count) root.selectedCard = count - 1
+  }
+
   function registerCard(index, item) { root.cardItems[index] = item }
+
+  function unregisterCard(index, item) {
+    if (root.cardItems[index] === item) delete root.cardItems[index]
+  }
+
+  // The card with this index, from the registry or – when the delegates were
+  // reused and never re-registered – by looking for it in the list.
+  function cardAt(index) {
+    var item = root.cardItems[index]
+    if (item && item.visible) return item
+    var found = root.findCard(column, index)
+    if (found) root.cardItems[index] = found
+    return found
+  }
+
+  function findCard(item, index) {
+    if (!item) return null
+    var kids = item.children || []
+    for (var i = 0; i < kids.length; i++) {
+      var kid = kids[i]
+      if (kid.objectName === "resultCard" && kid.cardIndex === index && kid.visible) return kid
+      var deeper = root.findCard(kid, index)
+      if (deeper) return deeper
+    }
+    return null
+  }
+
+  function showSelected() { root.showCard(root.selectedCard) }
+
+  // The offscreen test harness never gets a polish pass, so the card column
+  // is never positioned there; this asks for the layout Qt would do itself.
+  function layoutNow() { column.forceLayout() }
 
   function isCollapsed(index) { return root.collapsedCards[index] === true }
 
@@ -113,13 +186,18 @@ Item {
   }
 
   function showCard(index) {
-    var item = root.cardItems[index]
+    if (index < 0) return
+    var item = root.cardAt(index)
     if (!item || !item.visible) return
     var top = item.mapToItem(column, 0, 0).y
-    var bottom = top + item.height
-    if (top < flick.contentY) flick.contentY = Math.max(0, top - Style.spacing.md)
-    else if (bottom > flick.contentY + flick.height)
-      flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, bottom - flick.height + Style.spacing.md))
+    var maxY = Math.max(0, flick.contentHeight - flick.height)
+    // A card taller than the view is aligned at its top: scrolling to its
+    // bottom would hide the header one just selected.
+    if (item.height >= flick.height || top < flick.contentY) {
+      flick.contentY = Math.max(0, Math.min(maxY, top - Style.spacing.md))
+    } else if (top + item.height > flick.contentY + flick.height) {
+      flick.contentY = Math.max(0, Math.min(maxY, top + item.height - flick.height + Style.spacing.md))
+    }
   }
 
   function sorted(words) {
@@ -184,7 +262,9 @@ Item {
       ? Border.flat(Style.selectedBorderFor(root.foreground, root.accent), Math.max(1, Style.normalBorderWidth))
       : Border.controlSpec("normal", root.foreground, root.accent)
 
+    objectName: "resultCard"
     Component.onCompleted: if (cardIndex >= 0) root.registerCard(cardIndex, cardRoot)
+    Component.onDestruction: if (cardIndex >= 0) root.unregisterCard(cardIndex, cardRoot)
 
     // Clicking anywhere on the card selects it, a double click folds it away.
     // Chips, links and buttons sit above this area and keep their own clicks.

@@ -16,9 +16,10 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
-  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 57, 58, 6, 7, 8, 9, 55, 56, 10, 11, 12, 13, 14]
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 57, 58, 59, 60, 6, 7, 8, 9, 55, 56, 10, 11, 12, 13, 14]
   function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
+  property var manyResults: null
 
   function readJson(path) {
     var xhr = new XMLHttpRequest()
@@ -255,6 +256,74 @@ Item {
                         "centred in the gap: " + (spinner.x + spinner.width / 2) + " vs " + gapCentre)
           p.searching = false
           harness.check(!spinner.visible, "it goes away when the search is done")
+          break
+        case 59:
+          // A streamed answer with enough cards to make the list scroll,
+          // delivered exactly the way the backend delivers it: a start event
+          // that lays the cards out, then one result per source.
+          var many = harness.readJson(fx + "/lookup.json")
+          var one = many.results[many.results.length - 1]
+          for (var m = 0; m < 12; m++) {
+            var copy = JSON.parse(JSON.stringify(one))
+            copy.source = {id: "copy" + m, name: "Source " + m, type: "dictionary",
+                           driver: "generic", kind: "remote"}
+            many.results.push(copy)
+          }
+          harness.manyResults = many
+          p.mode = "lookup"
+          p.searching = true
+          p.result = null
+          p.applySearchEvent({event: "start", mode: "lookup", query: "Haus", lang: "de", lang2: "",
+                              total: many.results.length,
+                              sources: many.results.map(function(r) { return r.source }),
+                              skipped: []})
+          for (var e59 = 0; e59 < many.results.length; e59++)
+            p.applySearchEvent({event: "result", index: e59, total: many.results.length,
+                                result: many.results[e59]})
+          p.searching = false
+          break
+        case 60:
+          // Ctrl+J / Ctrl+K must scroll the selected card into view – the
+          // cards were created once, on the start event, and every streamed
+          // result since then replaced `result` without recreating them.
+          var view = p.resultsView
+          var rows60 = harness.manyResults.results.length
+          view.layoutNow()      // offscreen: nothing polishes the list for us
+          harness.check(view.cardCount === rows60, "all cards rendered: " + view.cardCount)
+          harness.check(view.contentHeight > view.viewHeight,
+                        "the list is longer than the view: " + view.contentHeight + " / " + view.viewHeight)
+          harness.check(view.selectedCard === 0, "the first card is selected")
+          harness.check(view.contentY === 0, "and the list starts at the top")
+          for (var j = 0; j < rows60 - 1; j++) view.stepCard(1)
+          harness.check(view.selectedCard === rows60 - 1, "the last card is selected")
+          harness.check(view.contentY > 0, "the view followed the selection down: " + view.contentY)
+          var atBottom = view.contentY
+          var lastCard = view.cardAt(view.selectedCard)
+          harness.check(!!lastCard, "the selected card is found")
+          harness.check(lastCard.mapToItem(lastCard.parent, 0, 0).y + lastCard.height
+                        <= view.contentY + view.viewHeight + 2 || lastCard.height >= view.viewHeight,
+                        "the selected card is in view")
+          for (var k = 0; k < rows60 - 1; k++) view.stepCard(-1)
+          harness.check(view.selectedCard === 0, "back at the first card")
+          harness.check(view.contentY < atBottom, "the view came back up: " + view.contentY)
+          // a further streamed result keeps the selection where it is
+          view.stepCard(1)
+          view.stepCard(1)
+          var kept = view.selectedCard
+          p.applySearchEvent({event: "result", index: 0, total: rows60,
+                              result: harness.manyResults.results[0]})
+          harness.check(view.selectedCard === kept,
+                        "a streamed update keeps the selection: " + view.selectedCard + " vs " + kept)
+          view.layoutNow()
+          for (var s60 = 0; s60 < rows60 - 1; s60++) view.stepCard(1)
+          harness.check(view.contentY > 0,
+                        "the view still follows the selection after an update: " + view.contentY)
+          // a different query does start over
+          var other = JSON.parse(JSON.stringify(harness.manyResults))
+          other.query = "something else"
+          p.result = other
+          harness.check(view.selectedCard === 0, "a new query starts at the first card again")
+          p.result = null
           break
         case 6:
           p.rememberHistory("Haus")

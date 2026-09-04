@@ -406,7 +406,6 @@ Item {
       root.result = reply.data
       root.rememberHistory(query)
       root.setStatus(root.searchSummary(reply.data.results || []), root.searchFailed(reply.data.results || []))
-      resultsView.scrollToTop()
     }, function(event) {
       if (seq !== root.searchSeq) return   // superseded
       root.applySearchEvent(event)
@@ -429,6 +428,9 @@ Item {
       root.result = {mode: event.mode, query: event.query, lang: event.lang, lang2: event.lang2,
                      results: placeholders, skipped: event.skipped || [],
                      consolidated: {synonyms: [], antonyms: [], groups: []}, streaming: true}
+      // A new answer starts at the top; later events must not yank the view
+      // away from what the reader is looking at.
+      resultsView.scrollToTop()
       if (root.expected > 0) root.setStatus("Searching " + event.query + " – 0 of " + root.expected + " sources…", false)
       return
     }
