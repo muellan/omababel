@@ -77,16 +77,6 @@ omababel data list
 
 ## Using the Panel
 
-```
- 󰗊 omababel                                                              ⚙  ×
- [Lookup] [Thesaurus] [Translate]        [German ▾]  󰓡  [English ▾]          
- [ Look up in German...                                                   ▾ ]
- ────────────────────────────────────────────────────────────────────────────
-  results ...                                                                
- ────────────────────────────────────────────────────────────────────────────
- 3 results from 2 sources · 480 ms        Click: look up · Right-click: copy
-```
-
 - The search field is focused when the panel opens; **Enter** searches.
 - The **mode toggle** switches between lookup, thesaurus and translate
   (also `Ctrl+1` / `Ctrl+2` / `Ctrl+3`). Switching mode with a query in the
@@ -121,24 +111,24 @@ omababel data list
   README; `Ctrl+,` or ⚙ opens the preferences, `Esc` goes back / closes the
   panel.
 
-| Shortcut | Action |
-|----------|--------|
-| `Enter` | Search |
-| `Ctrl+1` `Ctrl+2` `Ctrl+3` | Lookup / Thesaurus / Translate mode |
-| `Ctrl+[` `Ctrl+]` | Open the primary / target language picker |
-| `Ctrl+S` | Swap languages |
-| `Ctrl+L` | Focus the search field |
-| `Ctrl+C` `Ctrl+Backspace` | Clear field and results |
-| `↓` `Ctrl+H` | History dropdown |
-| `Ctrl+P` `Ctrl+N` | Previous / next history entry |
-| `Ctrl+D` `Ctrl+U` | Scroll results down / up |
-| `Ctrl+J` `Ctrl+K` | Select the next / previous result card |
-| `Ctrl+O` | Collapse or expand the selected card (or double-click it) |
-| `Ctrl+Shift+I` `Ctrl+Shift+O` | Collapse / expand every card |
-| `Ctrl+A` `Ctrl+Z` | Thesaurus mode: sort alphabetically / by length |
-| `Ctrl+.` | Help panel (all shortcuts, link to this README) |
-| `Ctrl+,` | Preferences |
-| `Esc` | Close popup / back / close panel |
+| Shortcut                      | Action                                                    |
+|-------------------------------|-----------------------------------------------------------|
+| `Enter`                       | Search                                                    |
+| `Ctrl+1` `Ctrl+2` `Ctrl+3`    | Lookup / Thesaurus / Translate mode                       |
+| `Ctrl+[` `Ctrl+]`             | Open the primary / target language picker                 |
+| `Ctrl+S`                      | Swap languages                                            |
+| `Ctrl+L`                      | Focus the search field                                    |
+| `Ctrl+C` `Ctrl+Backspace`     | Clear field and results                                   |
+| `↓` `Ctrl+H`                  | History dropdown                                          |
+| `Ctrl+P` `Ctrl+N`             | Previous / next history entry                             |
+| `Ctrl+D` `Ctrl+U`             | Scroll results down / up                                  |
+| `Ctrl+J` `Ctrl+K`             | Select the next / previous result card                    |
+| `Ctrl+O`                      | Collapse or expand the selected card (or double-click it) |
+| `Ctrl+Shift+I` `Ctrl+Shift+O` | Collapse / expand every card                              |
+| `Ctrl+A` `Ctrl+Z`             | Thesaurus mode: sort alphabetically / by length           |
+| `Ctrl+.`                      | Help panel (all shortcuts, link to this README)           |
+| `Ctrl+,`                      | Preferences                                               |
+| `Esc`                         | Close popup / back / close panel                          |
 
 
 
@@ -257,13 +247,13 @@ text and a right click copies all of it.
 
 Everything is stored in plain files you can edit as well:
 
-| File | Purpose |
-|------|---------|
-| `~/.config/omababel/sources.json` | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted |
-| `~/.config/omababel/prefs.json` | Last mode, languages and thesaurus sort order |
-| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000) |
-| `~/.local/share/omababel/` | Dictionary data and indexes |
-| `~/.cache/omababel/` | Indexes built from raw local files |
+| File                                   | Purpose                                                                                                             |
+|----------------------------------------|---------------------------------------------------------------------------------------------------------------------|
+| `~/.config/omababel/sources.json`      | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted |
+| `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                       |
+| `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                              |
+| `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                         |
+| `~/.cache/omababel/`                   | Indexes built from raw local files                                                                                  |
 
 `omababel sources reset` restores the built-in list.
 
