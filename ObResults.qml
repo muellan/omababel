@@ -523,11 +523,16 @@ Item {
           }
           readonly property real pairContentWidth: width - Style.spacing.lg * 2
           readonly property real pairArrowWidth: Style.space(18)
-          readonly property real pairPosWidth: pairsHavePos ? Style.space(80) : 0
-          readonly property real pairSrcWidth: Math.floor((pairContentWidth - pairArrowWidth - pairPosWidth
-            - Style.spacing.md * (pairsHavePos ? 3 : 2)) * 0.5)
-          readonly property real pairDstWidth: pairContentWidth - pairSrcWidth - pairArrowWidth - pairPosWidth
-            - Style.spacing.md * (pairsHavePos ? 3 : 2)
+          // The arrow lane is the same on every card, so the source and the
+          // target column are each half of the card – whether or not this
+          // card has a part-of-speech column – and the two columns line up
+          // across cards, not only inside one.
+          readonly property real pairLaneWidth: pairArrowWidth + Style.spacing.md * 2
+          readonly property real pairSrcWidth: Math.floor((pairContentWidth - pairLaneWidth) * 0.5)
+          readonly property real pairDstWidth: pairContentWidth - pairSrcWidth - pairLaneWidth
+          // The part of speech is an annotation *inside* the target column.
+          readonly property real pairPosWidth: pairsHavePos ? Math.min(Style.space(80), pairDstWidth * 0.3) : 0
+          readonly property real pairDstTextWidth: pairDstWidth - (pairPosWidth > 0 ? pairPosWidth + Style.spacing.md : 0)
           title: modelData.source.name
           detail: root.sourceLine(modelData) + (modelData.ms !== undefined ? "  ·  " + modelData.ms + " ms" : "")
           ok: modelData.ok
@@ -731,6 +736,9 @@ Item {
               objectName: "pairRow"
               required property var modelData
               required property int index
+              // exposed for the geometry checks in the test harness
+              readonly property real srcWidth: card.pairSrcWidth
+              readonly property real dstWidth: card.pairDstWidth
               width: parent.width
               implicitHeight: Math.max(srcText.contentHeight, dstText.contentHeight, posText.contentHeight)
                 + Style.spacing.xs
@@ -763,9 +771,9 @@ Item {
               ObLinkText {
                 id: dstText
                 objectName: "pairDst"
-                x: card.pairSrcWidth + card.pairArrowWidth + Style.spacing.md * 2
+                x: card.pairSrcWidth + card.pairLaneWidth
                 y: 0
-                width: card.pairDstWidth
+                width: card.pairDstTextWidth
                 height: contentHeight
                 html: (pairRow.modelData.dst_html || "")
                   + (pairRow.modelData.note_html ? "  <font color=\"" + root.muted + "\">" + pairRow.modelData.note_html + "</font>" : "")

@@ -140,6 +140,15 @@ Item {
                         "the long target wraps inside its column (" + dsts[wrapped].contentHeight + ")")
           harness.check(rows[wrapped].height >= dsts[wrapped].contentHeight,
                         "the row grows with the wrapped target")
+          // the two columns are the same width, on every card: the card with
+          // a part-of-speech column must lay out exactly like the one without
+          for (var g = 0; g < rows.length; g++) {
+            harness.check(Math.abs(rows[g].srcWidth - rows[g].dstWidth) <= 1,
+                          "source and target column are equally wide (row " + g + ": "
+                          + rows[g].srcWidth + " vs " + rows[g].dstWidth + ")")
+            harness.check(rows[g].srcWidth === rows[0].srcWidth,
+                          "columns identical across cards (row " + g + ")")
+          }
           break
         case 54:
           // the engaged mode chip is painted in the accent colour.  The test
