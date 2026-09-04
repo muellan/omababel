@@ -368,17 +368,27 @@ Item {
               spacing: Style.spacing.xs
               topPadding: index > 0 ? Style.spacing.md : 0
 
+              // Headword, part of speech and IPA on one line.  Rich text
+              // with wrapping enabled lays out at its minimum width inside a
+              // Row – one character per line – so the headword is explicitly
+              // unwrapped and sized to its own content.
               Row {
+                id: headRow
                 width: parent.width
                 spacing: Style.spacing.md
                 ObLinkText {
+                  id: headword
                   html: "<b>" + (entryCol.modelData.headword_html || "") + "</b>"
                   font.pixelSize: Style.font.title
                   color: root.foreground
+                  wrapMode: Text.NoWrap
+                  elide: Text.ElideRight
+                  width: Math.min(implicitWidth, Math.max(Style.space(80), headRow.width * 0.55))
                   onSearchWord: function(w) { root.searchWord(w) }
                   onCopyText: function(t) { root.copyText(t) }
                 }
                 Text {
+                  id: headPos
                   visible: entryCol.modelData.pos !== ""
                   textFormat: Text.PlainText
                   text: entryCol.modelData.pos
@@ -386,7 +396,11 @@ Item {
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body
                   font.italic: true
-                  anchors.baseline: parent.children[0].baseline
+                  anchors.baseline: headword.baseline
+                }
+                Item {   // gap between the word (with its pos) and the IPA
+                  width: entryCol.modelData.pronunciation !== "" ? Style.spacing.huge : 0
+                  height: 1
                 }
                 Text {
                   visible: entryCol.modelData.pronunciation !== ""
@@ -395,7 +409,7 @@ Item {
                   color: root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body
-                  anchors.baseline: parent.children[0].baseline
+                  anchors.baseline: headword.baseline
                 }
               }
 
