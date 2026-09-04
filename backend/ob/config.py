@@ -35,7 +35,7 @@ def _lang_name(code: str) -> str:
 
 
 def default_sources() -> List[dict]:
-    """The built-in source rows."""
+    """The built-in source rows, in the order the panel shows them."""
     rows: List[dict] = []
 
     def row(id, name, type, driver, **kw) -> dict:
@@ -47,6 +47,20 @@ def default_sources() -> List[dict]:
              "languages": [], "pairs": [], "builtin": True, "notes": ""}
         r.update(kw)
         return r
+
+    # AI services.  Disabled by default: they need the service's CLI (signed
+    # in with the user's own free or paid plan) or an API key.  One row per
+    # mode, all pointing at the same service, so a user can enable just the
+    # mode they want it for.
+    ai_note = ("Uses the signed-in Claude CLI by default (a free or paid plan; no API key). "
+               "Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and "
+               "switch the transport to the HTTP API.")
+    rows.append(row("ai-dictionary", "AI explanation", "dictionary", "ai", enabled=False,
+                    service="claude", transport="cli", notes=ai_note))
+    rows.append(row("ai-thesaurus", "AI synonyms and antonyms", "thesaurus", "ai", enabled=False,
+                    service="claude", transport="cli", notes=ai_note))
+    rows.append(row("ai-translator", "AI translation", "translator", "ai", enabled=False,
+                    service="claude", transport="cli", translation_mode="text", notes=ai_note))
 
     # ---- remote dictionaries / thesauri
     rows.append(row("duden", "Duden", "dictionary", "duden", url="https://www.duden.de/rechtschreibung/{slug}",
@@ -105,19 +119,6 @@ def default_sources() -> List[dict]:
     rows.append(row("unihan", "Unihan characters", "dictionary", "local", path="unihan.sqlite", dataset="unihan",
                     languages=["zh", "ja"]))
 
-    # AI services.  Disabled by default: they need the service's CLI (signed
-    # in with the user's own free or paid plan) or an API key.  One row per
-    # mode, all pointing at the same service, so a user can enable just the
-    # mode they want it for.
-    ai_note = ("Uses the signed-in Claude CLI by default (a free or paid plan; no API key). "
-               "Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and "
-               "switch the transport to the HTTP API.")
-    rows.append(row("ai-dictionary", "AI explanation", "dictionary", "ai", enabled=False,
-                    service="claude", transport="cli", notes=ai_note))
-    rows.append(row("ai-thesaurus", "AI synonyms and antonyms", "thesaurus", "ai", enabled=False,
-                    service="claude", transport="cli", notes=ai_note))
-    rows.append(row("ai-translator", "AI translation", "translator", "ai", enabled=False,
-                    service="claude", transport="cli", translation_mode="text", notes=ai_note))
     return rows
 
 
@@ -182,11 +183,15 @@ def _slug(text: str) -> str:
 
 class SourcesConfig:
     FILE = "sources.json"
+    # Bumped when the *default order* changes in a way an existing config
+    # should follow once (see `_migrate_layout`).
+    LAYOUT_VERSION = 2
 
     def __init__(self, path: Optional[Path] = None):
         self.path = path or (config_dir() / self.FILE)
         self.sources: List[dict] = []
         self.removed_builtins: List[str] = []
+        self.layout_version = self.LAYOUT_VERSION
         # ids whose key is still in the file because no keyring took it
         self.insecure: List[str] = []
         self.load()
@@ -202,12 +207,31 @@ class SourcesConfig:
         if not isinstance(data, dict):
             data = {}
         self.removed_builtins = [str(x) for x in data.get("removed_builtins") or []]
+        self.layout_version = int(data.get("layout_version") or 1)
         rows = [normalize_source(s) for s in data.get("sources") or [] if isinstance(s, dict)]
         self.sources = rows
         changed = self._merge_defaults()
+        changed = self._migrate_layout() or changed
         changed = self._migrate_plaintext_keys() or changed
         if not self.path.exists() or changed:
             self.save()
+
+    def _migrate_layout(self) -> bool:
+        """Follow a changed default order once.
+
+        Layout 2 puts the built-in AI rows first: they are the ones a user
+        is most likely to reach for, and a source list is read from the top.
+        Only the built-in rows are moved, and only once.
+        """
+        if self.layout_version >= self.LAYOUT_VERSION:
+            return False
+        self.layout_version = self.LAYOUT_VERSION
+        ai = [s for s in self.sources if s.get("builtin") and s.get("driver") == "ai"]
+        if not ai:
+            return True
+        rest = [s for s in self.sources if s not in ai]
+        self.sources = ai + rest
+        return True
 
     def _migrate_plaintext_keys(self) -> bool:
         """Move keys an older version wrote into sources.json to the keyring.
@@ -248,7 +272,8 @@ class SourcesConfig:
                 for field in SECRET_FIELDS:
                     row[field] = ""          # secrets belong in the keyring
             rows.append(row)
-        payload = {"version": 1, "sources": rows, "removed_builtins": self.removed_builtins}
+        payload = {"version": 1, "layout_version": self.layout_version,
+                   "sources": rows, "removed_builtins": self.removed_builtins}
         _atomic_write(self.path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n", mode=0o600)
 
     # -------------------------------------------------------- secrets
@@ -347,6 +372,7 @@ class SourcesConfig:
     def reset_defaults(self) -> None:
         self.sources = [normalize_source(d) for d in default_sources()]
         self.removed_builtins = []
+        self.layout_version = self.LAYOUT_VERSION
         self.save()
 
     def public(self) -> List[dict]:

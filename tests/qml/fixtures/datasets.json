@@ -1181,8 +1181,8 @@
     "de"
    ],
    "format": "tei",
-   "source": "/home/claude/omababel-r5/tests/fixtures/deu-eng.tei",
-   "built": 1788531897
+   "source": "/home/claude/omababel-r6/tests/fixtures/deu-eng.tei",
+   "built": 1788540292
   },
   {
    "id": "freedict-eng-deu",
@@ -2072,8 +2072,8 @@
     "zh"
    ],
    "format": "cedict",
-   "source": "/home/claude/omababel-r5/tests/fixtures/cedict-sample.u8",
-   "built": 1788531897
+   "source": "/home/claude/omababel-r6/tests/fixtures/cedict-sample.u8",
+   "built": 1788540292
   },
   {
    "id": "ecdict",

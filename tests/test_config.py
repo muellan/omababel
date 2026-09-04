@@ -134,6 +134,25 @@ class SourcesConfigTest(TempEnv):
         finally:
             del os.environ["OMABABEL_NO_KEYRING"]
 
+    def test_ai_rows_come_first_and_an_old_config_follows_once(self):
+        cfg = config.SourcesConfig()
+        self.assertEqual([s["id"] for s in cfg.sources][:3],
+                         ["ai-dictionary", "ai-thesaurus", "ai-translator"])
+        self.assertTrue(all(not s["enabled"] for s in cfg.sources[:3]))
+        # a config written before the AI rows moved up
+        raw = json.loads(cfg.path.read_text(encoding="utf-8"))
+        ai = [r for r in raw["sources"] if r["driver"] == "ai"]
+        raw["sources"] = [r for r in raw["sources"] if r["driver"] != "ai"] + ai
+        raw.pop("layout_version", None)
+        cfg.path.write_text(json.dumps(raw), encoding="utf-8")
+        again = config.SourcesConfig()
+        self.assertEqual([s["id"] for s in again.sources][:3],
+                         ["ai-dictionary", "ai-thesaurus", "ai-translator"])
+        # ... and only once: an order the user made afterwards survives
+        again.move("duden", -3)
+        third = config.SourcesConfig()
+        self.assertEqual(third.sources[0]["id"], "duden")
+
     def test_corrupt_file_recovers(self):
         cfg = config.SourcesConfig()
         cfg.path.write_text("{not json", encoding="utf-8")

@@ -172,10 +172,10 @@
     "de"
    ],
    "format": "tei",
-   "source": "/home/claude/omababel-r5/tests/fixtures/deu-eng.tei",
+   "source": "/home/claude/omababel-r6/tests/fixtures/deu-eng.tei",
    "title": "FreeDict German → English",
    "license": "GPL (see dictionary header)",
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "freedict-eng-deu": {
@@ -275,10 +275,10 @@
     "zh"
    ],
    "format": "cedict",
-   "source": "/home/claude/omababel-r5/tests/fixtures/cedict-sample.u8",
+   "source": "/home/claude/omababel-r6/tests/fixtures/cedict-sample.u8",
    "title": "CC-CEDICT (Chinese → English)",
    "license": "CC BY-SA 4.0",
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "cedict-translator": {
@@ -288,10 +288,10 @@
     "zh"
    ],
    "format": "cedict",
-   "source": "/home/claude/omababel-r5/tests/fixtures/cedict-sample.u8",
+   "source": "/home/claude/omababel-r6/tests/fixtures/cedict-sample.u8",
    "title": "CC-CEDICT (Chinese → English)",
    "license": "CC BY-SA 4.0",
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "ecdict": {
@@ -310,7 +310,7 @@
    "path": "/home/user/.omababel/data/unihan.sqlite"
   },
   "mini-en": {
-   "path": "/home/user/.omababel/cache/mini-en-c2064003e273fb3a.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-4e32cfabd393f3b1.sqlite",
    "entries": 4,
    "languages": [
     "en"
@@ -319,11 +319,11 @@
    "source": "/home/user/.omababel/data/mini-en.json",
    "title": "Mini English synonyms",
    "license": null,
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "mini-en-thes": {
-   "path": "/home/user/.omababel/cache/mini-en-c2064003e273fb3a.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-4e32cfabd393f3b1.sqlite",
    "entries": 4,
    "languages": [
     "en"
@@ -332,11 +332,11 @@
    "source": "/home/user/.omababel/data/mini-en.json",
    "title": "Mini English synonyms",
    "license": null,
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "mini-de": {
-   "path": "/home/user/.omababel/cache/mini-de-8e03d8bb626e46a7.sqlite",
+   "path": "/home/user/.omababel/cache/mini-de-8af20f05ac16bf7e.sqlite",
    "entries": 2,
    "languages": [
     "de"
@@ -345,11 +345,11 @@
    "source": "/home/user/.omababel/data/mini-de.json",
    "title": "Mini German",
    "license": null,
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "mini-de-thes": {
-   "path": "/home/user/.omababel/cache/mini-de-8e03d8bb626e46a7.sqlite",
+   "path": "/home/user/.omababel/cache/mini-de-8af20f05ac16bf7e.sqlite",
    "entries": 2,
    "languages": [
     "de"
@@ -358,11 +358,11 @@
    "source": "/home/user/.omababel/data/mini-de.json",
    "title": "Mini German",
    "license": null,
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   },
   "mini-trans": {
-   "path": "/home/user/.omababel/cache/mini-en-c2064003e273fb3a.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-4e32cfabd393f3b1.sqlite",
    "entries": 4,
    "languages": [
     "en"
@@ -371,7 +371,7 @@
    "source": "/home/user/.omababel/data/mini-en.json",
    "title": "Mini English synonyms",
    "license": null,
-   "built": 1788531897,
+   "built": 1788540292,
    "installed": true
   }
  },
