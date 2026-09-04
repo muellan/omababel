@@ -184,12 +184,21 @@ class QmlStructureTest(unittest.TestCase):
         self.assertNotIn("root.finished(reply)", self.body_of(inst, "onExited:"))
         self.assertIn("Qt.callLater(root.emitFinished)", inst)
 
-    def test_backend_is_warmed_up_when_the_panel_loads(self):
-        """The first open after an install/update used to pay for python's
-        bytecode compilation of the whole backend."""
+    def test_the_first_open_does_no_work_a_later_one_does_not(self):
+        """The panel crashed the shell on the very first open after an
+        install or update.  Everything that only happened on the first open
+        -- the backend's cold start and filling the language/source models --
+        now runs at load time, so opening is always the same code path."""
         panel = self.strip((ROOT / "Omababel.qml").read_text(encoding="utf-8"))
-        self.assertIn("Component.onCompleted: backend.warmup()", panel)
+        self.assertIn("Component.onCompleted: root.preload()", panel)
+        preload = self.body_of(panel, "function preload(")
+        self.assertIn("backend.warmup()", preload)
+        self.assertIn("root.loadState()", preload)
         self.assertIn("function warmup()", (ROOT / "ObBackend.qml").read_text(encoding="utf-8"))
+        # open() must not throw into the shell's IPC caller
+        self.assertIn("try { root.applyOpen(payload) } catch", panel)
+        # focus is taken after the surface is mapped, not from open()
+        self.assertNotIn("forceActiveFocus", self.body_of(panel, "function applyOpen("))
 
     def test_no_stray_hyprland_import(self):
         for f in self.qml_files():

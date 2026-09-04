@@ -111,13 +111,30 @@ Item {
   ]
 
   // ================================================================ lifecycle
+  // The panel is `keepLoaded`, so this runs while the shell starts – long
+  // before the first summon.  Everything that only ever happened on the
+  // *first* open (the backend's cold start, and filling the language and
+  // source models, which rebuilds the selectors' list views) happens here
+  // instead, with no window mapped and nothing racing the compositor.  The
+  // first open then does exactly what every later open does.
+  function preload() {
+    backend.warmup()
+    root.loadState()
+  }
+
   function open(payloadJson) {
     var payload = {}
     try { payload = payloadJson ? JSON.parse(payloadJson) : {} } catch (e) { payload = {} }
     if (typeof payload !== "object" || payload === null) payload = {}
     root.opened = true
     root.prefsOpen = false
+    // Nothing in here may throw into the shell's IPC caller.
+    try { root.applyOpen(payload) } catch (e) { console.warn("omababel: open failed:", e) }
+  }
+
+  function applyOpen(payload) {
     if (!root.stateLoaded) {
+      // the preload has not finished (or failed): apply the payload once it does
       root.pendingPayload = payload
       root.loadState()
     } else {
@@ -125,7 +142,6 @@ Item {
       // pick up history / sources changed by the CLI while we were closed
       backend.call("state.get", {}, function(reply) { if (reply.ok) root.applyState(reply.data, false) })
     }
-    Qt.callLater(function() { searchField.forceActiveFocus(); searchField.selectAll() })
   }
 
   function close() {
@@ -478,10 +494,10 @@ Item {
 
   // ================================================================ children
   // The plugin is kept loaded by the shell, so this runs long before the
-  // panel is opened for the first time: the round trip makes python compile
-  // the backend to __pycache__ (which an install or an update invalidates)
-  // while nobody is waiting for it.
-  Component.onCompleted: backend.warmup()
+  // panel is opened for the first time: the backend's cold start (python
+  // compiling the plugin to __pycache__, which an install or an update
+  // invalidates) and the whole state load happen while nobody is waiting.
+  Component.onCompleted: root.preload()
 
   ObBackend {
     id: backend
@@ -508,6 +524,23 @@ Item {
   PanelWindow {
     id: panel
     visible: root.opened
+
+    // Focus is taken once the surface is actually mapped: the window is
+    // instantiated hidden, so a forceActiveFocus() issued from open() would
+    // land on a scene the compositor has not shown yet.
+    onVisibleChanged: {
+      if (!visible) return
+      focusTimer.restart()
+    }
+    Timer {
+      id: focusTimer
+      interval: 1
+      onTriggered: {
+        if (!root.opened) return
+        searchField.forceActiveFocus()
+        searchField.selectAll()
+      }
+    }
     anchors { top: true; bottom: true; left: true; right: true }
     color: "transparent"
     WlrLayershell.namespace: "omababel"
