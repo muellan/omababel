@@ -155,7 +155,44 @@ sample word. **Add source** creates a new one. A source has:
 | Languages        | Language codes this source serves (`de, en`). Empty = any                                                                                     |
 | Language pairs   | Translators: `de-en, en-de`. Empty = derived from *Languages* (or from the data for local files)                                              |
 | Translation kind | Translators: *word translations* (LEO-style pairs) or *full text service* (Google/DeepL-style)                                                |
-| API key          | For paid/keyed services (Google Cloud Translation, DeepL, dictionaryapi.com, OED Researcher API). Stored in `sources.json` (mode 600)         |
+| API key          | For paid/keyed services (Google Cloud Translation, DeepL, dictionaryapi.com, OED Researcher API, AI services). Stored in the system keyring, never in a file – see [Credentials](#credentials) |
+| Key from env     | Alternative to the key field: the name of an environment variable holding the key                                                              |
+| Key from command | Alternative to the key field: a command whose output is the key (`pass show omababel/deepl`)                                                   |
+
+
+### Credentials
+
+**API keys and other credentials are never written to a file in plain text.**
+They are stored in the login keyring of the session – Omarchy runs
+gnome-keyring, which provides the freedesktop Secret Service – under the
+attributes `service=omababel, id=<source id>`, and are read back only when a
+source is actually queried. `sources.json` keeps the *fact* that a key exists
+(`"has_key": true`), never the key itself.
+
+The keyring is reached through `secret-tool` (libsecret), so no third-party
+Python module is needed:
+
+```bash
+omababel sources keyring          # is a keyring available?
+omababel sources key deepl        # reads the key from stdin, stores it
+omababel sources forget-key deepl # removes it from the keyring
+secret-tool search service omababel   # everything omababel stored
+```
+
+Two alternatives are offered for setups without a running keyring, and for
+people who keep their secrets elsewhere:
+
+* **Key from env** – the name of an environment variable (`DEEPL_API_KEY`),
+* **Key from command** – a command whose first output line is the key
+  (`pass show omababel/deepl`, `gopass …`, `age -d …`).
+
+Both are consulted before the keyring, and neither stores the secret itself.
+Keys written to `sources.json` by an earlier version are moved into the
+keyring the first time the new version reads the file. If no keyring can be
+reached, such a key stays where it is and both the preferences panel and
+`omababel sources list` flag it – set it again once a keyring is running.
+Never put a key into the URL of a custom source: URLs *are* stored in
+`sources.json`.
 
 
 
@@ -249,7 +286,8 @@ Everything is stored in plain files you can edit as well:
 
 | File                                   | Purpose                                                                                                             |
 |----------------------------------------|---------------------------------------------------------------------------------------------------------------------|
-| `~/.config/omababel/sources.json`      | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted |
+| `~/.config/omababel/sources.json`      | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted. Contains no credentials |
+| login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                          |
 | `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                       |
 | `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                              |
 | `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                         |

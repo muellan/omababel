@@ -15,14 +15,18 @@ import tempfile
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from . import languages
+from . import languages, secrets
 from .paths import config_dir, state_dir
 
 SOURCE_TYPES = ("dictionary", "thesaurus", "translator")
 TRANSLATION_MODES = ("word", "text")
 
 FIELDS = ("id", "name", "enabled", "type", "kind", "driver", "url", "path", "format",
-          "dataset", "translation_mode", "api_key", "languages", "pairs", "builtin", "notes")
+          "dataset", "translation_mode", "api_key", "api_key_env", "api_key_cmd", "has_key",
+          "languages", "pairs", "builtin", "notes")
+
+# Never written to disk: the secret itself lives in the keyring (see ob.secrets).
+SECRET_FIELDS = ("api_key",)
 
 
 def _lang_name(code: str) -> str:
@@ -114,6 +118,11 @@ def normalize_source(src: dict) -> dict:
         "dataset": str(src.get("dataset") or "").strip(),
         "translation_mode": src.get("translation_mode") if src.get("translation_mode") in TRANSLATION_MODES else "",
         "api_key": str(src.get("api_key") or ""),
+        "api_key_env": str(src.get("api_key_env") or "").strip(),
+        "api_key_cmd": str(src.get("api_key_cmd") or "").strip(),
+        # not a secret: whether one is in the keyring.  Without it every row
+        # would need a keyring round trip on every request.
+        "has_key": bool(src.get("has_key") or src.get("api_key")),
         "builtin": bool(src.get("builtin", False)),
         "notes": str(src.get("notes") or ""),
     }
@@ -155,6 +164,8 @@ class SourcesConfig:
         self.path = path or (config_dir() / self.FILE)
         self.sources: List[dict] = []
         self.removed_builtins: List[str] = []
+        # ids whose key is still in the file because no keyring took it
+        self.insecure: List[str] = []
         self.load()
 
     # ------------------------------------------------------------- io
@@ -171,8 +182,29 @@ class SourcesConfig:
         rows = [normalize_source(s) for s in data.get("sources") or [] if isinstance(s, dict)]
         self.sources = rows
         changed = self._merge_defaults()
+        changed = self._migrate_plaintext_keys() or changed
         if not self.path.exists() or changed:
             self.save()
+
+    def _migrate_plaintext_keys(self) -> bool:
+        """Move keys an older version wrote into sources.json to the keyring.
+
+        A row whose key cannot be moved (no keyring on this system) keeps it,
+        but is flagged so the panel and the CLI can say so.
+        """
+        changed = False
+        for row in self.sources:
+            if not row.get("api_key"):
+                continue
+            try:
+                secrets.store(row["id"], row["api_key"])
+            except secrets.SecretError:
+                self.insecure.append(row["id"])
+                continue
+            row["api_key"] = ""
+            row["has_key"] = True
+            changed = True
+        return changed
 
     def _merge_defaults(self) -> bool:
         present = {s["id"] for s in self.sources}
@@ -186,8 +218,43 @@ class SourcesConfig:
 
     def save(self) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = {"version": 1, "sources": self.sources, "removed_builtins": self.removed_builtins}
+        rows = []
+        for s in self.sources:
+            row = dict(s)
+            if s["id"] not in self.insecure:
+                for field in SECRET_FIELDS:
+                    row[field] = ""          # secrets belong in the keyring
+            rows.append(row)
+        payload = {"version": 1, "sources": rows, "removed_builtins": self.removed_builtins}
         _atomic_write(self.path, json.dumps(payload, indent=2, ensure_ascii=False) + "\n", mode=0o600)
+
+    # -------------------------------------------------------- secrets
+    def set_key(self, source_id: str, value: str) -> None:
+        """Store (or, for an empty value, drop) a source's secret."""
+        if value:
+            secrets.store(source_id, value)
+        else:
+            secrets.remove(source_id)
+        row = self.get(source_id)
+        if row is not None:
+            row["api_key"] = ""
+            row["has_key"] = bool(value)
+            if source_id in self.insecure:
+                self.insecure.remove(source_id)
+            self.save()
+
+    def key_for(self, source_id: str) -> str:
+        row = self.get(source_id)
+        return "" if row is None else (row.get("api_key") or secrets.resolve(row))
+
+    def with_keys(self) -> List[dict]:
+        """Rows with their secret filled in – for building sources."""
+        out = []
+        for s in self.sources:
+            row = dict(s)
+            row["api_key"] = s.get("api_key") or secrets.resolve(s)
+            out.append(row)
+        return out
 
     # ----------------------------------------------------------- edits
     def get(self, source_id: str) -> Optional[dict]:
@@ -197,8 +264,14 @@ class SourcesConfig:
         return None
 
     def upsert(self, src: dict) -> dict:
-        """Update the row with ``src["id"]`` or append a new row (no id given)."""
+        """Update the row with ``src["id"]`` or append a new row (no id given).
+
+        A secret in ``api_key`` is moved straight into the keyring; it is
+        never part of the stored row.
+        """
         row = normalize_source(src)
+        secret = row["api_key"]
+        row["api_key"] = ""
         existing = self.get(row["id"]) if str(src.get("id") or "").strip() else None
         if existing is not None:
             row["builtin"] = existing.get("builtin", False)
@@ -212,12 +285,15 @@ class SourcesConfig:
                 n += 1
             self.sources.append(row)
         self.save()
+        if secret:
+            self.set_key(row["id"], secret)
         return row
 
     def delete(self, source_id: str) -> bool:
         existing = self.get(source_id)
         if existing is None:
             return False
+        secrets.remove(source_id)
         self.sources.remove(existing)
         if existing.get("builtin") and source_id not in self.removed_builtins:
             self.removed_builtins.append(source_id)
@@ -251,11 +327,15 @@ class SourcesConfig:
         self.save()
 
     def public(self) -> List[dict]:
-        """Rows for the UI – API keys are masked."""
+        """Rows for the UI – secrets are never included, only where they live."""
         out = []
         for s in self.sources:
             row = dict(s)
-            row["has_key"] = bool(s.get("api_key"))
+            store = secrets.describe(s)
+            row["key_storage"] = "file" if s.get("api_key") else store
+            row["has_key"] = bool(s.get("api_key")) or bool(store)
+            row["supports_key"] = bool(s.get("has_key")) or row["has_key"]
+            row["key_insecure"] = s["id"] in self.insecure
             row["api_key"] = ""
             out.append(row)
         return out

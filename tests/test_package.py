@@ -56,6 +56,12 @@ class ManifestTest(unittest.TestCase):
         for heading in ("## install", "## adding your own sources", "## license"):
             self.assertIn(heading, lowered, heading)
 
+    def test_readme_documents_credential_storage(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        for needle in ("keyring", "secret-tool", "never written to a file in plain text",
+                       "omababel sources key"):
+            self.assertIn(needle, readme, needle)
+
     def test_backend_is_stdlib_only(self):
         stdlib_ok = {"__future__", "annotations", "argparse", "concurrent", "csv", "gzip", "hashlib", "html", "io", "json",
                      "lzma", "os", "pathlib", "random", "re", "shutil", "socket", "sqlite3", "subprocess", "sys",

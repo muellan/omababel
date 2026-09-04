@@ -82,6 +82,8 @@ Item {
   // Which languages an enabled source can answer in, per mode (from the
   // backend).  The selectors dim everything else.
   property var coverage: ({})
+  // { available, backend }: where source credentials are stored
+  property var keyring: ({})
 
   function unservedIn(mode, from) {
     var out = ({})
@@ -194,6 +196,7 @@ Item {
       root.thesaurusSort = data.prefs.thesaurus_sort === "length" ? "length" : "alpha"
     }
     if (data.coverage) root.coverage = data.coverage
+    if (data.keyring) root.keyring = data.keyring
     if (data.history_max) root.historyMax = data.history_max
     if (data.version) root.backendVersion = data.version
   }
@@ -1020,6 +1023,7 @@ Item {
           datasets: root.datasets
           localStatus: root.localStatus
           installer: installer
+          keyring: root.keyring
           historyCount: root.history.length
           historyMax: root.historyMax
           onHistoryMaxRequested: function(v) { root.setHistoryMax(v) }

@@ -14,6 +14,7 @@ Item {
   property var datasets: []         // data.list rows
   property var localStatus: ({})    // sources.status result
   property var installer: null      // ObInstaller
+  property var keyring: ({})        // { available, backend } from the backend
   property string tab: "sources"    // "sources" | "data" | "history" | "edit"
   property int historyCount: 0
   property int historyMax: 1000
@@ -65,7 +66,8 @@ Item {
     editing = {
       id: "", name: "", enabled: true, type: "dictionary", kind: "remote", driver: "generic",
       url: "https://example.org/dictionary/{word}", path: "", format: "", dataset: "",
-      translation_mode: "text", api_key: "", languages: [], pairs: [], builtin: false, notes: "", has_key: false
+      translation_mode: "text", api_key: "", api_key_env: "", api_key_cmd: "",
+      languages: [], pairs: [], builtin: false, notes: "", has_key: false, key_storage: ""
     }
     editingNew = true
     message = ""
@@ -115,6 +117,8 @@ Item {
     row.languages = langField.text.split(/[,;\s]+/).filter(function(x) { return x !== "" })
     row.pairs = pairsField.text.split(/[,;\s]+/).filter(function(x) { return x !== "" })
     row.api_key = keyField.text
+    row.api_key_env = keyEnvField.text.trim()
+    row.api_key_cmd = keyCmdField.text.trim()
     row.notes = notesField.text.trim()
     if (row.name === "") { message = "Give the source a name."; messageError = true; return }
     if (row.kind === "remote" && row.url === "") { message = "Enter the source URL."; messageError = true; return }
@@ -535,6 +539,29 @@ Item {
             text: "API key" + (root.editing && root.driverInfo(root.editing.driver) && root.driverInfo(root.editing.driver).key_hint
               ? "  —  " + root.driverInfo(root.editing.driver).key_hint : "  (optional, for paid services)")
           }
+          Text {
+            width: parent.width
+            textFormat: Text.PlainText
+            wrapMode: Text.WordWrap
+            text: root.keyring && root.keyring.available
+              ? "Stored in the login keyring (" + root.keyring.backend + "), never in a file."
+              : "No keyring found on this system: install libsecret (secret-tool) and run gnome-keyring, "
+                + "or point the source at an environment variable or a command below."
+            color: root.keyring && root.keyring.available ? root.muted : Color.urgent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+          Text {
+            width: parent.width
+            visible: !!(root.editing && root.editing.key_insecure)
+            textFormat: Text.PlainText
+            wrapMode: Text.WordWrap
+            text: "This key is still stored in plain text in sources.json because it could not be moved "
+                + "to a keyring. Set it again once a keyring is running."
+            color: Color.urgent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
           Row {
             width: parent.width
             spacing: Style.spacing.md
@@ -542,7 +569,10 @@ Item {
               id: keyField
               width: parent.width - clearKeyRow.width - Style.spacing.md
               password: true
-              placeholderText: root.editing && root.editing.has_key ? "key stored – enter a new one to replace it" : "no key"
+              enabled: !(root.editing && (root.editing.api_key_env || root.editing.api_key_cmd))
+              placeholderText: root.editing && root.editing.has_key
+                ? "key stored in the " + (root.editing.key_storage || "keyring") + " – enter a new one to replace it"
+                : "no key"
               foreground: root.foreground
               accent: root.accent
             }
@@ -569,6 +599,25 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
               }
             }
+          }
+
+          FieldLabel { text: "…or read the key from an environment variable" }
+          TextField {
+            id: keyEnvField
+            width: parent.width
+            text: root.editing ? (root.editing.api_key_env || "") : ""
+            placeholderText: "e.g. DEEPL_API_KEY"
+            foreground: root.foreground
+            accent: root.accent
+          }
+          FieldLabel { text: "…or from the output of a command (pass, gopass, age …)" }
+          TextField {
+            id: keyCmdField
+            width: parent.width
+            text: root.editing ? (root.editing.api_key_cmd || "") : ""
+            placeholderText: "e.g. pass show omababel/deepl"
+            foreground: root.foreground
+            accent: root.accent
           }
         }
 

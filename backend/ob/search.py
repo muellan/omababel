@@ -18,8 +18,9 @@ SOURCE_TIMEOUT = float(os.environ.get("OMABABEL_SOURCE_TIMEOUT", "20"))
 
 
 def build_sources(cfg: SourcesConfig) -> List[S.Source]:
+    """Live source objects, with their secrets read from the keyring."""
     out: List[S.Source] = []
-    for row in cfg.sources:
+    for row in cfg.with_keys():
         try:
             out.append(S.build(row))
         except S.SourceError:

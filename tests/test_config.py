@@ -76,6 +76,64 @@ class SourcesConfigTest(TempEnv):
         self.assertEqual(pub["api_key"], "")
         self.assertTrue(pub["has_key"])
 
+    def test_keys_go_to_the_keyring_and_never_into_the_file(self):
+        cfg = config.SourcesConfig()
+        cfg.upsert({"id": "deepl", "name": "DeepL", "type": "translator", "driver": "deepl",
+                    "api_key": "s3cret"})
+        raw = cfg.path.read_text(encoding="utf-8")
+        self.assertNotIn("s3cret", raw)
+        self.assertIn('"api_key": ""', raw)
+        # readable again for the source that needs it
+        self.assertEqual(cfg.key_for("deepl"), "s3cret")
+        self.assertEqual([r for r in cfg.with_keys() if r["id"] == "deepl"][0]["api_key"], "s3cret")
+        pub = [s for s in cfg.public() if s["id"] == "deepl"][0]
+        self.assertEqual(pub["api_key"], "")
+        self.assertTrue(pub["has_key"])
+        self.assertEqual(pub["key_storage"], "keyring")
+        # the file mode stays owner-only
+        self.assertEqual(cfg.path.stat().st_mode & 0o777, 0o600)
+        # deleting the source drops the secret with it
+        cfg.delete("deepl")
+        self.assertEqual(config.secrets.load("deepl"), "")
+
+    def test_a_key_from_an_older_version_is_migrated_out_of_the_file(self):
+        cfg = config.SourcesConfig()
+        raw = json.loads(cfg.path.read_text(encoding="utf-8"))
+        for row in raw["sources"]:
+            if row["id"] == "merriam-webster":
+                row["api_key"] = "legacy-key"
+        cfg.path.write_text(json.dumps(raw), encoding="utf-8")
+        again = config.SourcesConfig()
+        self.assertNotIn("legacy-key", again.path.read_text(encoding="utf-8"))
+        self.assertEqual(again.key_for("merriam-webster"), "legacy-key")
+        self.assertEqual(again.insecure, [])
+
+    def test_a_key_can_come_from_an_environment_variable_or_a_command(self):
+        cfg = config.SourcesConfig()
+        cfg.upsert({"id": "env-src", "name": "Env", "type": "dictionary", "driver": "generic",
+                    "url": "https://x/{word}", "api_key_env": "OMABABEL_TEST_KEY"})
+        os.environ["OMABABEL_TEST_KEY"] = "from-env"
+        try:
+            self.assertEqual(cfg.key_for("env-src"), "from-env")
+            self.assertEqual([s for s in cfg.public() if s["id"] == "env-src"][0]["key_storage"], "environment")
+        finally:
+            del os.environ["OMABABEL_TEST_KEY"]
+        cfg.upsert({"id": "cmd-src", "name": "Cmd", "type": "dictionary", "driver": "generic",
+                    "url": "https://x/{word}", "api_key_cmd": "printf 'from-cmd\\nnoise'"})
+        self.assertEqual(cfg.key_for("cmd-src"), "from-cmd")
+
+    def test_without_a_keyring_a_key_is_refused_rather_than_written(self):
+        os.environ["OMABABEL_NO_KEYRING"] = "1"
+        os.environ["OMABABEL_SECRET_TOOL"] = "/nonexistent/secret-tool"
+        try:
+            cfg = config.SourcesConfig()
+            with self.assertRaises(config.secrets.SecretError):
+                cfg.upsert({"id": "nokey", "name": "No key", "type": "dictionary", "driver": "generic",
+                            "url": "https://x/{word}", "api_key": "plain"})
+            self.assertNotIn("plain", cfg.path.read_text(encoding="utf-8"))
+        finally:
+            del os.environ["OMABABEL_NO_KEYRING"]
+
     def test_corrupt_file_recovers(self):
         cfg = config.SourcesConfig()
         cfg.path.write_text("{not json", encoding="utf-8")

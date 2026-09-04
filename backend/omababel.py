@@ -34,7 +34,7 @@ from typing import Callable, Dict
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ob import __version__, clipboard, data, languages, paths, render, search  # noqa: E402
+from ob import __version__, clipboard, data, languages, paths, render, search, secrets  # noqa: E402
 from ob import sources as S  # noqa: E402
 from ob.config import Prefs, SourcesConfig  # noqa: E402
 from ob.history import History  # noqa: E402
@@ -66,6 +66,7 @@ def op_state(params: dict) -> dict:
         "history": hist.list(),
         "history_max": hist.limit,
         "coverage": search.coverage(cfg),
+        "keyring": {"available": secrets.available(), "backend": secrets.backend_name()},
         "paths": {"config": str(paths.config_dir()), "data": str(paths.data_dir()),
                   "state": str(paths.state_dir()), "cache": str(paths.cache_dir())},
     }
@@ -126,17 +127,26 @@ def op_sources_save(params: dict) -> dict:
     if not isinstance(src, dict):
         raise RequestError("bad_request", "source object required")
     cfg = SourcesConfig()
-    existing = cfg.get(str(src.get("id") or ""))
-    # An empty api_key from the UI means "keep the stored key" unless clear_key is set.
-    if existing and not src.get("api_key") and not params.get("clear_key"):
-        src = dict(src)
-        src["api_key"] = existing.get("api_key", "")
     if src.get("driver") and src["driver"] not in S.all_drivers():
         raise RequestError("bad_driver", f"unknown driver '{src['driver']}'")
-    row = cfg.upsert(src)
+    # The secret never travels with the row: an empty api_key from the UI
+    # means "keep the stored one" unless clear_key is set, and a new one goes
+    # straight into the keyring (see ob.secrets).
+    key = str(src.get("api_key") or "")
+    existing = cfg.get(str(src.get("id") or ""))
+    src = dict(src)
+    if existing is not None and not key and not params.get("clear_key"):
+        src["has_key"] = existing.get("has_key", False)   # keep the stored one
+    try:
+        row = cfg.upsert(src)
+        if params.get("clear_key") and not key:
+            cfg.set_key(row["id"], "")
+    except secrets.SecretError as e:
+        raise RequestError("keyring", f"Cannot store the key in the keyring: {e}")
     public = dict(row)
-    public["has_key"] = bool(row.get("api_key"))
     public["api_key"] = ""
+    public["key_storage"] = secrets.describe(row)
+    public["has_key"] = bool(public["key_storage"])
     return {"source": public, "sources": cfg.public()}
 
 
@@ -183,6 +193,8 @@ def op_sources_test(params: dict) -> dict:
     row = cfg.get(str(params.get("id") or ""))
     if row is None:
         raise RequestError("not_found", "unknown source")
+    row = dict(row)
+    row["api_key"] = cfg.key_for(row["id"])
     src = S.build(row)
     mode = {"dictionary": "lookup", "thesaurus": "thesaurus", "translator": "translate"}[src.type]
     lang = languages.normalize(params.get("lang")) or (src.effective_languages() or ["en"])[0]
@@ -379,7 +391,8 @@ def cli(argv) -> int:
     p.add_argument("--keep", action="store_true", help="keep the downloaded file")
 
     p = sub.add_parser("sources", help="manage search sources")
-    p.add_argument("action", choices=["list", "enable", "disable", "delete", "reset", "test", "path"])
+    p.add_argument("action", choices=["list", "enable", "disable", "delete", "reset", "test", "path",
+                                      "key", "forget-key", "keyring"])
     p.add_argument("ids", nargs="*")
 
     p = sub.add_parser("history", help="search history")
@@ -453,7 +466,8 @@ def cli(argv) -> int:
                 for s in d["sources"]:
                     mark = "✔" if s["enabled"] else " "
                     loc = s["path"] if s["kind"] == "local" else s["url"]
-                    print(f"[{mark}] {s['id']:<34} {s['type']:<10} {s['driver']:<12} {loc}")
+                    key = f"  [key: {s['key_storage']}]" if s.get("key_storage") else ""
+                    print(f"[{mark}] {s['id']:<34} {s['type']:<10} {s['driver']:<12} {loc}{key}")
             return out(handle({"op": "sources.list", "params": {}}), pr)
         if args.action in ("enable", "disable"):
             rc = 0
@@ -487,6 +501,40 @@ def cli(argv) -> int:
         if args.action == "path":
             print(str(paths.config_dir() / "sources.json"))
             return 0
+        if args.action == "keyring":
+            if secrets.available():
+                print(f"keyring: {secrets.backend_name()}")
+                return 0
+            print("no keyring available – install libsecret (secret-tool) and run a Secret Service\n"
+                  "such as gnome-keyring, or point a source at an environment variable or a command.")
+            return 1
+        if args.action in ("key", "forget-key"):
+            # The secret is read from stdin so it never shows up in the shell
+            # history or in the process list, and never touches a file.
+            rc = 0
+            for sid in args.ids:
+                cfg = SourcesConfig()
+                if cfg.get(sid) is None:
+                    print(f"unknown source '{sid}'", file=sys.stderr)
+                    rc = 1
+                    continue
+                value = ""
+                if args.action == "key":
+                    if sys.stdin.isatty():
+                        print(f"key for {sid} (input is not echoed to a file, end with Enter):", file=sys.stderr)
+                    value = sys.stdin.readline().strip()
+                    if not value:
+                        print("empty key – nothing stored", file=sys.stderr)
+                        rc = 1
+                        continue
+                try:
+                    cfg.set_key(sid, value)
+                except secrets.SecretError as e:
+                    print(f"cannot store the key: {e}", file=sys.stderr)
+                    rc = 1
+                    continue
+                print(f"{sid}: key {'stored in the keyring' if value else 'removed'}")
+            return rc
     if args.cmd == "history":
         if args.action == "list":
             return out(handle({"op": "history.list", "params": {}}),

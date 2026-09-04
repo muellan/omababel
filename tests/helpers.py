@@ -32,13 +32,17 @@ class TempEnv(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp(prefix="omababel-test-"))
         self._old_env = {k: os.environ.get(k) for k in
                          ("OMABABEL_CONFIG_DIR", "OMABABEL_DATA_DIR", "OMABABEL_STATE_DIR",
-                          "OMABABEL_CACHE_DIR", "OMABABEL_OFFLINE", "OMABABEL_FAKE_CLIPBOARD")}
+                          "OMABABEL_CACHE_DIR", "OMABABEL_OFFLINE", "OMABABEL_FAKE_CLIPBOARD",
+                          "OMABABEL_SECRET_TOOL", "OMABABEL_FAKE_KEYRING")}
         os.environ["OMABABEL_CONFIG_DIR"] = str(self.tmp / "config")
         os.environ["OMABABEL_DATA_DIR"] = str(self.tmp / "data")
         os.environ["OMABABEL_STATE_DIR"] = str(self.tmp / "state")
         os.environ["OMABABEL_CACHE_DIR"] = str(self.tmp / "cache")
         os.environ["OMABABEL_OFFLINE"] = "1"
         os.environ["OMABABEL_FAKE_CLIPBOARD"] = str(self.tmp / "clipboard.txt")
+        # a throw-away keyring: credentials never touch the real one
+        os.environ["OMABABEL_SECRET_TOOL"] = str(Path(__file__).resolve().parent / "fake_secret_tool.py")
+        os.environ["OMABABEL_FAKE_KEYRING"] = str(self.tmp / "keyring.json")
         for d in ("config", "data", "state", "cache"):
             (self.tmp / d).mkdir(parents=True, exist_ok=True)
 
