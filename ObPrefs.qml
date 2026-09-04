@@ -594,6 +594,10 @@ Item {
             MouseArea {
               anchors.fill: parent
               acceptedButtons: Qt.LeftButton
+              // While a row is being dragged the list must not take the grab
+              // and start panning; before that it may, so a drag on a list
+              // that cannot be reordered still scrolls it.
+              preventStealing: root.dragging
               property real pressY: 0
               property bool collapseOnRelease: false
 
