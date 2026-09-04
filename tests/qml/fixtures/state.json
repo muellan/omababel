@@ -1,5 +1,5 @@
 {
- "version": "1.0.0",
+ "version": "1.1.0",
  "sources": [
   {
    "id": "duden",
@@ -2804,14 +2804,14 @@
    "mode": "translate",
    "lang": "en",
    "lang2": "de",
-   "time": 1788531774
+   "time": 1788531897
   },
   {
    "query": "Haus",
    "mode": "translate",
    "lang": "de",
    "lang2": "en",
-   "time": 1788531774
+   "time": 1788531897
   }
  ],
  "history_max": 1000,
@@ -2891,9 +2891,9 @@
   "backend": "secret-service (secret-tool)"
  },
  "paths": {
-  "config": "/tmp/omababel-fixtures-gtqovl7s/config",
-  "data": "/tmp/omababel-fixtures-gtqovl7s/data",
-  "state": "/tmp/omababel-fixtures-gtqovl7s/state",
-  "cache": "/tmp/omababel-fixtures-gtqovl7s/cache"
+  "config": "/home/user/.omababel/config",
+  "data": "/home/user/.omababel/data",
+  "state": "/home/user/.omababel/state",
+  "cache": "/home/user/.omababel/cache"
  }
 }

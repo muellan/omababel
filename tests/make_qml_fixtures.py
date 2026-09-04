@@ -24,6 +24,15 @@ sys.path.insert(0, str(HERE))
 OUT = HERE / "qml" / "fixtures"
 
 
+def _stable(obj):
+    """Replace measured durations with a fixed value."""
+    if isinstance(obj, dict):
+        return {k: (12 if k == "ms" and isinstance(v, int) else _stable(v)) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_stable(v) for v in obj]
+    return obj
+
+
 def main() -> None:
     tmp = Path(tempfile.mkdtemp(prefix="omababel-fixtures-"))
     os.environ.update({
@@ -76,7 +85,11 @@ def main() -> None:
 
     for name, obj in (("state", state), ("lookup", lookup), ("thesaurus", thesaurus), ("translate", translate),
                       ("translate_text", translate_text), ("datasets", datasets), ("status", status)):
-        (OUT / f"{name}.json").write_text(json.dumps(obj, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        # The throw-away XDG tree and the measured durations change on every
+        # run; keep both out of the fixtures so regenerating them shows only
+        # real changes.
+        text = json.dumps(_stable(obj), ensure_ascii=False, indent=1).replace(str(tmp), "/home/user/.omababel")
+        (OUT / f"{name}.json").write_text(text + "\n", encoding="utf-8")
         print("wrote", OUT / f"{name}.json")
     shutil.rmtree(tmp, ignore_errors=True)
 

@@ -16,7 +16,7 @@
    "ok": false,
    "error": "LEO: offline mode (OMABABEL_OFFLINE is set); offline mode (OMABABEL_OFFLINE is set)",
    "count": 0,
-   "ms": 0,
+   "ms": 12,
    "alternatives_html": []
   },
   {
@@ -47,7 +47,7 @@
    "url": "",
    "alternatives": [],
    "count": 1,
-   "ms": 1,
+   "ms": 12,
    "alternatives_html": []
   },
   {
@@ -96,7 +96,7 @@
    "url": "",
    "alternatives": [],
    "count": 3,
-   "ms": 0,
+   "ms": 12,
    "alternatives_html": []
   },
   {
@@ -133,7 +133,7 @@
     "<a href=\"w:Das\">Das</a> <a href=\"w:Geb%C3%A4ude\">Gebäude</a>"
    ],
    "count": 2,
-   "ms": 240
+   "ms": 12
   }
  ],
  "skipped": [

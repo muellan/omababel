@@ -17,7 +17,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-de.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de.sqlite"
   },
   {
    "id": "wiktionary-de-native",
@@ -35,7 +35,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-de-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de-native.sqlite"
   },
   {
    "id": "wiktionary-en",
@@ -54,7 +54,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-en.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-en.sqlite"
   },
   {
    "id": "wiktionary-zh",
@@ -73,7 +73,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-zh.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite"
   },
   {
    "id": "wiktionary-zh-native",
@@ -91,7 +91,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-zh-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh-native.sqlite"
   },
   {
    "id": "wiktionary-fr",
@@ -110,7 +110,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-fr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite"
   },
   {
    "id": "wiktionary-fr-native",
@@ -128,7 +128,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-fr-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr-native.sqlite"
   },
   {
    "id": "wiktionary-es",
@@ -147,7 +147,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-es.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es.sqlite"
   },
   {
    "id": "wiktionary-es-native",
@@ -165,7 +165,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-es-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es-native.sqlite"
   },
   {
    "id": "wiktionary-pt",
@@ -184,7 +184,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-pt.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite"
   },
   {
    "id": "wiktionary-pt-native",
@@ -202,7 +202,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-pt-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt-native.sqlite"
   },
   {
    "id": "wiktionary-ja",
@@ -221,7 +221,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ja.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite"
   },
   {
    "id": "wiktionary-ja-native",
@@ -239,7 +239,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ja-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja-native.sqlite"
   },
   {
    "id": "wiktionary-ar",
@@ -258,7 +258,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ar.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ar.sqlite"
   },
   {
    "id": "wiktionary-bg",
@@ -277,7 +277,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-bg.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-bg.sqlite"
   },
   {
    "id": "wiktionary-ca",
@@ -296,7 +296,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ca.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ca.sqlite"
   },
   {
    "id": "wiktionary-cs",
@@ -315,7 +315,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-cs.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-cs.sqlite"
   },
   {
    "id": "wiktionary-cs-native",
@@ -333,7 +333,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-cs-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-cs-native.sqlite"
   },
   {
    "id": "wiktionary-da",
@@ -352,7 +352,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-da.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-da.sqlite"
   },
   {
    "id": "wiktionary-el",
@@ -371,7 +371,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-el.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-el.sqlite"
   },
   {
    "id": "wiktionary-el-native",
@@ -389,7 +389,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-el-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-el-native.sqlite"
   },
   {
    "id": "wiktionary-eo",
@@ -408,7 +408,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-eo.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-eo.sqlite"
   },
   {
    "id": "wiktionary-et",
@@ -427,7 +427,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-et.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-et.sqlite"
   },
   {
    "id": "wiktionary-fa",
@@ -446,7 +446,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-fa.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fa.sqlite"
   },
   {
    "id": "wiktionary-fi",
@@ -465,7 +465,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-fi.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fi.sqlite"
   },
   {
    "id": "wiktionary-ga",
@@ -484,7 +484,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ga.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ga.sqlite"
   },
   {
    "id": "wiktionary-he",
@@ -503,7 +503,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-he.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-he.sqlite"
   },
   {
    "id": "wiktionary-hi",
@@ -522,7 +522,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-hi.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-hi.sqlite"
   },
   {
    "id": "wiktionary-hr",
@@ -541,7 +541,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-hr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-hr.sqlite"
   },
   {
    "id": "wiktionary-hu",
@@ -560,7 +560,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-hu.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-hu.sqlite"
   },
   {
    "id": "wiktionary-id",
@@ -579,7 +579,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-id.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-id.sqlite"
   },
   {
    "id": "wiktionary-id-native",
@@ -597,7 +597,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-id-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-id-native.sqlite"
   },
   {
    "id": "wiktionary-is",
@@ -616,7 +616,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-is.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-is.sqlite"
   },
   {
    "id": "wiktionary-it",
@@ -635,7 +635,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-it.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-it.sqlite"
   },
   {
    "id": "wiktionary-it-native",
@@ -653,7 +653,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-it-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-it-native.sqlite"
   },
   {
    "id": "wiktionary-ko",
@@ -672,7 +672,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ko.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ko.sqlite"
   },
   {
    "id": "wiktionary-ko-native",
@@ -690,7 +690,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ko-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ko-native.sqlite"
   },
   {
    "id": "wiktionary-la",
@@ -709,7 +709,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-la.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-la.sqlite"
   },
   {
    "id": "wiktionary-lt",
@@ -728,7 +728,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-lt.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-lt.sqlite"
   },
   {
    "id": "wiktionary-lv",
@@ -747,7 +747,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-lv.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-lv.sqlite"
   },
   {
    "id": "wiktionary-ms",
@@ -766,7 +766,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ms.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ms.sqlite"
   },
   {
    "id": "wiktionary-ms-native",
@@ -784,7 +784,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ms-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ms-native.sqlite"
   },
   {
    "id": "wiktionary-nb",
@@ -803,7 +803,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-nb.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-nb.sqlite"
   },
   {
    "id": "wiktionary-nl",
@@ -822,7 +822,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-nl.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-nl.sqlite"
   },
   {
    "id": "wiktionary-nl-native",
@@ -840,7 +840,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-nl-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-nl-native.sqlite"
   },
   {
    "id": "wiktionary-pl",
@@ -859,7 +859,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-pl.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pl.sqlite"
   },
   {
    "id": "wiktionary-pl-native",
@@ -877,7 +877,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-pl-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pl-native.sqlite"
   },
   {
    "id": "wiktionary-ro",
@@ -896,7 +896,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ro.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ro.sqlite"
   },
   {
    "id": "wiktionary-ru",
@@ -915,7 +915,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ru.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ru.sqlite"
   },
   {
    "id": "wiktionary-ru-native",
@@ -933,7 +933,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-ru-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ru-native.sqlite"
   },
   {
    "id": "wiktionary-sk",
@@ -952,7 +952,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-sk.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-sk.sqlite"
   },
   {
    "id": "wiktionary-sl",
@@ -971,7 +971,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-sl.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-sl.sqlite"
   },
   {
    "id": "wiktionary-sr",
@@ -990,7 +990,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-sr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-sr.sqlite"
   },
   {
    "id": "wiktionary-sv",
@@ -1009,7 +1009,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-sv.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-sv.sqlite"
   },
   {
    "id": "wiktionary-sw",
@@ -1028,7 +1028,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-sw.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-sw.sqlite"
   },
   {
    "id": "wiktionary-th",
@@ -1047,7 +1047,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-th.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-th.sqlite"
   },
   {
    "id": "wiktionary-th-native",
@@ -1065,7 +1065,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-th-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-th-native.sqlite"
   },
   {
    "id": "wiktionary-tr",
@@ -1084,7 +1084,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-tr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-tr.sqlite"
   },
   {
    "id": "wiktionary-tr-native",
@@ -1102,7 +1102,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-tr-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-tr-native.sqlite"
   },
   {
    "id": "wiktionary-uk",
@@ -1121,7 +1121,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-uk.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-uk.sqlite"
   },
   {
    "id": "wiktionary-vi",
@@ -1140,7 +1140,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-vi.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-vi.sqlite"
   },
   {
    "id": "wiktionary-vi-native",
@@ -1158,7 +1158,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/wiktionary-vi-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-vi-native.sqlite"
   },
   {
    "id": "freedict-deu-eng",
@@ -1174,7 +1174,7 @@
    ],
    "default": true,
    "installed": true,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-eng.sqlite",
+   "path": "/home/user/.omababel/data/freedict-deu-eng.sqlite",
    "size": 36864,
    "entries": 2,
    "languages": [
@@ -1182,7 +1182,7 @@
    ],
    "format": "tei",
    "source": "/home/claude/omababel-r5/tests/fixtures/deu-eng.tei",
-   "built": 1788531774
+   "built": 1788531897
   },
   {
    "id": "freedict-eng-deu",
@@ -1198,7 +1198,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-deu.sqlite"
   },
   {
    "id": "freedict-deu-fra",
@@ -1214,7 +1214,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-fra.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-fra.sqlite"
   },
   {
    "id": "freedict-fra-deu",
@@ -1230,7 +1230,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-deu.sqlite"
   },
   {
    "id": "freedict-deu-spa",
@@ -1246,7 +1246,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-spa.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-spa.sqlite"
   },
   {
    "id": "freedict-spa-deu",
@@ -1262,7 +1262,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-spa-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-spa-deu.sqlite"
   },
   {
    "id": "freedict-deu-por",
@@ -1278,7 +1278,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-por.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-por.sqlite"
   },
   {
    "id": "freedict-por-deu",
@@ -1294,7 +1294,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-por-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-por-deu.sqlite"
   },
   {
    "id": "freedict-deu-ita",
@@ -1310,7 +1310,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-ita.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-ita.sqlite"
   },
   {
    "id": "freedict-ita-deu",
@@ -1326,7 +1326,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-ita-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-ita-deu.sqlite"
   },
   {
    "id": "freedict-deu-jpn",
@@ -1342,7 +1342,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-jpn.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-jpn.sqlite"
   },
   {
    "id": "freedict-jpn-deu",
@@ -1358,7 +1358,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-jpn-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-jpn-deu.sqlite"
   },
   {
    "id": "freedict-eng-fra",
@@ -1374,7 +1374,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-fra.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-fra.sqlite"
   },
   {
    "id": "freedict-fra-eng",
@@ -1390,7 +1390,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-eng.sqlite"
   },
   {
    "id": "freedict-eng-spa",
@@ -1406,7 +1406,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-spa.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-spa.sqlite"
   },
   {
    "id": "freedict-spa-eng",
@@ -1422,7 +1422,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-spa-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-spa-eng.sqlite"
   },
   {
    "id": "freedict-eng-por",
@@ -1438,7 +1438,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-por.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-por.sqlite"
   },
   {
    "id": "freedict-por-eng",
@@ -1454,7 +1454,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-por-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-por-eng.sqlite"
   },
   {
    "id": "freedict-eng-ita",
@@ -1470,7 +1470,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-ita.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-ita.sqlite"
   },
   {
    "id": "freedict-ita-eng",
@@ -1486,7 +1486,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-ita-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-ita-eng.sqlite"
   },
   {
    "id": "freedict-eng-jpn",
@@ -1502,7 +1502,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-jpn.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-jpn.sqlite"
   },
   {
    "id": "freedict-jpn-eng",
@@ -1518,7 +1518,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-jpn-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-jpn-eng.sqlite"
   },
   {
    "id": "freedict-eng-zho",
@@ -1534,7 +1534,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-zho.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-zho.sqlite"
   },
   {
    "id": "freedict-fra-zho",
@@ -1550,7 +1550,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-zho.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-zho.sqlite"
   },
   {
    "id": "freedict-fra-spa",
@@ -1566,7 +1566,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-spa.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-spa.sqlite"
   },
   {
    "id": "freedict-spa-fra",
@@ -1582,7 +1582,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-spa-fra.sqlite"
+   "path": "/home/user/.omababel/data/freedict-spa-fra.sqlite"
   },
   {
    "id": "freedict-fra-por",
@@ -1598,7 +1598,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-por.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-por.sqlite"
   },
   {
    "id": "freedict-por-fra",
@@ -1614,7 +1614,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-por-fra.sqlite"
+   "path": "/home/user/.omababel/data/freedict-por-fra.sqlite"
   },
   {
    "id": "freedict-spa-por",
@@ -1630,7 +1630,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-spa-por.sqlite"
+   "path": "/home/user/.omababel/data/freedict-spa-por.sqlite"
   },
   {
    "id": "freedict-por-spa",
@@ -1646,7 +1646,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-por-spa.sqlite"
+   "path": "/home/user/.omababel/data/freedict-por-spa.sqlite"
   },
   {
    "id": "freedict-fra-jpn",
@@ -1662,7 +1662,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-fra-jpn.sqlite"
+   "path": "/home/user/.omababel/data/freedict-fra-jpn.sqlite"
   },
   {
    "id": "freedict-jpn-fra",
@@ -1678,7 +1678,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-jpn-fra.sqlite"
+   "path": "/home/user/.omababel/data/freedict-jpn-fra.sqlite"
   },
   {
    "id": "freedict-eng-rus",
@@ -1694,7 +1694,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-rus.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-rus.sqlite"
   },
   {
    "id": "freedict-rus-eng",
@@ -1710,7 +1710,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-rus-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-rus-eng.sqlite"
   },
   {
    "id": "freedict-deu-rus",
@@ -1726,7 +1726,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-rus.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-rus.sqlite"
   },
   {
    "id": "freedict-rus-deu",
@@ -1742,7 +1742,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-rus-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-rus-deu.sqlite"
   },
   {
    "id": "freedict-eng-nld",
@@ -1758,7 +1758,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-nld.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-nld.sqlite"
   },
   {
    "id": "freedict-nld-eng",
@@ -1774,7 +1774,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-nld-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-nld-eng.sqlite"
   },
   {
    "id": "freedict-deu-nld",
@@ -1790,7 +1790,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-nld.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-nld.sqlite"
   },
   {
    "id": "freedict-nld-deu",
@@ -1806,7 +1806,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-nld-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-nld-deu.sqlite"
   },
   {
    "id": "freedict-eng-pol",
@@ -1822,7 +1822,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-pol.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-pol.sqlite"
   },
   {
    "id": "freedict-pol-eng",
@@ -1838,7 +1838,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-pol-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-pol-eng.sqlite"
   },
   {
    "id": "freedict-deu-pol",
@@ -1854,7 +1854,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-pol.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-pol.sqlite"
   },
   {
    "id": "freedict-pol-deu",
@@ -1870,7 +1870,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-pol-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-pol-deu.sqlite"
   },
   {
    "id": "freedict-eng-swe",
@@ -1886,7 +1886,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-swe.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-swe.sqlite"
   },
   {
    "id": "freedict-swe-eng",
@@ -1902,7 +1902,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-swe-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-swe-eng.sqlite"
   },
   {
    "id": "freedict-deu-swe",
@@ -1918,7 +1918,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-swe.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-swe.sqlite"
   },
   {
    "id": "freedict-swe-deu",
@@ -1934,7 +1934,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-swe-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-swe-deu.sqlite"
   },
   {
    "id": "freedict-eng-lat",
@@ -1950,7 +1950,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-lat.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-lat.sqlite"
   },
   {
    "id": "freedict-lat-eng",
@@ -1966,7 +1966,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-lat-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-lat-eng.sqlite"
   },
   {
    "id": "freedict-lat-deu",
@@ -1982,7 +1982,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-lat-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-lat-deu.sqlite"
   },
   {
    "id": "freedict-eng-tur",
@@ -1998,7 +1998,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-eng-tur.sqlite"
+   "path": "/home/user/.omababel/data/freedict-eng-tur.sqlite"
   },
   {
    "id": "freedict-tur-eng",
@@ -2014,7 +2014,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-tur-eng.sqlite"
+   "path": "/home/user/.omababel/data/freedict-tur-eng.sqlite"
   },
   {
    "id": "freedict-deu-tur",
@@ -2030,7 +2030,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-deu-tur.sqlite"
+   "path": "/home/user/.omababel/data/freedict-deu-tur.sqlite"
   },
   {
    "id": "freedict-tur-deu",
@@ -2046,7 +2046,7 @@
    ],
    "default": false,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/freedict-tur-deu.sqlite"
+   "path": "/home/user/.omababel/data/freedict-tur-deu.sqlite"
   },
   {
    "id": "cedict",
@@ -2065,7 +2065,7 @@
    ],
    "default": true,
    "installed": true,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/cedict.sqlite",
+   "path": "/home/user/.omababel/data/cedict.sqlite",
    "size": 36864,
    "entries": 4,
    "languages": [
@@ -2073,7 +2073,7 @@
    ],
    "format": "cedict",
    "source": "/home/claude/omababel-r5/tests/fixtures/cedict-sample.u8",
-   "built": 1788531774
+   "built": 1788531897
   },
   {
    "id": "ecdict",
@@ -2091,7 +2091,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/ecdict.sqlite"
+   "path": "/home/user/.omababel/data/ecdict.sqlite"
   },
   {
    "id": "unihan",
@@ -2109,7 +2109,7 @@
    ],
    "default": true,
    "installed": false,
-   "path": "/tmp/omababel-fixtures-gtqovl7s/data/unihan.sqlite"
+   "path": "/home/user/.omababel/data/unihan.sqlite"
   }
  ]
 }

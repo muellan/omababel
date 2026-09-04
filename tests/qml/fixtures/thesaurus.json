@@ -16,7 +16,7 @@
    "ok": false,
    "error": "Merriam-Webster thesaurus: offline mode (OMABABEL_OFFLINE is set)",
    "count": 0,
-   "ms": 0
+   "ms": 12
   },
   {
    "source": {
@@ -30,7 +30,7 @@
    "ok": false,
    "error": "Thesaurus.com: offline mode (OMABABEL_OFFLINE is set)",
    "count": 0,
-   "ms": 0
+   "ms": 12
   },
   {
    "source": {
@@ -87,7 +87,7 @@
    ],
    "url": "",
    "count": 7,
-   "ms": 9
+   "ms": 12
   }
  ],
  "skipped": [

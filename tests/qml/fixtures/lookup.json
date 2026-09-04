@@ -16,7 +16,7 @@
    "ok": false,
    "error": "Duden: offline mode (OMABABEL_OFFLINE is set)",
    "count": 0,
-   "ms": 0
+   "ms": 12
   },
   {
    "source": {
@@ -79,7 +79,7 @@
    ],
    "url": "",
    "count": 1,
-   "ms": 10
+   "ms": 12
   }
  ],
  "skipped": [

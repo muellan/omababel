@@ -16,7 +16,7 @@
    "ok": false,
    "error": "LEO: offline mode (OMABABEL_OFFLINE is set); offline mode (OMABABEL_OFFLINE is set)",
    "count": 0,
-   "ms": 0,
+   "ms": 12,
    "alternatives_html": []
   },
   {
@@ -65,7 +65,7 @@
    "url": "",
    "alternatives": [],
    "count": 3,
-   "ms": 0,
+   "ms": 12,
    "alternatives_html": []
   },
   {
@@ -96,7 +96,7 @@
    "url": "",
    "alternatives": [],
    "count": 1,
-   "ms": 1,
+   "ms": 12,
    "alternatives_html": []
   }
  ],
