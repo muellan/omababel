@@ -39,6 +39,11 @@ class ProtocolTest(TempEnv):
         self.assertEqual(d["prefs"]["mode"], "lookup")
         self.assertEqual(d["history"], [])
         self.assertIn("drivers", d)
+        # language coverage per mode drives the dimming in the selectors
+        for mode in ("lookup", "thesaurus", "translate"):
+            self.assertIn(mode, d["coverage"])
+            self.assertIn("langs", d["coverage"][mode])
+        self.assertIn("pairs", d["coverage"]["translate"])
         reply, _, _ = self.call("nope")
         self.assertFalse(reply["ok"])
         self.assertEqual(reply["error"]["code"], "unknown_op")

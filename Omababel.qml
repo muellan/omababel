@@ -79,6 +79,29 @@ Item {
   readonly property int cardWidth: Math.min(Style.space(980), panel.width - Style.gapsOut * 2)
   readonly property int cardHeight: Math.min(Style.space(740), panel.height - Style.gapsOut * 2)
 
+  // Which languages an enabled source can answer in, per mode (from the
+  // backend).  The selectors dim everything else.
+  property var coverage: ({})
+
+  function unservedIn(mode, from) {
+    var out = ({})
+    var cov = root.coverage ? root.coverage[mode] : null
+    if (!cov || cov.any) return out          // no data, or a source serves any language
+    var served = ({})
+    var list = (mode === "translate" && from)
+      ? ((cov.pairs && cov.pairs[from]) || [])
+      : (cov.langs || [])
+    for (var i = 0; i < list.length; i++) served[list[i]] = true
+    for (var j = 0; j < root.languages.length; j++) {
+      var code = root.languages[j].value
+      if (!served[code]) out[code] = true
+    }
+    return out
+  }
+
+  readonly property var unservedLangs: root.unservedIn(root.mode, "")
+  readonly property var unservedTargetLangs: root.unservedIn("translate", root.lang)
+
   readonly property var modeOptions: [
     {value: "lookup", label: "Lookup", icon: "󰗚", tooltip: "Dictionary lookup (Ctrl+1)"},
     {value: "thesaurus", label: "Thesaurus", icon: "󰉹", tooltip: "Synonyms and antonyms (Ctrl+2)"},
@@ -170,13 +193,16 @@ Item {
       root.lang2 = data.prefs.lang2 || "en"
       root.thesaurusSort = data.prefs.thesaurus_sort === "length" ? "length" : "alpha"
     }
+    if (data.coverage) root.coverage = data.coverage
     if (data.history_max) root.historyMax = data.history_max
     if (data.version) root.backendVersion = data.version
   }
 
   function refreshLocalStatus() {
     backend.call("sources.status", {}, function(reply) {
-      if (reply.ok) root.localStatus = reply.data.status || ({})
+      if (!reply.ok) return
+      root.localStatus = reply.data.status || ({})
+      if (reply.data.coverage) root.coverage = reply.data.coverage
     })
   }
 
@@ -633,13 +659,15 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             spacing: Style.spacing.sm
 
-            SearchableDropdown {
+            ObLangPicker {
               id: langPicker
               width: Style.space(190)
               showLabel: false
               rowHeight: modeGroup.implicitHeight
               options: root.languages
               value: root.lang
+              dimmedValues: root.unservedLangs
+              dimmedNote: "no source in this mode"
               placeholderText: "Language…"
               foreground: root.foreground
               accent: root.accent
@@ -656,7 +684,7 @@ Item {
               width: Style.space(190)
               height: modeGroup.implicitHeight
               opacity: root.mode === "translate" ? 1 : 0.4
-              SearchableDropdown {
+              ObLangPicker {
                 id: langPicker2
                 anchors.fill: parent
                 showLabel: false
@@ -664,6 +692,8 @@ Item {
                 enabled: root.mode === "translate"
                 options: root.languages
                 value: root.lang2
+                dimmedValues: root.unservedTargetLangs
+                dimmedNote: "not translatable from " + root.langName(root.lang)
                 placeholderText: "Target language…"
                 foreground: root.foreground
                 accent: root.accent

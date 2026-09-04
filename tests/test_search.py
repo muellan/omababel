@@ -153,6 +153,18 @@ class SearchRunTest(TempEnv):
         de = search.run("lookup", "Haus", "de", cfg=cfg)
         self.assertEqual([r["source"]["id"] for r in de["results"]], ["d2"])
 
+    def test_coverage_reports_the_languages_a_mode_is_served_in(self):
+        cov = search.coverage(cfg_with(self.rows()))
+        # d1 serves en, d2 en+de, the disabled d3 counts for nothing
+        self.assertEqual(cov["lookup"], {"any": False, "langs": ["de", "en"]})
+        # t1..t3 declare no languages at all -> every language is served
+        self.assertTrue(cov["thesaurus"]["any"])
+        self.assertEqual(cov["translate"]["langs"], ["en"])
+        self.assertEqual(cov["translate"]["pairs"], {"en": ["de"]})
+        self.assertFalse(cov["translate"]["any"])
+        # an uninstalled local dictionary does not make its language available
+        self.assertNotIn("zh", cov["lookup"]["langs"])
+
     def test_thesaurus_consolidation(self):
         res = search.run("thesaurus", "x", "en", cfg=cfg_with(self.rows()))
         self.assertEqual(res["consolidated"]["synonyms"], ["a", "b", "c", "d"])

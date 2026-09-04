@@ -65,6 +65,7 @@ def op_state(params: dict) -> dict:
         "prefs": prefs.data,
         "history": hist.list(),
         "history_max": hist.limit,
+        "coverage": search.coverage(cfg),
         "paths": {"config": str(paths.config_dir()), "data": str(paths.data_dir()),
                   "state": str(paths.state_dir()), "cache": str(paths.cache_dir())},
     }
@@ -174,7 +175,7 @@ def op_sources_status(params: dict) -> dict:
                 out[row["id"]] = src.status()  # type: ignore[attr-defined]
             except S.SourceError as e:
                 out[row["id"]] = {"installed": False, "error": str(e)}
-    return {"status": out}
+    return {"status": out, "coverage": search.coverage(cfg)}
 
 
 def op_sources_test(params: dict) -> dict:

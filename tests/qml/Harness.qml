@@ -16,7 +16,7 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
-  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 54, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 6, 7, 8, 9, 10, 11, 12, 13, 14]
   function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
 
@@ -149,6 +149,25 @@ Item {
             harness.check(rows[g].srcWidth === rows[0].srcWidth,
                           "columns identical across cards (row " + g + ")")
           }
+          break
+        case 53:
+          // languages with no source for the current mode are dimmed
+          p.coverage = ({lookup: {any: false, langs: ["de", "en"]},
+                         thesaurus: {any: false, langs: ["en"]},
+                         translate: {any: false, langs: ["de"], pairs: {de: ["en", "fr"]}}})
+          p.mode = "thesaurus"
+          harness.check(p.unservedLangs["de"] === true, "German dimmed in thesaurus mode")
+          harness.check(p.unservedLangs["en"] === undefined, "English not dimmed in thesaurus mode")
+          p.mode = "lookup"
+          harness.check(p.unservedLangs["de"] === undefined, "German served in lookup mode")
+          harness.check(p.unservedLangs["fr"] === true, "French dimmed in lookup mode")
+          p.mode = "translate"
+          p.lang = "de"
+          harness.check(p.unservedTargetLangs["fr"] === undefined, "de->fr is served")
+          harness.check(p.unservedTargetLangs["it"] === true, "de->it is not served")
+          p.coverage = ({})
+          harness.check(p.unservedLangs["fr"] === undefined, "nothing is dimmed without coverage data")
+          p.mode = "lookup"
           break
         case 54:
           // the engaged mode chip is painted in the accent colour.  The test

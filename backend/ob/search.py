@@ -27,6 +27,51 @@ def build_sources(cfg: SourcesConfig) -> List[S.Source]:
     return out
 
 
+def coverage(cfg: Optional[SourcesConfig] = None) -> dict:
+    """Which languages an enabled source can actually answer for, per mode.
+
+    ``any`` is true when a source serves every language (an unrestricted
+    generic row); ``langs`` lists the languages a mode is served in (for
+    translate: the languages usable as the *source* side) and ``pairs`` maps
+    each source language to the target languages reachable from it.  The
+    panel dims everything else in the language selectors.
+    """
+    cfg = cfg or SourcesConfig()
+    out: Dict[str, dict] = {
+        "lookup": {"any": False, "langs": []},
+        "thesaurus": {"any": False, "langs": []},
+        "translate": {"any": False, "langs": [], "pairs": {}},
+    }
+    by_type = {"dictionary": "lookup", "thesaurus": "thesaurus", "translator": "translate"}
+    for src in build_sources(cfg):
+        mode = by_type.get(src.type)
+        if not src.enabled or mode is None:
+            continue
+        if src.kind == "local" and hasattr(src, "installed") and not src.installed():
+            continue
+        if mode != "translate":
+            langs = src.effective_languages()
+            if langs:
+                out[mode]["langs"].extend(langs)
+            else:
+                out[mode]["any"] = True
+            continue
+        pairs = src.effective_pairs()
+        if not pairs:
+            langs = src.effective_languages()
+            if not langs:
+                out["translate"]["any"] = True
+                continue
+            pairs = [(a, b) for a in langs for b in langs if a != b]
+        for a, b in pairs:
+            out["translate"]["langs"].append(a)
+            out["translate"]["pairs"].setdefault(a, []).append(b)
+    for mode in ("lookup", "thesaurus", "translate"):
+        out[mode]["langs"] = sorted(set(out[mode]["langs"]))
+    out["translate"]["pairs"] = {a: sorted(set(bs)) for a, bs in out["translate"]["pairs"].items()}
+    return out
+
+
 def _run_one(src: S.Source, mode: str, query: str, lang: str, lang2: str) -> dict:
     started = time.time()
     base = {"source": src.describe(), "ok": True, "error": ""}
