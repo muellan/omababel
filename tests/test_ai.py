@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from helpers import FakeResponse, fake_fetch
+from helpers import FakeResponse, TempEnv, fake_fetch
 
 from ob import http
 from ob import sources as S
@@ -109,28 +109,82 @@ class AiCliTest(unittest.TestCase):
         self.assertIn("not JSON", str(ctx.exception))
 
 
-class AiApiTest(unittest.TestCase):
+class AiApiTest(TempEnv):
+    """The API transport. TempEnv gives each test its own model cache."""
+
     def row(self, service, **kw):
         row = {"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai",
                "service": service, "transport": "api", "api_key": "KEY"}
         row.update(kw)
         return row
 
+    def responder(self, chat_payload, models=None):
+        """Answer the model listing and the chat call from one handler."""
+        def handle(url, **kw):
+            if url.rstrip("/").endswith("/models"):
+                return FakeResponse(json.dumps(models if models is not None else {"data": []}))
+            return FakeResponse(json.dumps(chat_payload))
+        return handle
+
     def test_claude_uses_the_messages_api(self):
         payload = {"content": [{"type": "text", "text": '{"explanation": "x", "pos": "", "example": ""}'}]}
-        with fake_fetch(lambda url, **kw: FakeResponse(json.dumps(payload))) as calls:
+        models = {"data": [{"id": "claude-opus-5"}, {"id": "claude-haiku-4-5-20251001"}]}
+        with fake_fetch(self.responder(payload, models)) as calls:
             res = S.build(self.row("claude")).lookup("house", "en")
-        url, kw = calls[0]
-        self.assertEqual(url, "https://api.anthropic.com/v1/messages")
-        self.assertEqual(kw["headers"]["x-api-key"], "KEY")
-        self.assertEqual(kw["headers"]["anthropic-version"], "2023-06-01")
-        self.assertEqual(kw["json_body"]["model"], ai.SERVICES["claude"][3])
+        listing, chat = calls[0], calls[-1]
+        self.assertEqual(listing[0], "https://api.anthropic.com/v1/models")
+        self.assertEqual(listing[1]["headers"]["X-Api-Key"], "KEY")
+        self.assertEqual(chat[0], "https://api.anthropic.com/v1/messages")
+        self.assertEqual(chat[1]["headers"]["X-Api-Key"], "KEY")
+        self.assertEqual(chat[1]["headers"]["anthropic-version"], "2023-06-01")
+        self.assertEqual(chat[1]["json_body"]["max_tokens"], ai.MAX_TOKENS)
+        self.assertEqual(chat[1]["json_body"]["messages"][0]["role"], "user")
+        # the cheapest model the key may use, not a hardcoded one
+        self.assertEqual(chat[1]["json_body"]["model"], "claude-haiku-4-5-20251001")
         self.assertEqual(res["entries"][0]["senses"][0]["gloss"], "x")
+
+    def test_a_configured_model_is_used_as_is_and_asks_for_no_listing(self):
+        payload = {"content": [{"type": "text", "text": '{"explanation": "x"}'}]}
+        with fake_fetch(self.responder(payload)) as calls:
+            S.build(self.row("claude", model="claude-sonnet-5")).lookup("house", "en")
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(calls[0][1]["json_body"]["model"], "claude-sonnet-5")
+
+    def test_a_retired_model_is_rediscovered_once(self):
+        """A model id that answers 404 must not be a dead end."""
+        payload = {"content": [{"type": "text", "text": '{"explanation": "ok"}'}]}
+        state = {"listings": 0}
+
+        def handle(url, **kw):
+            if url.endswith("/models"):
+                state["listings"] += 1
+                if state["listings"] == 1:
+                    return FakeResponse(json.dumps({"data": [{"id": "claude-haiku-old"}]}))
+                return FakeResponse(json.dumps({"data": [{"id": "claude-haiku-new"}]}))
+            if kw["json_body"]["model"] == "claude-haiku-old":
+                raise http.FetchError("HTTP 404", status=404, url=url)
+            return FakeResponse(json.dumps(payload))
+
+        with fake_fetch(handle) as calls:
+            res = S.build(self.row("claude")).lookup("house", "en")
+        self.assertEqual(res["entries"][0]["senses"][0]["gloss"], "ok")
+        self.assertEqual(calls[-1][1]["json_body"]["model"], "claude-haiku-new")
+
+    def test_a_404_that_survives_the_retry_names_the_usable_models(self):
+        def handle(url, **kw):
+            if url.endswith("/models"):
+                return FakeResponse(json.dumps({"data": [{"id": "claude-sonnet-5"}]}))
+            raise http.FetchError("HTTP 404", status=404, url=url)
+        with fake_fetch(handle):
+            with self.assertRaises(SourceError) as ctx:
+                S.build(self.row("claude", model="gone-model")).lookup("house", "en")
+        self.assertIn("does not know the model 'gone-model'", str(ctx.exception))
+        self.assertIn("claude-sonnet-5", str(ctx.exception))
 
     def test_openai_compatible_services(self):
         payload = {"choices": [{"message": {"content": '{"explanation": "y"}'}}]}
         for service, host in (("chatgpt", "api.openai.com"), ("grok", "api.x.ai")):
-            with fake_fetch(lambda url, **kw: FakeResponse(json.dumps(payload))) as calls:
+            with fake_fetch(self.responder(payload)) as calls:
                 res = S.build(self.row(service, model="custom-model")).lookup("house", "en")
             url, kw = calls[0]
             self.assertIn(host, url)
@@ -140,12 +194,40 @@ class AiApiTest(unittest.TestCase):
 
     def test_gemini_uses_its_own_shape(self):
         payload = {"candidates": [{"content": {"parts": [{"text": '{"explanation": "z"}'}]}}]}
-        with fake_fetch(lambda url, **kw: FakeResponse(json.dumps(payload))) as calls:
+        models = {"models": [{"name": "models/gemini-2.5-pro", "supportedGenerationMethods": ["generateContent"]},
+                             {"name": "models/gemini-2.5-flash", "supportedGenerationMethods": ["generateContent"]},
+                             {"name": "models/embedding-001", "supportedGenerationMethods": ["embedContent"]}]}
+        with fake_fetch(self.responder(payload, models)) as calls:
             res = S.build(self.row("gemini")).lookup("house", "en")
-        url, kw = calls[0]
-        self.assertIn("gemini-2.0-flash:generateContent", url)
+        url, kw = calls[-1]
+        self.assertIn("gemini-2.5-flash:generateContent", url)
         self.assertEqual(kw["headers"]["x-goog-api-key"], "KEY")
         self.assertEqual(res["entries"][0]["senses"][0]["gloss"], "z")
+
+    def test_the_model_listing_is_cached(self):
+        payload = {"content": [{"type": "text", "text": '{"explanation": "x"}'}]}
+        models = {"data": [{"id": "claude-haiku-4-5"}]}
+        with fake_fetch(self.responder(payload, models)) as calls:
+            S.build(self.row("claude")).lookup("house", "en")
+            self.assertEqual(sum(1 for c in calls if c[0].endswith("/models")), 1)
+            S.build(self.row("claude")).lookup("home", "en")
+            self.assertEqual(sum(1 for c in calls if c[0].endswith("/models")), 1)
+        ai.forget_models("claude")
+        with fake_fetch(self.responder(payload, models)) as calls:
+            S.build(self.row("claude")).lookup("house", "en")
+            self.assertEqual(sum(1 for c in calls if c[0].endswith("/models")), 1)
+
+    def test_an_unreadable_listing_falls_back_to_the_static_default(self):
+        payload = {"content": [{"type": "text", "text": '{"explanation": "x"}'}]}
+
+        def handle(url, **kw):
+            if url.endswith("/models"):
+                raise http.FetchError("HTTP 500", status=500, url=url)
+            return FakeResponse(json.dumps(payload))
+
+        with fake_fetch(handle) as calls:
+            S.build(self.row("claude")).lookup("house", "en")
+        self.assertEqual(calls[-1][1]["json_body"]["model"], ai.SERVICES["claude"][3])
 
     def test_a_rejected_key_and_a_missing_key_are_explained(self):
         def deny(url, **kw):
@@ -159,13 +241,32 @@ class AiApiTest(unittest.TestCase):
         self.assertIn("needs a key", str(ctx.exception))
 
 
+class ModelPickTest(unittest.TestCase):
+    def test_ids_are_read_from_every_listing_shape(self):
+        self.assertEqual(ai._model_ids({"data": [{"id": "a"}, {"id": "text-embedding-3"}]}), ["a"])
+        self.assertEqual(ai._model_ids({"models": [{"name": "models/b"}]}), ["b"])
+        self.assertEqual(ai._model_ids({"data": ["c"]}), ["c"])
+        self.assertEqual(ai._model_ids("nonsense"), [])
+
+    def test_the_small_model_of_a_family_wins(self):
+        self.assertEqual(ai.pick_model("claude", ["claude-opus-5", "claude-sonnet-5", "claude-haiku-4-5"]),
+                         "claude-haiku-4-5")
+        # a plain id beats a dated snapshot of the same family
+        self.assertEqual(ai.pick_model("claude", ["claude-haiku-4-5-20251001", "claude-haiku-4-5"]),
+                         "claude-haiku-4-5")
+        self.assertEqual(ai.pick_model("chatgpt", ["gpt-5", "gpt-5-mini"]), "gpt-5-mini")
+        self.assertEqual(ai.pick_model("gemini", ["gemini-2.5-pro", "gemini-2.5-flash"]), "gemini-2.5-flash")
+        self.assertEqual(ai.pick_model("muse", ["only-one"]), "only-one")
+        self.assertEqual(ai.pick_model("claude", []), "")
+
+
 class AiConfigTest(unittest.TestCase):
     def test_defaults_are_the_free_signed_in_cli(self):
         src = S.build({"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai"})
         self.assertEqual(src.service, "claude")
         self.assertEqual(src.transport, "cli")           # no API key, no billing
         self.assertEqual(src.command, "claude -p")
-        self.assertEqual(src.describe()["model"], ai.SERVICES["claude"][3])
+        self.assertEqual(src.describe()["model"], "")   # the CLI picks its own
         # an AI source serves every language, in every mode
         self.assertEqual(src.effective_languages(), [])
         for mode in ("lookup", "thesaurus", "translate"):

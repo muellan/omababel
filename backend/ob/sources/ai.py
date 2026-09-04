@@ -32,22 +32,28 @@ import re
 import shlex
 import shutil
 import subprocess
+import time
 from typing import List, Optional, Tuple
 
-from .. import http, languages
+from .. import http, languages, paths
 from .. import results as R
 from .base import Source, SourceError, register
 
-# service id -> (label, default CLI, default API endpoint, default model, key hint)
+# service id -> (label, default CLI, default API endpoint, fallback model, key hint)
+#
+# The fallback model is only used when the service's model list cannot be
+# read: model ids come and go (a hardcoded one answers 404 the day it is
+# retired), so the driver asks the service which models the key may use and
+# picks the smallest one - see `list_models` / `pick_model`.
 SERVICES = {
     "claude": ("Claude (Anthropic)", "claude -p",
-               "https://api.anthropic.com/v1/messages", "claude-3-5-haiku-latest",
+               "https://api.anthropic.com/v1/messages", "claude-sonnet-5",
                "Anthropic API key (only for the API transport)"),
     "chatgpt": ("ChatGPT (OpenAI)", "codex exec",
                 "https://api.openai.com/v1/chat/completions", "gpt-4o-mini",
                 "OpenAI API key (only for the API transport)"),
     "grok": ("Grok (xAI)", "grok",
-             "https://api.x.ai/v1/chat/completions", "grok-2-latest",
+             "https://api.x.ai/v1/chat/completions", "grok-4-latest",
              "xAI API key (only for the API transport)"),
     "gemini": ("Gemini (Google)", "gemini -p",
                "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
@@ -55,15 +61,147 @@ SERVICES = {
     "muse": ("Muse", "muse",
              "", "", "API key of the service"),
 }
+# Where the service lists the models a key may use, and which of them to
+# prefer: the small, cheap ones first (this is a dictionary lookup, not a
+# reasoning task).  An empty URL means "same host as the endpoint".
+MODEL_LISTS = {
+    "claude": "https://api.anthropic.com/v1/models",
+    "chatgpt": "https://api.openai.com/v1/models",
+    "grok": "https://api.x.ai/v1/models",
+    "gemini": "https://generativelanguage.googleapis.com/v1beta/models",
+    "muse": "",
+}
+MODEL_PREFERENCE = {
+    "claude": ("haiku", "sonnet"),
+    "chatgpt": ("mini", "nano", "turbo"),
+    "grok": ("mini", "fast"),
+    "gemini": ("flash-lite", "flash"),
+    "muse": (),
+}
+# Ids that are not chat models at all.
+_NOT_CHAT = re.compile(r"(?i)(embed|whisper|tts|audio|image|vision-only|dall|moderation|"
+                       r"rerank|search|realtime|transcribe|davinci|babbage)")
 DEFAULT_SERVICE = "claude"
 TRANSPORTS = ("cli", "api")
 MAX_TOKENS = 900
 CLI_TIMEOUT = float(os.environ.get("OMABABEL_AI_TIMEOUT", "60"))
+MODEL_CACHE_TTL = float(os.environ.get("OMABABEL_AI_MODEL_TTL", "86400"))
 
 
 def service_options() -> List[dict]:
     return [{"value": key, "label": val[0], "command": val[1], "model": val[3]}
             for key, val in SERVICES.items()]
+
+
+# ------------------------------------------------------------------- models
+
+def auth_headers(service: str, key: str) -> dict:
+    """How each service wants its API key (per the services' own docs)."""
+    if service == "claude":
+        return {"X-Api-Key": key, "anthropic-version": "2023-06-01"}
+    if service == "gemini":
+        return {"x-goog-api-key": key}
+    return {"Authorization": "Bearer " + key}
+
+
+def _cache_path():
+    return paths.cache_dir() / "ai-models.json"
+
+
+def _cache_read() -> dict:
+    try:
+        with open(_cache_path(), encoding="utf-8") as fh:
+            data = json.load(fh)
+        return data if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def _cache_write(data: dict) -> None:
+    try:
+        path = _cache_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w", encoding="utf-8") as fh:
+            json.dump(data, fh)
+    except OSError:
+        pass
+
+
+def forget_models(service: str) -> None:
+    data = _cache_read()
+    if data.pop(service, None) is not None:
+        _cache_write(data)
+
+
+def list_models(service: str, key: str, endpoint: str = "") -> List[str]:
+    """Chat model ids this key may use, newest first, cached for a day.
+
+    Model ids are not stable over time – a hardcoded one answers 404 the day
+    it is retired – so the service is asked instead of guessed.  A failure
+    here is never fatal: the caller falls back to the static default.
+    """
+    if not key:
+        return []
+    cached = _cache_read().get(service)
+    if isinstance(cached, dict) and time.time() - float(cached.get("ts", 0)) < MODEL_CACHE_TTL:
+        return [str(m) for m in cached.get("models", [])]
+    url = MODEL_LISTS.get(service) or _models_url_for(endpoint)
+    if not url:
+        return []
+    try:
+        data = http.fetch(url, headers=dict(auth_headers(service, key),
+                                            **{"Accept": "application/json"}),
+                          timeout=15).json()
+    except (http.FetchError, ValueError):
+        return []
+    models = _model_ids(data)
+    if models:
+        cache = _cache_read()
+        cache[service] = {"ts": time.time(), "models": models}
+        _cache_write(cache)
+    return models
+
+
+def _models_url_for(endpoint: str) -> str:
+    """/v1/models next to an OpenAI-compatible chat endpoint."""
+    for tail in ("/chat/completions", "/completions", "/responses"):
+        if endpoint.endswith(tail):
+            return endpoint[: -len(tail)] + "/models"
+    return ""
+
+
+def _model_ids(data) -> List[str]:
+    """Ids out of an Anthropic / OpenAI / Gemini model listing."""
+    out: List[str] = []
+    if not isinstance(data, dict):
+        return out
+    rows = data.get("data") if isinstance(data.get("data"), list) else data.get("models")
+    for row in rows or []:
+        if isinstance(row, str):
+            name = row
+        elif isinstance(row, dict):
+            name = str(row.get("id") or row.get("name") or "")
+            methods = row.get("supportedGenerationMethods")
+            if isinstance(methods, list) and methods and "generateContent" not in methods:
+                continue
+        else:
+            continue
+        name = name.split("/")[-1].strip()      # gemini reports "models/<id>"
+        if name and not _NOT_CHAT.search(name):
+            out.append(name)
+    return out
+
+
+def pick_model(service: str, models: List[str]) -> str:
+    """The smallest useful model of a listing: this is a dictionary lookup,
+    not a reasoning task, so cheap and fast wins."""
+    for want in MODEL_PREFERENCE.get(service, ()):
+        matches = [m for m in models if want in m.lower()]
+        if matches:
+            # a plain id beats a dated snapshot of the same family
+            matches.sort(key=lambda m: (bool(re.search(r"\d{8}$", m)), len(m)))
+            return matches[0]
+    return models[0] if models else ""
 
 
 @register
@@ -92,7 +230,12 @@ class AI(Source):
             self.transport = "cli"
         preset = SERVICES[self.service]
         self.command = str(cfg.get("command") or "").strip() or preset[1]
-        self.model = str(cfg.get("model") or "").strip() or preset[3]
+        # The configured model wins; without one the service is asked which
+        # models the key may use (cached), and only if that fails does the
+        # static fallback apply.
+        self.model_cfg = str(cfg.get("model") or "").strip()
+        self.fallback_model = preset[3]
+        self._model = self.model_cfg
         # the URL field is an *endpoint override*, and only the API transport
         # has an endpoint at all
         override = self.url if (self.transport == "api" and self.url.startswith("http")) else ""
@@ -103,9 +246,23 @@ class AI(Source):
         """Service presets for the preferences panel."""
         return service_options()
 
+    @property
+    def model(self) -> str:
+        """The model to send.  Resolved once per process, and only for the
+        API transport – a CLI uses whatever its own configuration says."""
+        if self._model:
+            return self._model
+        if self.transport != "api":
+            return ""
+        self._model = pick_model(self.service, list_models(self.service, self.api_key, self.endpoint)) \
+            or self.fallback_model
+        return self._model
+
     def describe(self) -> dict:
         out = super().describe()
-        out.update({"service": self.service, "transport": self.transport, "model": self.model})
+        out.update({"service": self.service, "transport": self.transport,
+                    "model": self._model or (self.model_cfg or (self.fallback_model
+                                                                if self.transport == "api" else ""))})
         return out
 
     # -------------------------------------------------------------- modes
@@ -201,14 +358,15 @@ class AI(Source):
         return proc.stdout or ""
 
     # -- API: the service's HTTP endpoint with a key from the keyring
-    def _api_call(self, prompt: str) -> str:
+    def _api_call(self, prompt: str, retried: bool = False) -> str:
         if not self.api_key:
             raise SourceError(f"{self.name}: the API transport needs a key (Preferences → the "
                               "source → API key), or switch back to the CLI transport")
-        endpoint = self.endpoint.replace("{model}", self.model)
-        if not endpoint:
+        if not self.endpoint:
             raise SourceError(f"{self.name}: no API endpoint configured for this service")
-        body, headers, pick = self._request_for(prompt, endpoint)
+        model = self.model
+        endpoint = self.endpoint.replace("{model}", model)
+        body, headers, pick = self._request_for(prompt, model)
         try:
             resp = http.fetch(endpoint, json_body=body, headers=headers, method="POST",
                               timeout=CLI_TIMEOUT)
@@ -218,6 +376,18 @@ class AI(Source):
                 raise SourceError(f"{self.name}: the API rejected the key")
             if e.status == 429:
                 raise SourceError(f"{self.name}: rate limited by the service")
+            if e.status == 404:
+                # An id that was fine yesterday is gone today: forget what was
+                # cached, ask the service again and try once more.
+                if not retried and not self.model_cfg:
+                    forget_models(self.service)
+                    self._model = ""
+                    if self.model != model:
+                        return self._api_call(prompt, retried=True)
+                available = list_models(self.service, self.api_key, self.endpoint)
+                hint = ("; this key can use " + ", ".join(available[:6])) if available else ""
+                raise SourceError(f"{self.name}: the service does not know the model "
+                                  f"'{model}'{hint}")
             raise SourceError(f"{self.name}: {e}")
         except ValueError:
             raise SourceError(f"{self.name}: invalid JSON from the API")
@@ -226,25 +396,30 @@ class AI(Source):
         except (KeyError, IndexError, TypeError):
             raise SourceError(f"{self.name}: unexpected API reply ({_snippet(json.dumps(data))})")
 
-    def _request_for(self, prompt: str, endpoint: str) -> Tuple[dict, dict, object]:
+    def _request_for(self, prompt: str, model: str) -> Tuple[dict, dict, object]:
         """(body, headers, extractor) for the service's API flavour."""
         if self.service == "claude":
-            return ({"model": self.model, "max_tokens": MAX_TOKENS,
+            # https://platform.claude.com/docs/en/api – the Messages API takes
+            # the key in X-Api-Key next to the (required) version header, and
+            # model/max_tokens/messages are all mandatory.
+            return ({"model": model, "max_tokens": MAX_TOKENS,
                      "messages": [{"role": "user", "content": prompt}]},
-                    {"x-api-key": self.api_key, "anthropic-version": "2023-06-01",
-                     "Accept": "application/json"},
-                    lambda d: "".join(part.get("text", "") for part in d["content"]))
+                    dict(auth_headers("claude", self.api_key),
+                         **{"Accept": "application/json", "Content-Type": "application/json"}),
+                    lambda d: "".join(part.get("text", "") for part in d["content"]
+                                      if part.get("type", "text") == "text"))
         if self.service == "gemini":
-            sep = "&" if "?" in endpoint else "?"
-            return ({"contents": [{"parts": [{"text": prompt}]}],
+            return ({"contents": [{"role": "user", "parts": [{"text": prompt}]}],
                      "generationConfig": {"maxOutputTokens": MAX_TOKENS}},
-                    {"x-goog-api-key": self.api_key, "Accept": "application/json"},
+                    dict(auth_headers("gemini", self.api_key),
+                         **{"Accept": "application/json", "Content-Type": "application/json"}),
                     lambda d: "".join(p.get("text", "")
                                       for p in d["candidates"][0]["content"]["parts"]))
         # OpenAI-compatible (ChatGPT, Grok, Muse and anything else that speaks it)
-        return ({"model": self.model, "max_tokens": MAX_TOKENS,
+        return ({"model": model, "max_completion_tokens": MAX_TOKENS,
                  "messages": [{"role": "user", "content": prompt}]},
-                {"Authorization": "Bearer " + self.api_key, "Accept": "application/json"},
+                dict(auth_headers(self.service, self.api_key),
+                     **{"Accept": "application/json", "Content-Type": "application/json"}),
                 lambda d: d["choices"][0]["message"]["content"])
 
 

@@ -99,7 +99,8 @@ def _run_one(src: S.Source, mode: str, query: str, lang: str, lang2: str) -> dic
 
 
 def run(mode: str, query: str, lang: str, lang2: str = "", cfg: Optional[SourcesConfig] = None,
-        only: Optional[List[str]] = None, timeout: float = SOURCE_TIMEOUT) -> dict:
+        only: Optional[List[str]] = None, timeout: float = SOURCE_TIMEOUT,
+        include_disabled: bool = False) -> dict:
     if mode not in MODES:
         raise ValueError(f"unknown mode '{mode}'")
     query = " ".join(str(query).split())
@@ -109,7 +110,7 @@ def run(mode: str, query: str, lang: str, lang2: str = "", cfg: Optional[Sources
     for src in build_sources(cfg):
         if only and src.id not in only:
             continue
-        if not src.enabled:
+        if not src.enabled and not include_disabled:
             continue
         want_type = {"lookup": "dictionary", "thesaurus": "thesaurus", "translate": "translator"}[mode]
         if src.type != want_type:

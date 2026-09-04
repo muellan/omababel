@@ -204,7 +204,9 @@ def op_sources_test(params: dict) -> dict:
         lang, lang2 = pairs[0] if pairs else (lang, "en" if lang != "en" else "de")
     query = str(params.get("query") or {"de": "Haus", "en": "house", "fr": "maison", "es": "casa",
                                          "pt": "casa", "zh": "家", "ja": "家"}.get(lang, "house"))
-    result = search.run(mode, query, lang, lang2, cfg=cfg, only=[src.id])
+    # A test must work on a source that is switched off – that is the normal
+    # state of a row somebody is still setting up.
+    result = search.run(mode, query, lang, lang2, cfg=cfg, only=[src.id], include_disabled=True)
     return result
 
 

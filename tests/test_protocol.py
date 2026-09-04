@@ -129,6 +129,14 @@ class ProtocolTest(TempEnv):
         self.assertTrue(reply["ok"], reply)
         self.assertEqual(reply["data"]["results"][0]["source"]["id"], "cedict")
         self.assertEqual(reply["data"]["query"], "家")
+        # a source that is switched off must still be testable – that is the
+        # normal state of a row somebody is still setting up (the AI rows ship
+        # disabled, and testing them reported "not applicable")
+        self.call("sources.enable", {"id": "cedict", "enabled": False})
+        reply, _, _ = self.call("sources.test", {"id": "cedict"})
+        self.assertTrue(reply["ok"], reply)
+        self.assertEqual(reply["data"]["results"][0]["source"]["id"], "cedict")
+        self.call("sources.enable", {"id": "cedict", "enabled": True})
         reply, _, _ = self.call("search", {"mode": "translate", "query": "China", "lang": "en", "lang2": "zh"})
         pairs = [r for r in reply["data"]["results"] if r["source"]["id"] == "cedict-translator"][0]["pairs"]
         self.assertEqual(pairs[0]["dst"], "中国")

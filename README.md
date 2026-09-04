@@ -240,10 +240,20 @@ site. They are **disabled by default**; enable the ones you want in
   a paid one** - a Claude Pro or Max subscription needs no API key and is not
   billed per request. Nothing is stored, and the *Command* field can point at
   any other program that reads a prompt on stdin and answers on stdout.
-* **HTTP API + key** calls the service's API instead. The key is stored in the
-  keyring (see [Credentials](#credentials)), the model defaults to the small,
-  cheap one of each service, and the *Model* and *API endpoint* fields take
-  anything else - including a self-hosted, OpenAI-compatible endpoint.
+* **HTTP API + key** calls the service's API instead, following each
+  service's own reference (Anthropic's Messages API with `X-Api-Key` and
+  `anthropic-version`, Gemini's `generateContent` with `x-goog-api-key`, and
+  the OpenAI-compatible chat endpoint with a bearer token for ChatGPT, Grok
+  and Muse). The key is stored in the keyring (see
+  [Credentials](#credentials)).
+
+  **Models are not hardcoded.** Leave *Model* empty and the plugin asks the
+  service which models the key may use (`/v1/models` and friends, cached for
+  a day) and picks the smallest one - a fixed id would answer `404` the day
+  it is retired. A model that stops existing is looked up again and retried
+  once; a `404` that survives that names the models the key can actually use.
+  Fill *Model* in to pin one, and *API endpoint* to point at something else
+  entirely, such as a self-hosted OpenAI-compatible server.
 
 The plugin asks for a strict JSON answer and parses it defensively (code
 fences, a chatty preamble or a CLI banner are all tolerated), so a talkative
