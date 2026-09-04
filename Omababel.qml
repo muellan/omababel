@@ -43,9 +43,13 @@ Item {
   property string status: ""
   property bool statusError: false
   property bool prefsOpen: false
+  property bool helpOpen: false
+  // true while the search view (not the preferences or the help) is showing
+  readonly property bool searchActive: root.opened && !root.prefsOpen && !root.helpOpen
   property var pendingPayload: null
   property string thesaurusSort: "alpha"    // "alpha" | "length" (persisted)
   property int historyMax: 1000              // configurable in Preferences → History
+  property string backendVersion: ""
   // Ctrl+P / Ctrl+N walk a snapshot of the history taken when the walk
   // starts, so re-running an entry (which moves it to the top) does not
   // reshuffle the list under the cursor.
@@ -61,6 +65,7 @@ Item {
   readonly property alias prefsView: prefs
   readonly property alias historyView: historyPopup
   readonly property alias resultsView: resultsView
+  readonly property alias helpView: help
 
   // --- look
   readonly property color background: Color.menu.background
@@ -157,6 +162,7 @@ Item {
       root.thesaurusSort = data.prefs.thesaurus_sort === "length" ? "length" : "alpha"
     }
     if (data.history_max) root.historyMax = data.history_max
+    if (data.version) root.backendVersion = data.version
   }
 
   function refreshLocalStatus() {
@@ -227,7 +233,7 @@ Item {
   // function, which is also what every Shortcut below calls – so the two
   // paths can never drift apart.  Returns true when the key was handled.
   function panelAction(key, shift) {
-    if (root.prefsOpen) return false
+    if (root.prefsOpen || root.helpOpen) return false
     switch (key) {
     case Qt.Key_C:
     case Qt.Key_Backspace: root.clearSearch(); return true
@@ -398,7 +404,21 @@ Item {
   }
 
   // ============================================================= preferences
+  function openHelp() {
+    root.prefsOpen = false
+    root.helpOpen = true
+    historyPopup.close()
+  }
+
+  function closeHelp() {
+    root.helpOpen = false
+    Qt.callLater(function() { searchField.forceActiveFocus() })
+  }
+
+  function toggleHelp() { root.helpOpen ? root.closeHelp() : root.openHelp() }
+
   function openPrefs() {
+    root.helpOpen = false
     root.prefsOpen = true
     prefs.tab = "sources"
     root.refreshLocalStatus()
@@ -452,29 +472,30 @@ Item {
     Rectangle { anchors.fill: parent; color: Color.menu.scrim }
     MouseArea { anchors.fill: parent; onClicked: root.dismiss() }
 
-    Shortcut { sequence: "Ctrl+1"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_1, false) }
-    Shortcut { sequence: "Ctrl+2"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_2, false) }
-    Shortcut { sequence: "Ctrl+3"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_3, false) }
-    Shortcut { sequence: "Ctrl+S"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_S, false) }
-    Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_L, false) }
+    Shortcut { sequence: "Ctrl+1"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_1, false) }
+    Shortcut { sequence: "Ctrl+2"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_2, false) }
+    Shortcut { sequence: "Ctrl+3"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_3, false) }
+    Shortcut { sequence: "Ctrl+S"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_S, false) }
+    Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_L, false) }
     Shortcut { sequence: "Ctrl+,"; context: Qt.WindowShortcut; enabled: root.opened; onActivated: root.prefsOpen ? root.closePrefs() : root.openPrefs() }
-    Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_H, false) }
-    Shortcut { sequence: "Ctrl+C"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_C, false) }
-    Shortcut { sequence: "Ctrl+Backspace"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_Backspace, false) }
-    Shortcut { sequence: "Ctrl+P"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_P, false) }
-    Shortcut { sequence: "Ctrl+N"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_N, false) }
-    Shortcut { sequence: "Ctrl+["; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_BracketLeft, false) }
-    Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_BracketRight, false) }
-    Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_D, false) }
-    Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_U, false) }
-    Shortcut { sequence: "Ctrl+J"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_J, false) }
-    Shortcut { sequence: "Ctrl+K"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_K, false) }
-    Shortcut { sequence: "Ctrl+I"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_I, false) }
-    Shortcut { sequence: "Ctrl+O"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_O, false) }
-    Shortcut { sequence: "Ctrl+Shift+I"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_I, true) }
-    Shortcut { sequence: "Ctrl+Shift+O"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_O, true) }
-    Shortcut { sequence: "Ctrl+A"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_A, false) }
-    Shortcut { sequence: "Ctrl+Z"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_Z, false) }
+    Shortcut { sequence: "Ctrl+."; context: Qt.WindowShortcut; enabled: root.opened; onActivated: root.toggleHelp() }
+    Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_H, false) }
+    Shortcut { sequence: "Ctrl+C"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_C, false) }
+    Shortcut { sequence: "Ctrl+Backspace"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_Backspace, false) }
+    Shortcut { sequence: "Ctrl+P"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_P, false) }
+    Shortcut { sequence: "Ctrl+N"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_N, false) }
+    Shortcut { sequence: "Ctrl+["; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_BracketLeft, false) }
+    Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_BracketRight, false) }
+    Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_D, false) }
+    Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_U, false) }
+    Shortcut { sequence: "Ctrl+J"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_J, false) }
+    Shortcut { sequence: "Ctrl+K"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_K, false) }
+    Shortcut { sequence: "Ctrl+I"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_I, false) }
+    Shortcut { sequence: "Ctrl+O"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_O, false) }
+    Shortcut { sequence: "Ctrl+Shift+I"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_I, true) }
+    Shortcut { sequence: "Ctrl+Shift+O"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_O, true) }
+    Shortcut { sequence: "Ctrl+A"; context: Qt.WindowShortcut; enabled: root.searchActive && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_A, false) }
+    Shortcut { sequence: "Ctrl+Z"; context: Qt.WindowShortcut; enabled: root.searchActive && root.mode === "thesaurus"; onActivated: root.panelAction(Qt.Key_Z, false) }
 
     BorderSurface {
       id: card
@@ -492,6 +513,7 @@ Item {
       Keys.onPressed: function(event) {
         if (event.key === Qt.Key_Escape) {
           if (historyPopup.opened) historyPopup.close()
+          else if (root.helpOpen) root.closeHelp()
           else if (root.prefsOpen) root.closePrefs()
           else root.dismiss()
           event.accepted = true
@@ -527,7 +549,7 @@ Item {
             Text {
               id: titleText
               textFormat: Text.PlainText
-              text: root.prefsOpen ? "Omababel · Preferences" : "Omababel"
+              text: root.prefsOpen ? "Omababel · Preferences" : (root.helpOpen ? "Omababel · Help" : "Omababel")
               color: root.foreground
               font.family: root.fontFamily
               font.pixelSize: Style.font.heading
@@ -540,6 +562,15 @@ Item {
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: Style.spacing.xs
+            Button {
+              id: helpButton
+              iconText: root.helpOpen ? "󰁍" : "󰋖"
+              text: root.helpOpen ? "Back" : ""
+              tooltipText: root.helpOpen ? "Back to search (Esc)" : "Keyboard shortcuts and documentation (Ctrl+.)"
+              foreground: root.foreground
+              accent: root.accent
+              onClicked: root.toggleHelp()
+            }
             Button {
               id: gearButton
               iconText: root.prefsOpen ? "󰁍" : "󰒓"
@@ -562,7 +593,7 @@ Item {
         // ------------------------------------------------- mode + languages
         Item {
           id: controlsRow
-          visible: !root.prefsOpen
+          visible: root.searchActive
           width: parent.width
           height: visible ? Math.max(modeGroup.implicitHeight, langPicker.implicitHeight) : 0
 
@@ -632,7 +663,7 @@ Item {
         // -------------------------------------------------------- search row
         Item {
           id: searchRow
-          visible: !root.prefsOpen
+          visible: root.searchActive
           width: parent.width
           height: visible ? searchField.height : 0
 
@@ -891,7 +922,7 @@ Item {
         // ---------------------------------------------------------- results
         ObResults {
           id: resultsView
-          visible: !root.prefsOpen
+          visible: root.searchActive
           width: parent.width
           height: content.height - headerRow.height - controlsRow.height - searchRow.height - statusRow.height - content.spacing * 4
           result: root.result
@@ -904,6 +935,19 @@ Item {
           onSearchWord: function(w) { root.searchWord(w) }
           onCopyText: function(t) { root.copyText(t) }
           onSortRequested: function(m) { root.setThesaurusSort(m) }
+        }
+
+        // ------------------------------------------------------------ help
+        ObHelp {
+          id: help
+          visible: root.helpOpen
+          width: parent.width
+          height: content.height - headerRow.height - statusRow.height - content.spacing * 2
+          version: root.backendVersion
+          foreground: root.foreground
+          accent: root.accent
+          fontFamily: root.fontFamily
+          onCloseRequested: root.closeHelp()
         }
 
         // ------------------------------------------------------ preferences
@@ -992,7 +1036,7 @@ Item {
             id: hintText
             anchors.right: parent.right
             textFormat: Text.PlainText
-            text: root.prefsOpen ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+P/N: history · Ctrl+D/J/K/U: scroll · Ctrl+,: preferences"
+            text: (root.prefsOpen || root.helpOpen) ? "Esc: back" : "Click: look up · Right-click: copy · Ctrl+1/2/3: mode · Ctrl+P/N: history · Ctrl+D/J/K/U: scroll · Ctrl+,: preferences"
             color: root.muted
             font.family: root.fontFamily
             font.pixelSize: Style.font.caption

@@ -238,6 +238,30 @@ Item {
           harness.check(p.lang === "en" && p.lang2 === "de", "swap languages: " + p.lang + "/" + p.lang2)
           break
         case 13:
+          // help panel
+          p.toggleHelp()
+          harness.check(p.helpOpen === true && p.searchActive === false, "Ctrl+. opens the help")
+          harness.check(p.helpView.sections.length >= 4, "help lists shortcut sections")
+          var shortcuts = ""
+          for (var si = 0; si < p.helpView.sections.length; si++) {
+            var rows = p.helpView.sections[si].rows
+            for (var ri = 0; ri < rows.length; ri++) shortcuts += rows[ri][0] + " | "
+          }
+          var expected = ["Ctrl+1", "Ctrl+[", "Ctrl+]", "Ctrl+S", "Ctrl+L", "Ctrl+C", "Ctrl+H", "Ctrl+P",
+                          "Ctrl+J", "Ctrl+D", "Ctrl+I", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
+          for (var ei = 0; ei < expected.length; ei++)
+            harness.check(shortcuts.indexOf(expected[ei]) >= 0, "help documents " + expected[ei])
+          harness.check(p.helpView.documentationUrl.indexOf("github.com/muellan/omababel") >= 0, "documentation link")
+          harness.check(p.panelAction(Qt.Key_J, false) === false, "panel shortcuts are inert while the help is open")
+          p.toggleHelp()
+          harness.check(p.helpOpen === false && p.searchActive === true, "help closes again")
+          p.openPrefs()
+          harness.check(p.helpOpen === false, "preferences and help are mutually exclusive")
+          p.openHelp()
+          harness.check(p.prefsOpen === false, "opening the help leaves the preferences")
+          p.closeHelp()
+          break
+        case 14:
           p.dismiss()
           harness.check(p.opened === false, "dismiss closes")
           break
