@@ -20,6 +20,7 @@ Searching is done by a bundled, dependency-free Python 3 backend.
 No third-party packages or build steps are required.
 
 
+![](preview.png)
 
 
 ## Installation
