@@ -77,9 +77,9 @@ Item {
   readonly property int cardHeight: Math.min(Style.space(740), panel.height - Style.gapsOut * 2)
 
   readonly property var modeOptions: [
-    {value: "lookup", label: "Lookup", icon: "󰗚"},
-    {value: "thesaurus", label: "Thesaurus", icon: "󰉹"},
-    {value: "translate", label: "Translate", icon: "󰗊"}
+    {value: "lookup", label: "Lookup", icon: "󰗚", tooltip: "Dictionary lookup (Ctrl+1)"},
+    {value: "thesaurus", label: "Thesaurus", icon: "󰉹", tooltip: "Synonyms and antonyms (Ctrl+2)"},
+    {value: "translate", label: "Translate", icon: "󰗊", tooltip: "Translate between two languages (Ctrl+3)"}
   ]
 
   // ================================================================ lifecycle
@@ -621,6 +621,7 @@ Item {
               id: langPicker
               width: Style.space(190)
               showLabel: false
+              rowHeight: modeGroup.implicitHeight
               options: root.languages
               value: root.lang
               placeholderText: "Language…"
@@ -630,19 +631,20 @@ Item {
             }
             Button {
               iconText: "󰓡"
-              tooltipText: root.mode === "translate" ? "Swap languages (Ctrl+S)" : "Swap with the secondary language"
+              tooltipText: (root.mode === "translate" ? "Swap languages" : "Swap with the secondary language") + " (Ctrl+S)"
               foreground: root.foreground
               accent: root.accent
               onClicked: root.swapLangs()
             }
             Item {
               width: Style.space(190)
-              height: langPicker2.implicitHeight
+              height: modeGroup.implicitHeight
               opacity: root.mode === "translate" ? 1 : 0.4
               SearchableDropdown {
                 id: langPicker2
                 anchors.fill: parent
                 showLabel: false
+                rowHeight: modeGroup.implicitHeight
                 enabled: root.mode === "translate"
                 options: root.languages
                 value: root.lang2
@@ -664,8 +666,10 @@ Item {
         Item {
           id: searchRow
           visible: root.searchActive
+          // One extra spacing unit above the field, so the gap to the mode /
+          // language row is roughly twice the normal column spacing.
           width: parent.width
-          height: visible ? searchField.height : 0
+          height: visible ? searchField.height + Style.spacing.md : 0
 
           // Fallback fonts for CJK glyphs have taller line boxes than the
           // theme font; size the field from the font metrics with head room
@@ -677,6 +681,7 @@ Item {
             anchors.left: parent.left
             anchors.right: clearButton.left
             anchors.rightMargin: Style.spacing.sm
+            anchors.bottom: parent.bottom
             font.pixelSize: Style.font.title
             height: Math.round(searchMetrics.height * 1.5) + topPadding + bottomPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -723,7 +728,10 @@ Item {
             anchors.right: historyButton.left
             anchors.rightMargin: Style.spacing.sm
             anchors.verticalCenter: searchField.verticalCenter
-            iconText: "󰅖"
+            width: searchField.height
+            height: searchField.height
+            iconText: "󰭜"
+            iconSize: Style.font.title
             tooltipText: "Clear search and results (Ctrl+C / Ctrl+Backspace)"
             bordered: true
             enabled: searchField.text !== "" || root.result !== null
@@ -737,7 +745,10 @@ Item {
             id: historyButton
             anchors.right: parent.right
             anchors.verticalCenter: searchField.verticalCenter
+            width: searchField.height
+            height: searchField.height
             iconText: historyPopup.opened ? "󰅃" : "󰅀"
+            iconSize: Style.font.title
             tooltipText: "Search history (↓ / Ctrl+H)"
             bordered: true
             foreground: root.foreground
@@ -749,7 +760,7 @@ Item {
           Popup {
             id: historyPopup
             x: 0
-            y: searchField.height + Style.spacing.xxs
+            y: searchRow.height + Style.spacing.xxs
             width: searchRow.width
             property var rows: []
             property int currentIndex: -1
