@@ -112,7 +112,13 @@ omababel data list
 - `Ctrl+P` / `Ctrl+N` step backwards / forwards through the search history and
   re-run the entry; `Ctrl+[` / `Ctrl+]` open the primary / target language
   picker; `Ctrl+D` / `Ctrl+U` scroll the results half a page.
-- `Ctrl+,` or ⚙ opens the preferences, `Esc` goes back / closes the panel.
+- Result cards can be walked with `Ctrl+J` / `Ctrl+K` (the selected one has a
+  brighter border) and folded away with the arrow in their header, with
+  `Ctrl+I` / `Ctrl+O`, or with the *Collapse all* / *Expand all* buttons above
+  the list.
+- 󰋖 or `Ctrl+.` opens the help panel with every shortcut and a link to this
+  README; `Ctrl+,` or ⚙ opens the preferences, `Esc` goes back / closes the
+  panel.
 
 | Shortcut | Action |
 |----------|--------|
@@ -125,6 +131,11 @@ omababel data list
 | `↓` `Ctrl+H` | History dropdown |
 | `Ctrl+P` `Ctrl+N` | Previous / next history entry |
 | `Ctrl+D` `Ctrl+U` | Scroll results down / up |
+| `Ctrl+J` `Ctrl+K` | Select the next / previous result card |
+| `Ctrl+I` `Ctrl+O` | Collapse / expand the selected card |
+| `Ctrl+Shift+I` `Ctrl+Shift+O` | Collapse / expand every card |
+| `Ctrl+A` `Ctrl+Z` | Thesaurus mode: sort alphabetically / by length |
+| `Ctrl+.` | Help panel (all shortcuts, link to this README) |
 | `Ctrl+,` | Preferences |
 | `Esc` | Close popup / back / close panel |
 

@@ -175,6 +175,53 @@ Item {
           harness.check(p.historyNavIndex === 0, "Ctrl+N stops at the newest entry")
           p.runSearch("fresh")
           harness.check(p.historyNav === null, "a fresh search resets the history walk")
+          // after a history walk the dropdown must show every entry again
+          p.historyStep(1)
+          harness.check(p.searchTyped === false, "history walk does not count as typing")
+          p.toggleHistoryPopup()
+          harness.check(p.historyView.opened === true, "history popup opened by keyboard")
+          harness.check(p.historyView.rows.length === p.history.length,
+                        "unfiltered after a history walk: " + p.historyView.rows.length + " of " + p.history.length)
+          p.toggleHistoryPopup()
+          // Ctrl+U scrolls instead of clearing the results (Qt binds it to
+          // delete-to-start-of-line inside the field)
+          p.result = harness.readJson(fx + "/lookup.json")
+          p.searching = false
+          harness.check(p.panelAction(Qt.Key_U, false) === true, "Ctrl+U handled by the panel")
+          harness.check(p.result !== null, "Ctrl+U keeps the results")
+          harness.check(p.panelAction(Qt.Key_D, false) === true, "Ctrl+D handled by the panel")
+          harness.check(p.result !== null, "Ctrl+D keeps the results")
+          // card selection + collapsing
+          var view = p.resultsView
+          harness.check(view.cardCount === p.result.results.length, "one card per source")
+          harness.check(view.selectedCard === 0, "first card selected for a new result list")
+          p.panelAction(Qt.Key_J, false)
+          harness.check(view.selectedCard === Math.min(1, view.cardCount - 1), "Ctrl+J selects the next card")
+          for (var j = 0; j < view.cardCount + 2; j++) p.panelAction(Qt.Key_J, false)
+          harness.check(view.selectedCard === view.cardCount - 1, "Ctrl+J stops at the last card")
+          p.panelAction(Qt.Key_K, false)
+          harness.check(view.selectedCard === Math.max(0, view.cardCount - 2), "Ctrl+K selects the previous card")
+          for (var k = 0; k < view.cardCount + 2; k++) p.panelAction(Qt.Key_K, false)
+          harness.check(view.selectedCard === 0, "Ctrl+K stops at the first card")
+          p.panelAction(Qt.Key_I, false)
+          harness.check(view.isCollapsed(0) === true, "Ctrl+I collapses the selected card")
+          p.panelAction(Qt.Key_O, false)
+          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands the selected card")
+          p.panelAction(Qt.Key_I, true)
+          harness.check(view.isCollapsed(0) && view.isCollapsed(view.cardCount - 1), "Ctrl+Shift+I collapses all")
+          p.panelAction(Qt.Key_O, true)
+          harness.check(!view.isCollapsed(0) && !view.isCollapsed(1), "Ctrl+Shift+O expands all")
+          // sorting shortcuts only bite in thesaurus mode
+          p.mode = "lookup"
+          harness.check(p.panelAction(Qt.Key_A, false) === false, "Ctrl+A left to the text field outside thesaurus mode")
+          p.mode = "thesaurus"
+          p.result = harness.readJson(fx + "/thesaurus.json")
+          harness.check(view.cardCount === p.result.consolidated.groups.length + 1, "group cards plus the overview")
+          harness.check(p.panelAction(Qt.Key_Z, false) === true, "Ctrl+Z sorts by length")
+          harness.check(p.thesaurusSort === "length", "length sort applied")
+          harness.check(p.panelAction(Qt.Key_A, false) === true, "Ctrl+A sorts alphabetically")
+          harness.check(p.thesaurusSort === "alpha", "alphabetical sort applied")
+          p.mode = "lookup"
           p.result = harness.readJson(fx + "/lookup.json")
           p.searching = false
           p.resultsView.scrollBy(0.5)
@@ -191,6 +238,30 @@ Item {
           harness.check(p.lang === "en" && p.lang2 === "de", "swap languages: " + p.lang + "/" + p.lang2)
           break
         case 13:
+          // help panel
+          p.toggleHelp()
+          harness.check(p.helpOpen === true && p.searchActive === false, "Ctrl+. opens the help")
+          harness.check(p.helpView.sections.length >= 4, "help lists shortcut sections")
+          var shortcuts = ""
+          for (var si = 0; si < p.helpView.sections.length; si++) {
+            var rows = p.helpView.sections[si].rows
+            for (var ri = 0; ri < rows.length; ri++) shortcuts += rows[ri][0] + " | "
+          }
+          var expected = ["Ctrl+1", "Ctrl+[", "Ctrl+]", "Ctrl+S", "Ctrl+L", "Ctrl+C", "Ctrl+H", "Ctrl+P",
+                          "Ctrl+J", "Ctrl+D", "Ctrl+I", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
+          for (var ei = 0; ei < expected.length; ei++)
+            harness.check(shortcuts.indexOf(expected[ei]) >= 0, "help documents " + expected[ei])
+          harness.check(p.helpView.documentationUrl.indexOf("github.com/muellan/omababel") >= 0, "documentation link")
+          harness.check(p.panelAction(Qt.Key_J, false) === false, "panel shortcuts are inert while the help is open")
+          p.toggleHelp()
+          harness.check(p.helpOpen === false && p.searchActive === true, "help closes again")
+          p.openPrefs()
+          harness.check(p.helpOpen === false, "preferences and help are mutually exclusive")
+          p.openHelp()
+          harness.check(p.prefsOpen === false, "opening the help leaves the preferences")
+          p.closeHelp()
+          break
+        case 14:
           p.dismiss()
           harness.check(p.opened === false, "dismiss closes")
           break

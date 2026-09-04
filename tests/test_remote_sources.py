@@ -99,6 +99,12 @@ class MerriamWebsterTest(unittest.TestCase):
         self.assertEqual(ant, ["evict"])           # near antonyms ignored
         syn, ant = mw.MerriamWebster.parse_thesaurus(read_fixture("mw-thes-new.html"))
         self.assertEqual((syn, ant), (["home", "abode"], ["evict"]))
+        # antonym boxes share the synonym list class; the box heading decides,
+        # and the "Definitions" link back to the dictionary is not a word
+        groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-headings.html"))
+        self.assertEqual([(g["label"], g["synonyms"], g["antonyms"]) for g in groups],
+                         [("as in home", ["home", "abode"], ["office", "workplace"]),
+                          ("as in family", ["household"], [])])
         groups = mw.MerriamWebster.parse_thesaurus_groups(read_fixture("mw-thes-senses.html"))
         self.assertEqual([(g["pos"], g["label"], g["synonyms"], g["antonyms"]) for g in groups],
                          [("noun", "as in home", ["home", "abode"], ["office"]),

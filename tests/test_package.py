@@ -121,9 +121,20 @@ class QmlStructureTest(unittest.TestCase):
                        "function open(", "function close(", "function dismiss(", "function toggle(",
                        "PanelWindow", "WlrLayershell.keyboardFocus", "backend/omababel.py"):
             self.assertIn(needle, src, needle)
-        # spec: three modes, two language selectors, history, preferences
-        for needle in ('"lookup"', '"thesaurus"', '"translate"', "langPicker2", "historyPopup", "ObPrefs", "ObResults"):
+        # spec: three modes, two language selectors, history, preferences, help
+        for needle in ('"lookup"', '"thesaurus"', '"translate"', "langPicker2", "historyPopup",
+                       "ObPrefs", "ObResults", "ObHelp"):
             self.assertIn(needle, src, needle)
+
+    def test_shortcuts_are_documented_in_the_help(self):
+        """Every Ctrl sequence the panel binds appears in the help panel."""
+        panel = (ROOT / "Omababel.qml").read_text(encoding="utf-8")
+        help_src = (ROOT / "ObHelp.qml").read_text(encoding="utf-8")
+        bound = set(re.findall(r'Shortcut \{ sequence: "([^"]+)"', panel))
+        self.assertGreaterEqual(len(bound), 20)
+        for seq in bound:
+            self.assertIn(seq, help_src, f"{seq} is bound but missing from the help panel")
+        self.assertIn("github.com/muellan/omababel", help_src)
 
     def test_components_referenced_exist(self):
         names = {f.stem for f in self.qml_files()}

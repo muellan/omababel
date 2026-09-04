@@ -23,10 +23,97 @@ Item {
   // thesaurus word order inside groups: "alpha" (default) or "length"
   property string sortMode: "alpha"
 
+  // ---- keyboard-traversable card list
+  // Cards are produced by three delegates (thesaurus groups, the "All
+  // meanings" overview, and one card per source in lookup / translate); each
+  // one gets a running cardIndex so selection and collapsing can address them
+  // uniformly.
+  property int selectedCard: -1
+  property var collapsedCards: ({})
+  readonly property int groupCount: (root.mode === "thesaurus" && root.result && root.result.consolidated)
+    ? root.result.consolidated.groups.length : 0
+  readonly property bool overviewVisible: root.mode === "thesaurus" && !!root.result && !!root.result.consolidated
+    && root.result.consolidated.groups.length !== 1
+  // A function rather than an inline expression: resetCards() needs the count
+  // for the result that just arrived, and a sibling binding is not guaranteed
+  // to have been re-evaluated when the change handler runs.
+  function countCards() {
+    if (root.mode === "thesaurus") {
+      if (!root.result || !root.result.consolidated) return 0
+      var groups = root.result.consolidated.groups.length
+      return groups + (groups !== 1 ? 1 : 0)
+    }
+    return (root.result && root.result.results) ? root.result.results.length : 0
+  }
+  readonly property int cardCount: root.countCards()
+  // cardIndex -> Card item, for scrolling the selection into view.  Not used
+  // in bindings, so it is mutated in place.
+  property var cardItems: ({})
+
   signal searchWord(string word)
   signal copyText(string text)
   signal installRequested(string dataset)
   signal sortRequested(string mode)
+
+  onResultChanged: root.resetCards()
+  onModeChanged: root.resetCards()
+
+  function resetCards() {
+    root.collapsedCards = ({})
+    root.cardItems = ({})
+    root.selectedCard = root.countCards() > 0 ? 0 : -1
+  }
+
+  function registerCard(index, item) { root.cardItems[index] = item }
+
+  function isCollapsed(index) { return root.collapsedCards[index] === true }
+
+  function setCollapsed(index, collapsed) {
+    if (index < 0 || index >= root.countCards()) return
+    var next = ({})
+    for (var k in root.collapsedCards) next[k] = root.collapsedCards[k]
+    if (collapsed) next[index] = true
+    else delete next[index]
+    root.collapsedCards = next
+  }
+
+  function toggleCollapsed(index) { root.setCollapsed(index, !root.isCollapsed(index)) }
+
+  function setAllCollapsed(collapsed) {
+    var next = ({})
+    if (collapsed) for (var i = 0; i < root.countCards(); i++) next[i] = true
+    root.collapsedCards = next
+  }
+
+  function collapseSelected(collapsed) {
+    if (root.selectedCard < 0 && root.countCards() > 0) root.selectedCard = 0
+    root.setCollapsed(root.selectedCard, collapsed)
+    root.showCard(root.selectedCard)
+  }
+
+  // Ctrl+J / Ctrl+K walk the cards.
+  function stepCard(delta) {
+    var count = root.countCards()
+    if (count === 0) return
+    var next = root.selectedCard < 0 ? (delta > 0 ? 0 : count - 1) : root.selectedCard + delta
+    root.selectedCard = Math.max(0, Math.min(count - 1, next))
+    root.showCard(root.selectedCard)
+  }
+
+  function selectCard(index) {
+    if (index < 0 || index >= root.countCards()) return
+    root.selectedCard = index
+  }
+
+  function showCard(index) {
+    var item = root.cardItems[index]
+    if (!item || !item.visible) return
+    var top = item.mapToItem(column, 0, 0).y
+    var bottom = top + item.height
+    if (top < flick.contentY) flick.contentY = Math.max(0, top - Style.spacing.md)
+    else if (bottom > flick.contentY + flick.height)
+      flick.contentY = Math.max(0, Math.min(flick.contentHeight - flick.height, bottom - flick.height + Style.spacing.md))
+  }
 
   function sorted(words) {
     var out = (words || []).slice()
@@ -64,59 +151,118 @@ Item {
   }
 
   // ---------------------------------------------------------- components
-  component SectionHeader: Row {
+  // A result card: header row (title, detail, optional web link, collapse
+  // arrow) plus the caller's content, which the arrow hides.  The selected
+  // card is marked with a brighter border.
+  component Card: BorderSurface {
+    id: cardRoot
+    default property alias content: inner.data
+    property int cardIndex: -1
     property string title: ""
     property string detail: ""
+    property string detailPlain: ""      // detail rendered in the muted colour
     property bool ok: true
     property string url: ""
-    spacing: Style.spacing.md
+    property bool collapsible: true
+    readonly property bool selected: root.selectedCard === cardRoot.cardIndex
+    readonly property bool collapsed: cardRoot.collapsible && root.isCollapsed(cardRoot.cardIndex)
+
     width: parent.width
-    Text {
-      textFormat: Text.PlainText
-      text: parent.title
-      color: root.foreground
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.subtitle
-      font.bold: true
-    }
-    Text {
-      textFormat: Text.PlainText
-      text: parent.detail
-      color: parent.ok ? root.muted : root.errorColor
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.caption
-      anchors.baseline: parent.children[0].baseline
-    }
-    Item { width: Math.max(0, parent.width - parent.children[0].width - parent.children[1].width - openLink.width - Style.spacing.md * 3); height: 1 }
-    Text {
-      id: openLink
-      visible: parent.url !== ""
-      textFormat: Text.PlainText
-      text: "open ↗"
-      color: root.muted
-      font.family: root.fontFamily
-      font.pixelSize: Style.font.caption
-      anchors.baseline: parent.children[0].baseline
-      MouseArea {
-        anchors.fill: parent
-        cursorShape: Qt.PointingHandCursor
-        onClicked: Qt.openUrlExternally(parent.parent.url)
+    implicitHeight: head.height + (cardRoot.collapsed ? 0 : inner.implicitHeight + Style.spacing.sm) + Style.spacing.lg * 2
+    radius: Style.cornerRadius
+    color: cardRoot.selected ? Style.hoverFillFor(root.foreground, root.accent)
+                             : Style.normalFillFor(root.foreground, root.accent)
+    borderSpec: cardRoot.selected
+      ? Border.flat(Style.selectedBorderFor(root.foreground, root.accent), Math.max(1, Style.normalBorderWidth))
+      : Border.controlSpec("normal", root.foreground, root.accent)
+
+    Component.onCompleted: if (cardIndex >= 0) root.registerCard(cardIndex, cardRoot)
+
+    // clicking anywhere on the card selects it
+    MouseArea {
+      anchors.fill: parent
+      acceptedButtons: Qt.LeftButton
+      propagateComposedEvents: true
+      onPressed: function(mouse) {
+        root.selectCard(cardRoot.cardIndex)
+        mouse.accepted = false
       }
     }
-  }
 
-  component Card: BorderSurface {
-    default property alias content: inner.data
-    width: parent.width
-    implicitHeight: inner.implicitHeight + Style.spacing.lg * 2
-    radius: Style.cornerRadius
-    color: Style.normalFillFor(root.foreground, root.accent)
-    borderSpec: Border.controlSpec("normal", root.foreground, root.accent)
-    Column {
-      id: inner
+    Item {
+      id: head
       x: Style.spacing.lg
       y: Style.spacing.lg
       width: parent.width - Style.spacing.lg * 2
+      height: Math.max(titleText.implicitHeight, collapseButton.implicitHeight)
+
+      Row {
+        anchors.left: parent.left
+        anchors.right: headActions.left
+        anchors.rightMargin: Style.spacing.md
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: Style.spacing.md
+        Text {
+          id: titleText
+          textFormat: Text.PlainText
+          text: cardRoot.title
+          color: root.foreground
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.subtitle
+          font.bold: true
+          elide: Text.ElideRight
+          width: Math.min(implicitWidth, head.width * 0.6)
+        }
+        Text {
+          textFormat: Text.PlainText
+          text: cardRoot.detail
+          color: cardRoot.ok ? root.muted : root.errorColor
+          font.family: root.fontFamily
+          font.pixelSize: Style.font.caption
+          anchors.baseline: titleText.baseline
+          elide: Text.ElideRight
+          width: Math.min(implicitWidth, Math.max(0, head.width * 0.4))
+        }
+      }
+
+      Row {
+        id: headActions
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: Style.spacing.xs
+        Button {
+          visible: cardRoot.url !== ""
+          text: "open ↗"
+          fontSize: Style.font.caption
+          tooltipText: "open in the browser"
+          verticalPadding: Style.spacing.xxs
+          foreground: root.muted
+          accent: root.accent
+          onClicked: Qt.openUrlExternally(cardRoot.url)
+        }
+        Button {
+          id: collapseButton
+          visible: cardRoot.collapsible
+          iconText: cardRoot.collapsed ? "󰅀" : "󰅃"
+          iconSize: Style.font.body
+          tooltipText: cardRoot.collapsed ? "Expand (Ctrl+O)" : "Collapse (Ctrl+I)"
+          verticalPadding: Style.spacing.xxs
+          foreground: root.foreground
+          accent: root.accent
+          onClicked: {
+            root.selectCard(cardRoot.cardIndex)
+            root.toggleCollapsed(cardRoot.cardIndex)
+          }
+        }
+      }
+    }
+
+    Column {
+      id: inner
+      x: Style.spacing.lg
+      y: head.y + head.height + Style.spacing.sm
+      width: parent.width - Style.spacing.lg * 2
+      visible: !cardRoot.collapsed
       spacing: Style.spacing.sm
     }
   }
@@ -198,15 +344,47 @@ Item {
         topPadding: Style.spacing.huge
       }
 
-      // -------------------------------------------------------- thesaurus
-      Column {
-        visible: root.mode === "thesaurus" && !!root.result && !root.searching && !!root.result.consolidated
+      // ------------------------------------------------------- card toolbar
+      Row {
+        id: cardToolbar
+        visible: root.cardCount > 0 && !root.searching
         width: parent.width
-        spacing: Style.spacing.lg
+        spacing: Style.spacing.md
 
-        // sort switch: alphabetical (default) or by word length, within groups
+        Button {
+          id: collapseAllButton
+          text: "Collapse all"
+          iconText: "󰅃"
+          iconSize: Style.font.body
+          fontSize: Style.font.bodySmall
+          bordered: true
+          tooltipText: "Collapse every card (Ctrl+Shift+I)"
+          foreground: root.foreground
+          accent: root.accent
+          onClicked: root.setAllCollapsed(true)
+        }
+        Button {
+          id: expandAllButton
+          text: "Expand all"
+          iconText: "󰅀"
+          iconSize: Style.font.body
+          fontSize: Style.font.bodySmall
+          bordered: true
+          tooltipText: "Expand every card (Ctrl+Shift+O)"
+          foreground: root.foreground
+          accent: root.accent
+          onClicked: root.setAllCollapsed(false)
+        }
+
+        Item {
+          width: Math.max(0, cardToolbar.width - collapseAllButton.width - expandAllButton.width
+                              - (sortRow.visible ? sortRow.width : 0) - Style.spacing.md * 3)
+          height: 1
+        }
+
         Row {
-          width: parent.width
+          id: sortRow
+          visible: root.mode === "thesaurus"
           spacing: Style.spacing.md
           Text {
             textFormat: Text.PlainText
@@ -217,7 +395,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
           }
           ButtonGroup {
-            options: [{value: "alpha", label: "A–Z"}, {value: "length", label: "Length"}]
+            options: [{value: "alpha", label: "A–Z", tooltip: "Sort alphabetically (Ctrl+A)"},
+                      {value: "length", label: "Length", tooltip: "Sort by word length (Ctrl+Z)"}]
             value: root.sortMode
             foreground: root.foreground
             background: "transparent"
@@ -226,6 +405,13 @@ Item {
             onChanged: function(v) { root.sortRequested(v) }
           }
         }
+      }
+
+      // -------------------------------------------------------- thesaurus
+      Column {
+        visible: root.mode === "thesaurus" && !!root.result && !root.searching && !!root.result.consolidated
+        width: parent.width
+        spacing: Style.spacing.lg
 
         // one block per meaning, in source order (thesaurus.com style)
         Repeater {
@@ -234,30 +420,10 @@ Item {
             id: groupCard
             required property var modelData
             required property int index
+            cardIndex: index
+            title: modelData.label ? modelData.label : "Meaning " + (index + 1)
+            detail: (modelData.pos ? modelData.pos + "  ·  " : "") + modelData.source
 
-            Row {
-              width: parent.width
-              spacing: Style.spacing.md
-              Text {
-                textFormat: Text.PlainText
-                text: groupCard.modelData.label ? groupCard.modelData.label : "Meaning " + (groupCard.index + 1)
-                color: root.foreground
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.subtitle
-                font.bold: true
-                elide: Text.ElideRight
-                width: Math.min(implicitWidth, groupCard.width - Style.spacing.lg * 2 - groupMeta.width - Style.spacing.md)
-              }
-              Text {
-                id: groupMeta
-                textFormat: Text.PlainText
-                text: (groupCard.modelData.pos ? groupCard.modelData.pos + "  ·  " : "") + groupCard.modelData.source
-                color: root.muted
-                font.family: root.fontFamily
-                font.pixelSize: Style.font.caption
-                anchors.baseline: parent.children[0].baseline
-              }
-            }
             WordSection {
               title: "Synonyms"
               words: root.sorted(groupCard.modelData.synonyms)
@@ -271,15 +437,11 @@ Item {
 
         // everything merged, for a quick overview
         Card {
-          visible: !!(root.result && root.result.consolidated && root.result.consolidated.groups.length !== 1)
-          Text {
-            textFormat: Text.PlainText
-            text: "All meanings"
-            color: root.foreground
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.subtitle
-            font.bold: true
-          }
+          visible: root.overviewVisible
+          cardIndex: root.groupCount
+          title: "All meanings"
+          detail: root.result && root.result.consolidated
+            ? root.result.consolidated.synonyms.length + " syn · " + root.result.consolidated.antonyms.length + " ant" : ""
           Hint {
             visible: !!(root.result && root.result.consolidated && root.result.consolidated.synonyms.length === 0
                         && root.result.consolidated.antonyms.length === 0)
@@ -333,13 +495,11 @@ Item {
           id: card
           required property var modelData
           required property int index
-
-          SectionHeader {
-            title: card.modelData.source.name
-            detail: root.sourceLine(card.modelData) + (card.modelData.ms !== undefined ? "  ·  " + card.modelData.ms + " ms" : "")
-            ok: card.modelData.ok
-            url: card.modelData.url || ""
-          }
+          cardIndex: index
+          title: modelData.source.name
+          detail: root.sourceLine(modelData) + (modelData.ms !== undefined ? "  ·  " + modelData.ms + " ms" : "")
+          ok: modelData.ok
+          url: modelData.url || ""
 
           Text {
             visible: !card.modelData.ok
@@ -368,17 +528,27 @@ Item {
               spacing: Style.spacing.xs
               topPadding: index > 0 ? Style.spacing.md : 0
 
+              // Headword, part of speech and IPA on one line.  Rich text
+              // with wrapping enabled lays out at its minimum width inside a
+              // Row – one character per line – so the headword is explicitly
+              // unwrapped and sized to its own content.
               Row {
+                id: headRow
                 width: parent.width
                 spacing: Style.spacing.md
                 ObLinkText {
+                  id: headword
                   html: "<b>" + (entryCol.modelData.headword_html || "") + "</b>"
                   font.pixelSize: Style.font.title
                   color: root.foreground
+                  wrapMode: Text.NoWrap
+                  elide: Text.ElideRight
+                  width: Math.min(implicitWidth, Math.max(Style.space(80), headRow.width * 0.55))
                   onSearchWord: function(w) { root.searchWord(w) }
                   onCopyText: function(t) { root.copyText(t) }
                 }
                 Text {
+                  id: headPos
                   visible: entryCol.modelData.pos !== ""
                   textFormat: Text.PlainText
                   text: entryCol.modelData.pos
@@ -386,7 +556,11 @@ Item {
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body
                   font.italic: true
-                  anchors.baseline: parent.children[0].baseline
+                  anchors.baseline: headword.baseline
+                }
+                Item {   // gap between the word (with its pos) and the IPA
+                  width: entryCol.modelData.pronunciation !== "" ? Style.spacing.huge : 0
+                  height: 1
                 }
                 Text {
                   visible: entryCol.modelData.pronunciation !== ""
@@ -395,7 +569,7 @@ Item {
                   color: root.muted
                   font.family: root.fontFamily
                   font.pixelSize: Style.font.body
-                  anchors.baseline: parent.children[0].baseline
+                  anchors.baseline: headword.baseline
                 }
               }
 

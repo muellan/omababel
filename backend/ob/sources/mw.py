@@ -224,15 +224,26 @@ class MerriamWebster(Source):
         doc = htmlutil.parse(markup)
 
         def words_in(node: Node) -> List[str]:
-            out = [a.inline_text() for a in node.find_all("a")]
-            if not out:
+            # "Definitions" is MW's link back to the dictionary entry, not a word.
+            anchors = [a for a in node.find_all("a") if "/dictionary/" not in a.get("href", "")]
+            out = [a.inline_text() for a in anchors]
+            if not out and not node.find_all("a"):
                 out = [li.inline_text() for li in node.find_all("li")]
-            return [w for w in out if w and len(w) < 60]
+            return [w for w in out if w and len(w) < 60 and not re.match(r"(?i)^definitions?$", w)]
+
+        def heading_kind(text: str) -> str:
+            low = text.strip().lower()
+            if low.startswith("antonym") or low.startswith("near antonym") or low.startswith("opposite"):
+                return "antonyms"
+            if low.startswith("synonym") or low.startswith("similar"):
+                return "synonyms"
+            return ""
 
         groups: List[dict] = []
         current: Optional[dict] = None
         pending_label = ""
         pending_pos = ""
+        pending_kind = ""        # "Synonyms…" / "Antonyms…" heading seen since the last list
         handled = set()
         for node in doc.elements():
             if any(id(a) in handled for a in node.ancestors()):
@@ -247,24 +258,39 @@ class MerriamWebster(Source):
                 if m:
                     pending_pos = m.group(1)
                 continue
+            if text and len(text) < 60 and not node.find("a") and heading_kind(text):
+                pending_kind = heading_kind(text)
+                continue
             if not cls_:
                 continue
-            if re.search(r"\b(synonyms_list|syn-list|synonym-list)\b", cls_):
-                words = words_in(node)
-                handled.add(id(node))
-                if not words:
-                    continue
+            is_syn_cls = bool(re.search(r"\b(synonyms_list|syn-list|synonym-list)\b", cls_))
+            is_ant_cls = bool(re.search(r"\b(antonyms_list|ant-list|antonym-list)\b", cls_)) and "near" not in cls_
+            if not (is_syn_cls or is_ant_cls):
+                continue
+            handled.add(id(node))
+            words = words_in(node)
+            # A heading inside the list box ("Antonyms & Near Antonyms") or the
+            # last heading before it decides; the class is only the fallback –
+            # MW uses the synonym list class for antonym boxes too.
+            inner = ""
+            for child in node.elements():
+                t = child.inline_text() if child.tag in ("span", "p", "h2", "h3", "h4", "div", "strong") else ""
+                if t and len(t) < 60 and not child.find("a") and heading_kind(t):
+                    inner = heading_kind(t)
+                    break
+            kind = inner or pending_kind or ("antonyms" if is_ant_cls else "synonyms")
+            pending_kind = ""
+            if not words:
+                continue
+            if kind == "synonyms":
                 current = R.group(words, [], label=pending_label, pos=pending_pos)
                 groups.append(current)
                 pending_label = ""
-            elif re.search(r"\b(antonyms_list|ant-list|antonym-list)\b", cls_) and "near" not in cls_:
-                words = words_in(node)
-                handled.add(id(node))
-                if not words:
-                    continue
-                if current is None:
+            else:
+                if current is None or (pending_label and pending_label != current["label"]):
                     current = R.group([], [], label=pending_label, pos=pending_pos)
                     groups.append(current)
+                    pending_label = ""
                 current["antonyms"] = R.dedupe(current["antonyms"] + words)
         if not groups:
             # Newer layout: headings "Synonyms of X" / "Antonyms of X" followed by lists.
