@@ -85,6 +85,13 @@ Item {
     root.collapsedCards = next
   }
 
+  // Ctrl+O and a double click on a card toggle the selected card.
+  function toggleSelected() {
+    if (root.selectedCard < 0 && root.countCards() > 0) root.selectedCard = 0
+    root.toggleCollapsed(root.selectedCard)
+    root.showCard(root.selectedCard)
+  }
+
   function collapseSelected(collapsed) {
     if (root.selectedCard < 0 && root.countCards() > 0) root.selectedCard = 0
     root.setCollapsed(root.selectedCard, collapsed)
@@ -178,14 +185,15 @@ Item {
 
     Component.onCompleted: if (cardIndex >= 0) root.registerCard(cardIndex, cardRoot)
 
-    // clicking anywhere on the card selects it
+    // Clicking anywhere on the card selects it, a double click folds it away.
+    // Chips, links and buttons sit above this area and keep their own clicks.
     MouseArea {
       anchors.fill: parent
       acceptedButtons: Qt.LeftButton
       propagateComposedEvents: true
-      onPressed: function(mouse) {
-        root.selectCard(cardRoot.cardIndex)
-        mouse.accepted = false
+      onPressed: function(mouse) { root.selectCard(cardRoot.cardIndex) }
+      onDoubleClicked: function(mouse) {
+        if (cardRoot.collapsible) root.toggleCollapsed(cardRoot.cardIndex)
       }
     }
 
@@ -308,9 +316,81 @@ Item {
     font.pixelSize: Style.font.bodySmall
   }
 
+  // ------------------------------------------------------- card toolbar
+  // Pinned above the list so it stays reachable while scrolling.
+  Row {
+    id: cardToolbar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    visible: root.cardCount > 0 && !root.searching
+    height: visible ? implicitHeight : 0
+    spacing: Style.spacing.md
+
+    Button {
+      id: collapseAllButton
+      text: "Collapse all"
+      iconText: "󰅃"
+      iconSize: Style.font.body
+      fontSize: Style.font.bodySmall
+      bordered: true
+      tooltipText: "Collapse every card (Ctrl+Shift+I)"
+      foreground: root.foreground
+      accent: root.accent
+      onClicked: root.setAllCollapsed(true)
+    }
+    Button {
+      id: expandAllButton
+      text: "Expand all"
+      iconText: "󰅀"
+      iconSize: Style.font.body
+      fontSize: Style.font.bodySmall
+      bordered: true
+      tooltipText: "Expand every card (Ctrl+Shift+O)"
+      foreground: root.foreground
+      accent: root.accent
+      onClicked: root.setAllCollapsed(false)
+    }
+
+    Item {
+      width: Math.max(0, cardToolbar.width - collapseAllButton.width - expandAllButton.width
+                          - (sortRow.visible ? sortRow.width : 0) - Style.spacing.md * 3)
+      height: 1
+    }
+
+    Row {
+      id: sortRow
+      visible: root.mode === "thesaurus"
+      spacing: Style.spacing.md
+      Text {
+        textFormat: Text.PlainText
+        text: "Sort"
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+        anchors.verticalCenter: parent.verticalCenter
+      }
+      ButtonGroup {
+        options: [{value: "alpha", label: "A–Z", tooltip: "Sort alphabetically (Ctrl+A)"},
+                  {value: "length", label: "Length", tooltip: "Sort by word length (Ctrl+Z)"}]
+        value: root.sortMode
+        foreground: root.foreground
+        background: "transparent"
+        accent: root.accent
+        fontSize: Style.font.bodySmall
+        onChanged: function(v) { root.sortRequested(v) }
+      }
+    }
+  }
+
   Flickable {
     id: flick
-    anchors.fill: parent
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    // the toolbar stays put while the list scrolls underneath it
+    anchors.top: cardToolbar.visible ? cardToolbar.bottom : parent.top
+    anchors.topMargin: cardToolbar.visible ? Style.spacing.md : 0
     contentWidth: width
     contentHeight: column.implicitHeight + Style.spacing.lg
     clip: true
@@ -342,69 +422,6 @@ Item {
           : "No source is configured for this language and mode. Open the preferences (󰒓) to add or enable sources."
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
-      }
-
-      // ------------------------------------------------------- card toolbar
-      Row {
-        id: cardToolbar
-        visible: root.cardCount > 0 && !root.searching
-        width: parent.width
-        spacing: Style.spacing.md
-
-        Button {
-          id: collapseAllButton
-          text: "Collapse all"
-          iconText: "󰅃"
-          iconSize: Style.font.body
-          fontSize: Style.font.bodySmall
-          bordered: true
-          tooltipText: "Collapse every card (Ctrl+Shift+I)"
-          foreground: root.foreground
-          accent: root.accent
-          onClicked: root.setAllCollapsed(true)
-        }
-        Button {
-          id: expandAllButton
-          text: "Expand all"
-          iconText: "󰅀"
-          iconSize: Style.font.body
-          fontSize: Style.font.bodySmall
-          bordered: true
-          tooltipText: "Expand every card (Ctrl+Shift+O)"
-          foreground: root.foreground
-          accent: root.accent
-          onClicked: root.setAllCollapsed(false)
-        }
-
-        Item {
-          width: Math.max(0, cardToolbar.width - collapseAllButton.width - expandAllButton.width
-                              - (sortRow.visible ? sortRow.width : 0) - Style.spacing.md * 3)
-          height: 1
-        }
-
-        Row {
-          id: sortRow
-          visible: root.mode === "thesaurus"
-          spacing: Style.spacing.md
-          Text {
-            textFormat: Text.PlainText
-            text: "Sort"
-            color: root.muted
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.caption
-            anchors.verticalCenter: parent.verticalCenter
-          }
-          ButtonGroup {
-            options: [{value: "alpha", label: "A–Z", tooltip: "Sort alphabetically (Ctrl+A)"},
-                      {value: "length", label: "Length", tooltip: "Sort by word length (Ctrl+Z)"}]
-            value: root.sortMode
-            foreground: root.foreground
-            background: "transparent"
-            accent: root.accent
-            fontSize: Style.font.bodySmall
-            onChanged: function(v) { root.sortRequested(v) }
-          }
-        }
       }
 
       // -------------------------------------------------------- thesaurus

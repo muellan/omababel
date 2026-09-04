@@ -203,10 +203,14 @@ Item {
           harness.check(view.selectedCard === Math.max(0, view.cardCount - 2), "Ctrl+K selects the previous card")
           for (var k = 0; k < view.cardCount + 2; k++) p.panelAction(Qt.Key_K, false)
           harness.check(view.selectedCard === 0, "Ctrl+K stops at the first card")
-          p.panelAction(Qt.Key_I, false)
-          harness.check(view.isCollapsed(0) === true, "Ctrl+I collapses the selected card")
+          harness.check(p.panelAction(Qt.Key_I, false) === false, "plain Ctrl+I is not a panel shortcut")
           p.panelAction(Qt.Key_O, false)
-          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands the selected card")
+          harness.check(view.isCollapsed(0) === true, "Ctrl+O collapses the selected card")
+          p.panelAction(Qt.Key_O, false)
+          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands it again")
+          view.toggleCollapsed(0)
+          harness.check(view.isCollapsed(0) === true, "a double click toggles a card")
+          view.toggleCollapsed(0)
           p.panelAction(Qt.Key_I, true)
           harness.check(view.isCollapsed(0) && view.isCollapsed(view.cardCount - 1), "Ctrl+Shift+I collapses all")
           p.panelAction(Qt.Key_O, true)
@@ -248,7 +252,7 @@ Item {
             for (var ri = 0; ri < rows.length; ri++) shortcuts += rows[ri][0] + " | "
           }
           var expected = ["Ctrl+1", "Ctrl+[", "Ctrl+]", "Ctrl+S", "Ctrl+L", "Ctrl+C", "Ctrl+H", "Ctrl+P",
-                          "Ctrl+J", "Ctrl+D", "Ctrl+I", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
+                          "Ctrl+J", "Ctrl+D", "Ctrl+O", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
           for (var ei = 0; ei < expected.length; ei++)
             harness.check(shortcuts.indexOf(expected[ei]) >= 0, "help documents " + expected[ei])
           harness.check(p.helpView.documentationUrl.indexOf("github.com/muellan/omababel") >= 0, "documentation link")

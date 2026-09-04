@@ -46,7 +46,7 @@ Item {
         ["Right click", "Copy the clicked word (or a whole translation)"],
         ["Ctrl+J  ·  Ctrl+K", "Select the next / previous result card"],
         ["Ctrl+D  ·  Ctrl+U", "Scroll the result list down / up"],
-        ["Ctrl+I  ·  Ctrl+O", "Collapse / expand the selected card"],
+        ["Ctrl+O", "Collapse or expand the selected card (double click does the same)"],
         ["Ctrl+Shift+I  ·  Ctrl+Shift+O", "Collapse / expand every card"],
         ["Ctrl+A  ·  Ctrl+Z", "Thesaurus mode: sort alphabetically / by length"]
       ]

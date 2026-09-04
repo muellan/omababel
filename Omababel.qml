@@ -248,11 +248,13 @@ Item {
     case Qt.Key_L: searchField.forceActiveFocus(); searchField.selectAll(); return true
     case Qt.Key_J: resultsView.stepCard(1); return true
     case Qt.Key_K: resultsView.stepCard(-1); return true
+    // Ctrl+Shift+I / Ctrl+Shift+O fold every card; plain Ctrl+O toggles the
+    // selected one.  Plain Ctrl+I is not a panel shortcut.
     case Qt.Key_I:
-      if (shift) resultsView.setAllCollapsed(true); else resultsView.collapseSelected(true)
-      return true
+      if (!shift) return false
+      resultsView.setAllCollapsed(true); return true
     case Qt.Key_O:
-      if (shift) resultsView.setAllCollapsed(false); else resultsView.collapseSelected(false)
+      if (shift) resultsView.setAllCollapsed(false); else resultsView.toggleSelected()
       return true
     // Sorting only exists in thesaurus mode; elsewhere Ctrl+A / Ctrl+Z keep
     // their text-field meaning (select all / undo).
@@ -490,7 +492,6 @@ Item {
     Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_U, false) }
     Shortcut { sequence: "Ctrl+J"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_J, false) }
     Shortcut { sequence: "Ctrl+K"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_K, false) }
-    Shortcut { sequence: "Ctrl+I"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_I, false) }
     Shortcut { sequence: "Ctrl+O"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_O, false) }
     Shortcut { sequence: "Ctrl+Shift+I"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_I, true) }
     Shortcut { sequence: "Ctrl+Shift+O"; context: Qt.WindowShortcut; enabled: root.searchActive; onActivated: root.panelAction(Qt.Key_O, true) }
