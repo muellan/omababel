@@ -186,6 +186,16 @@ Item {
           }
           harness.check(selected === 1, "one chip is engaged: " + selected)
           harness.check(accented === 1, "exactly one chip carries the accent colour")
+          // ... and its background is a dimmed, semi-transparent accent, not
+          // a colour the theme pinned for the "selected" state
+          for (var f = 0; f < chips.length; f++) {
+            if (!chips[f].selected) continue
+            harness.check(chips[f].fillColor.a > 0 && chips[f].fillColor.a < 0.6,
+                          "the engaged chip's fill is semi-transparent: " + chips[f].fillColor.a)
+            harness.check(chips[f].fillColor.r > 0.9 && chips[f].fillColor.b > 0.9
+                          && chips[f].fillColor.g < 0.1,
+                          "the engaged chip's fill is the accent hue: " + chips[f].fillColor)
+          }
           p.modeSelector.accent = p.accent
           p.setMode("lookup")
           break
