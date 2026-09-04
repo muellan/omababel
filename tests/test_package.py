@@ -64,7 +64,7 @@ class ManifestTest(unittest.TestCase):
 
     def test_backend_is_stdlib_only(self):
         stdlib_ok = {"__future__", "annotations", "argparse", "concurrent", "csv", "gzip", "hashlib", "html", "io", "json",
-                     "lzma", "os", "pathlib", "random", "re", "shutil", "socket", "sqlite3", "subprocess", "sys",
+                     "lzma", "os", "pathlib", "random", "re", "shlex", "shutil", "socket", "sqlite3", "subprocess", "sys",
                      "tarfile", "tempfile", "time", "traceback", "typing", "unicodedata", "urllib", "xml",
                      "zipfile", "zlib", "ob"}
         import ast

@@ -158,6 +158,8 @@ sample word. **Add source** creates a new one. A source has:
 | API key          | For paid/keyed services (Google Cloud Translation, DeepL, dictionaryapi.com, OED Researcher API, AI services). Stored in the system keyring, never in a file – see [Credentials](#credentials) |
 | Key from env     | Alternative to the key field: the name of an environment variable holding the key                                                              |
 | Key from command | Alternative to the key field: a command whose output is the key (`pass show omababel/deepl`)                                                   |
+| Service / Access | AI sources only: which service (Claude, ChatGPT, Grok, Gemini, Muse) and whether it is reached through its signed-in CLI or its HTTP API       |
+| Model / Command  | AI sources only: override the service's default model, or the command that is run for the CLI access                                          |
 
 
 ### Credentials
@@ -207,10 +209,46 @@ Never put a key into the URL of a custom source: URLs *are* stored in
 | [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
 | Google Translate                                    | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a Cloud Translation API key and enable it                             |
 | DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
+| AI service                                          | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                              |
 
 The web sources are scraped from the public pages (like a browser would).
 Page layouts change; when a source stops returning results, check for a plugin
 update or report it. Using them is subject to the sites' terms.
+
+
+
+### AI Services
+
+Three built-in rows - **AI explanation** (lookup), **AI synonyms and antonyms**
+(thesaurus) and **AI translation** - ask an AI service instead of a dictionary
+site. They are **disabled by default**; enable the ones you want in
+⚙ → Sources. An AI source answers in *any* language.
+
+| Mode      | What it returns                                                       |
+|-----------|-----------------------------------------------------------------------|
+| Lookup    | One succinct explanation of the term, with a part of speech and one example |
+| Thesaurus | Synonyms and antonyms, grouped by meaning, one card per meaning       |
+| Translate | The best meaning-preserving translation, plus alternatives and a note about ambiguities |
+
+**Service**: Claude, ChatGPT, Grok, Gemini or Muse.
+
+**Access**: two ways to reach it.
+
+* **Signed-in CLI** (the default) runs the service's own command line tool,
+  which is already signed in with your account: `claude -p` for Claude,
+  `gemini -p` for Gemini, and so on. A **free plan is used as it is, and so is
+  a paid one** - a Claude Pro or Max subscription needs no API key and is not
+  billed per request. Nothing is stored, and the *Command* field can point at
+  any other program that reads a prompt on stdin and answers on stdout.
+* **HTTP API + key** calls the service's API instead. The key is stored in the
+  keyring (see [Credentials](#credentials)), the model defaults to the small,
+  cheap one of each service, and the *Model* and *API endpoint* fields take
+  anything else - including a self-hosted, OpenAI-compatible endpoint.
+
+The plugin asks for a strict JSON answer and parses it defensively (code
+fences, a chatty preamble or a CLI banner are all tolerated), so a talkative
+model cannot break the panel. `OMABABEL_AI_TIMEOUT` (default 60 s) bounds how
+long a service may take.
 
 
 

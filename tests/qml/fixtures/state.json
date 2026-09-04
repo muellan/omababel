@@ -13,6 +13,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "remote",
@@ -20,7 +27,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "merriam-webster",
@@ -34,6 +43,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "remote",
@@ -41,7 +57,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "merriam-webster-thesaurus",
@@ -55,6 +73,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "remote",
@@ -62,7 +87,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "oed",
@@ -76,6 +103,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "Subscription site; free access only returns search snippets. Enter an OED Researcher API credential (app_id:app_key) for full entries.",
    "kind": "remote",
@@ -83,7 +117,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "thesaurus-com",
@@ -97,6 +133,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "remote",
@@ -104,7 +147,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "leo",
@@ -118,12 +163,21 @@
    "dataset": "",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "remote",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "google-translate",
@@ -137,12 +191,21 @@
    "dataset": "",
    "translation_mode": "text",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "Disabled by default: the free endpoint rate-limits quickly. Add a Cloud Translation API key, then enable.",
    "kind": "remote",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "deepl",
@@ -156,12 +219,21 @@
    "dataset": "",
    "translation_mode": "text",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "Disabled by default: the free endpoint rate-limits quickly. Add a DeepL API key, then enable.",
    "kind": "remote",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-de",
@@ -175,6 +247,13 @@
    "dataset": "wiktionary-de",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -182,7 +261,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-de-thesaurus",
@@ -196,6 +277,13 @@
    "dataset": "wiktionary-de",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -203,7 +291,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-de-translator",
@@ -217,12 +307,21 @@
    "dataset": "wiktionary-de",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-de-native",
@@ -236,6 +335,13 @@
    "dataset": "wiktionary-de-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -243,7 +349,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-de-native-thesaurus",
@@ -257,6 +365,13 @@
    "dataset": "wiktionary-de-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -264,7 +379,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-en",
@@ -278,6 +395,13 @@
    "dataset": "wiktionary-en",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -285,7 +409,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-en-thesaurus",
@@ -299,6 +425,13 @@
    "dataset": "wiktionary-en",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -306,7 +439,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-en-translator",
@@ -320,12 +455,21 @@
    "dataset": "wiktionary-en",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-zh",
@@ -339,6 +483,13 @@
    "dataset": "wiktionary-zh",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -346,7 +497,9 @@
     "zh"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-zh-thesaurus",
@@ -360,6 +513,13 @@
    "dataset": "wiktionary-zh",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -367,7 +527,9 @@
     "zh"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-zh-translator",
@@ -381,12 +543,21 @@
    "dataset": "wiktionary-zh",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-zh-native",
@@ -400,6 +571,13 @@
    "dataset": "wiktionary-zh-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -407,7 +585,9 @@
     "zh"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-zh-native-thesaurus",
@@ -421,6 +601,13 @@
    "dataset": "wiktionary-zh-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -428,7 +615,9 @@
     "zh"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-fr",
@@ -442,6 +631,13 @@
    "dataset": "wiktionary-fr",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -449,7 +645,9 @@
     "fr"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-fr-thesaurus",
@@ -463,6 +661,13 @@
    "dataset": "wiktionary-fr",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -470,7 +675,9 @@
     "fr"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-fr-translator",
@@ -484,12 +691,21 @@
    "dataset": "wiktionary-fr",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-fr-native",
@@ -503,6 +719,13 @@
    "dataset": "wiktionary-fr-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -510,7 +733,9 @@
     "fr"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-fr-native-thesaurus",
@@ -524,6 +749,13 @@
    "dataset": "wiktionary-fr-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -531,7 +763,9 @@
     "fr"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-es",
@@ -545,6 +779,13 @@
    "dataset": "wiktionary-es",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -552,7 +793,9 @@
     "es"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-es-thesaurus",
@@ -566,6 +809,13 @@
    "dataset": "wiktionary-es",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -573,7 +823,9 @@
     "es"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-es-translator",
@@ -587,12 +839,21 @@
    "dataset": "wiktionary-es",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-es-native",
@@ -606,6 +867,13 @@
    "dataset": "wiktionary-es-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -613,7 +881,9 @@
     "es"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-es-native-thesaurus",
@@ -627,6 +897,13 @@
    "dataset": "wiktionary-es-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -634,7 +911,9 @@
     "es"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-pt",
@@ -648,6 +927,13 @@
    "dataset": "wiktionary-pt",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -655,7 +941,9 @@
     "pt"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-pt-thesaurus",
@@ -669,6 +957,13 @@
    "dataset": "wiktionary-pt",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -676,7 +971,9 @@
     "pt"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-pt-translator",
@@ -690,12 +987,21 @@
    "dataset": "wiktionary-pt",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-pt-native",
@@ -709,6 +1015,13 @@
    "dataset": "wiktionary-pt-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -716,7 +1029,9 @@
     "pt"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-pt-native-thesaurus",
@@ -730,6 +1045,13 @@
    "dataset": "wiktionary-pt-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -737,7 +1059,9 @@
     "pt"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-ja",
@@ -751,6 +1075,13 @@
    "dataset": "wiktionary-ja",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -758,7 +1089,9 @@
     "ja"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-ja-thesaurus",
@@ -772,6 +1105,13 @@
    "dataset": "wiktionary-ja",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -779,7 +1119,9 @@
     "ja"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-ja-translator",
@@ -793,12 +1135,21 @@
    "dataset": "wiktionary-ja",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-ja-native",
@@ -812,6 +1163,13 @@
    "dataset": "wiktionary-ja-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -819,7 +1177,9 @@
     "ja"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "wiktionary-ja-native-thesaurus",
@@ -833,6 +1193,13 @@
    "dataset": "wiktionary-ja-native",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -840,7 +1207,9 @@
     "ja"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-deu-eng",
@@ -854,6 +1223,13 @@
    "dataset": "freedict-deu-eng",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -868,7 +1244,9 @@
      "de"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-deu",
@@ -882,6 +1260,13 @@
    "dataset": "freedict-eng-deu",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -896,7 +1281,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-deu-fra",
@@ -910,6 +1297,13 @@
    "dataset": "freedict-deu-fra",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -924,7 +1318,9 @@
      "de"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-fra-deu",
@@ -938,6 +1334,13 @@
    "dataset": "freedict-fra-deu",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -952,7 +1355,9 @@
      "fr"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-deu-spa",
@@ -966,6 +1371,13 @@
    "dataset": "freedict-deu-spa",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -980,7 +1392,9 @@
      "de"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-spa-deu",
@@ -994,6 +1408,13 @@
    "dataset": "freedict-spa-deu",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1008,7 +1429,9 @@
      "es"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-deu-por",
@@ -1022,6 +1445,13 @@
    "dataset": "freedict-deu-por",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1036,7 +1466,9 @@
      "de"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-por-deu",
@@ -1050,6 +1482,13 @@
    "dataset": "freedict-por-deu",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1064,7 +1503,9 @@
      "pt"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-fra",
@@ -1078,6 +1519,13 @@
    "dataset": "freedict-eng-fra",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1092,7 +1540,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-fra-eng",
@@ -1106,6 +1556,13 @@
    "dataset": "freedict-fra-eng",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1120,7 +1577,9 @@
      "fr"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-spa",
@@ -1134,6 +1593,13 @@
    "dataset": "freedict-eng-spa",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1148,7 +1614,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-spa-eng",
@@ -1162,6 +1630,13 @@
    "dataset": "freedict-spa-eng",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1176,7 +1651,9 @@
      "es"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-por",
@@ -1190,6 +1667,13 @@
    "dataset": "freedict-eng-por",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1204,7 +1688,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-por-eng",
@@ -1218,6 +1704,13 @@
    "dataset": "freedict-por-eng",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1232,7 +1725,9 @@
      "pt"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-jpn",
@@ -1246,6 +1741,13 @@
    "dataset": "freedict-eng-jpn",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1260,7 +1762,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-jpn-eng",
@@ -1274,6 +1778,13 @@
    "dataset": "freedict-jpn-eng",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1288,7 +1799,9 @@
      "ja"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-deu-jpn",
@@ -1302,6 +1815,13 @@
    "dataset": "freedict-deu-jpn",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1316,7 +1836,9 @@
      "de"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-jpn-deu",
@@ -1330,6 +1852,13 @@
    "dataset": "freedict-jpn-deu",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1344,7 +1873,9 @@
      "ja"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "freedict-eng-zho",
@@ -1358,6 +1889,13 @@
    "dataset": "freedict-eng-zho",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1372,7 +1910,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "cedict",
@@ -1386,6 +1926,13 @@
    "dataset": "cedict",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1393,7 +1940,9 @@
     "zh"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "cedict-translator",
@@ -1407,6 +1956,13 @@
    "dataset": "cedict",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1421,7 +1977,9 @@
      "zh"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "ecdict",
@@ -1435,6 +1993,13 @@
    "dataset": "ecdict",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1442,7 +2007,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "ecdict-translator",
@@ -1456,6 +2023,13 @@
    "dataset": "ecdict",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1470,7 +2044,9 @@
      "en"
     ]
    ],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "unihan",
@@ -1484,6 +2060,13 @@
    "dataset": "unihan",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": true,
    "notes": "",
    "kind": "local",
@@ -1492,7 +2075,93 @@
     "ja"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
+  },
+  {
+   "id": "ai-dictionary",
+   "name": "AI explanation",
+   "enabled": false,
+   "type": "dictionary",
+   "driver": "ai",
+   "url": "",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "claude",
+   "transport": "cli",
+   "model": "",
+   "command": "",
+   "builtin": true,
+   "notes": "Uses the signed-in Claude CLI by default (a free or paid plan; no API key). Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and switch the transport to the HTTP API.",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
+  },
+  {
+   "id": "ai-thesaurus",
+   "name": "AI synonyms and antonyms",
+   "enabled": false,
+   "type": "thesaurus",
+   "driver": "ai",
+   "url": "",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "",
+   "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "claude",
+   "transport": "cli",
+   "model": "",
+   "command": "",
+   "builtin": true,
+   "notes": "Uses the signed-in Claude CLI by default (a free or paid plan; no API key). Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and switch the transport to the HTTP API.",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
+  },
+  {
+   "id": "ai-translator",
+   "name": "AI translation",
+   "enabled": false,
+   "type": "translator",
+   "driver": "ai",
+   "url": "",
+   "path": "",
+   "format": "",
+   "dataset": "",
+   "translation_mode": "text",
+   "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "claude",
+   "transport": "cli",
+   "model": "",
+   "command": "",
+   "builtin": true,
+   "notes": "Uses the signed-in Claude CLI by default (a free or paid plan; no API key). Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and switch the transport to the HTTP API.",
+   "kind": "remote",
+   "languages": [],
+   "pairs": [],
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "mini-en",
@@ -1506,6 +2175,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": false,
    "notes": "",
    "kind": "local",
@@ -1513,7 +2189,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "mini-en-thes",
@@ -1527,6 +2205,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": false,
    "notes": "",
    "kind": "local",
@@ -1534,7 +2219,9 @@
     "en"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "mini-de",
@@ -1548,6 +2235,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": false,
    "notes": "",
    "kind": "local",
@@ -1555,7 +2249,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "mini-de-thes",
@@ -1569,6 +2265,13 @@
    "dataset": "",
    "translation_mode": "",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": false,
    "notes": "",
    "kind": "local",
@@ -1576,7 +2279,9 @@
     "de"
    ],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   },
   {
    "id": "mini-trans",
@@ -1590,12 +2295,21 @@
    "dataset": "",
    "translation_mode": "word",
    "api_key": "",
+   "api_key_env": "",
+   "api_key_cmd": "",
+   "has_key": false,
+   "service": "",
+   "transport": "",
+   "model": "",
+   "command": "",
    "builtin": false,
    "notes": "",
    "kind": "local",
    "languages": [],
    "pairs": [],
-   "has_key": false
+   "key_storage": "",
+   "supports_key": false,
+   "key_insecure": false
   }
  ],
  "drivers": [
@@ -1615,7 +2329,8 @@
    "translation_modes": [
     "word"
    ],
-   "languages": []
+   "languages": [],
+   "services": []
   },
   {
    "driver": "duden",
@@ -1631,7 +2346,8 @@
    "translation_modes": [],
    "languages": [
     "de"
-   ]
+   ],
+   "services": []
   },
   {
    "driver": "mw",
@@ -1648,7 +2364,8 @@
    "translation_modes": [],
    "languages": [
     "en"
-   ]
+   ],
+   "services": []
   },
   {
    "driver": "oed",
@@ -1664,7 +2381,8 @@
    "translation_modes": [],
    "languages": [
     "en"
-   ]
+   ],
+   "services": []
   },
   {
    "driver": "thesauruscom",
@@ -1680,7 +2398,8 @@
    "translation_modes": [],
    "languages": [
     "en"
-   ]
+   ],
+   "services": []
   },
   {
    "driver": "leo",
@@ -1706,7 +2425,8 @@
     "ru",
     "pt",
     "pl"
-   ]
+   ],
+   "services": []
   },
   {
    "driver": "google",
@@ -1723,7 +2443,8 @@
     "text",
     "word"
    ],
-   "languages": []
+   "languages": [],
+   "services": []
   },
   {
    "driver": "deepl",
@@ -1771,6 +2492,57 @@
     "lv",
     "et",
     "sl"
+   ],
+   "services": []
+  },
+  {
+   "driver": "ai",
+   "label": "AI service",
+   "kind": "remote",
+   "types": [
+    "dictionary",
+    "thesaurus",
+    "translator"
+   ],
+   "description": "Claude, ChatGPT, Grok, Gemini or Muse. Uses the service's signed-in CLI by default (a free or paid plan, no API key); an API key can be used instead.",
+   "default_url": "",
+   "supports_key": true,
+   "key_hint": "API key – only needed for the API transport",
+   "translation_modes": [
+    "text"
+   ],
+   "languages": [],
+   "services": [
+    {
+     "value": "claude",
+     "label": "Claude (Anthropic)",
+     "command": "claude -p",
+     "model": "claude-3-5-haiku-latest"
+    },
+    {
+     "value": "chatgpt",
+     "label": "ChatGPT (OpenAI)",
+     "command": "codex exec",
+     "model": "gpt-4o-mini"
+    },
+    {
+     "value": "grok",
+     "label": "Grok (xAI)",
+     "command": "grok",
+     "model": "grok-2-latest"
+    },
+    {
+     "value": "gemini",
+     "label": "Gemini (Google)",
+     "command": "gemini -p",
+     "model": "gemini-2.0-flash"
+    },
+    {
+     "value": "muse",
+     "label": "Muse",
+     "command": "muse",
+     "model": ""
+    }
    ]
   },
   {
@@ -1790,7 +2562,8 @@
     "text",
     "word"
    ],
-   "languages": []
+   "languages": [],
+   "services": []
   }
  ],
  "languages": [
@@ -2020,6 +2793,7 @@
   "lang": "de",
   "lang2": "en",
   "thesaurus_sort": "alpha",
+  "history_max": 1000,
   "panel_width": 0,
   "panel_height": 0,
   "font_scale": 1.0
@@ -2030,20 +2804,96 @@
    "mode": "translate",
    "lang": "en",
    "lang2": "de",
-   "time": 1788473036
+   "time": 1788531774
   },
   {
    "query": "Haus",
    "mode": "translate",
    "lang": "de",
    "lang2": "en",
-   "time": 1788473036
+   "time": 1788531774
   }
  ],
+ "history_max": 1000,
+ "coverage": {
+  "lookup": {
+   "any": false,
+   "langs": [
+    "de",
+    "en",
+    "zh"
+   ]
+  },
+  "thesaurus": {
+   "any": false,
+   "langs": [
+    "de",
+    "en"
+   ]
+  },
+  "translate": {
+   "any": false,
+   "langs": [
+    "de",
+    "en",
+    "es",
+    "fr",
+    "it",
+    "pl",
+    "pt",
+    "ru",
+    "zh"
+   ],
+   "pairs": {
+    "de": [
+     "en",
+     "es",
+     "fr",
+     "it",
+     "pl",
+     "pt",
+     "ru",
+     "zh"
+    ],
+    "en": [
+     "de",
+     "fr",
+     "zh"
+    ],
+    "fr": [
+     "de",
+     "en"
+    ],
+    "es": [
+     "de"
+    ],
+    "it": [
+     "de"
+    ],
+    "zh": [
+     "de",
+     "en"
+    ],
+    "ru": [
+     "de"
+    ],
+    "pt": [
+     "de"
+    ],
+    "pl": [
+     "de"
+    ]
+   }
+  }
+ },
+ "keyring": {
+  "available": true,
+  "backend": "secret-service (secret-tool)"
+ },
  "paths": {
-  "config": "/tmp/omababel-fixtures-hv_f2ey9/config",
-  "data": "/tmp/omababel-fixtures-hv_f2ey9/data",
-  "state": "/tmp/omababel-fixtures-hv_f2ey9/state",
-  "cache": "/tmp/omababel-fixtures-hv_f2ey9/cache"
+  "config": "/tmp/omababel-fixtures-gtqovl7s/config",
+  "data": "/tmp/omababel-fixtures-gtqovl7s/data",
+  "state": "/tmp/omababel-fixtures-gtqovl7s/state",
+  "cache": "/tmp/omababel-fixtures-gtqovl7s/cache"
  }
 }

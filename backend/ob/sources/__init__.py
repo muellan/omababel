@@ -18,7 +18,7 @@ from .base import Source, SourceError, DRIVERS, register  # noqa: F401
 
 def _load_all() -> None:
     # Import for side effect: each module registers its driver.
-    from . import duden, mw, oed, thesauruscom, leo, google, deepl, generic, local  # noqa: F401
+    from . import duden, mw, oed, thesauruscom, leo, google, deepl, ai, generic, local  # noqa: F401
 
 
 def get_driver(name: str) -> Type[Source]:
@@ -44,6 +44,7 @@ def registry() -> List[dict]:
             "key_hint": cls.key_hint,
             "translation_modes": list(cls.translation_modes),
             "languages": list(cls.languages) if cls.languages else [],
+            "services": cls.services() if hasattr(cls, "services") else [],
         })
     return out
 

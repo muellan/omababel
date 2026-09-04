@@ -20,10 +20,11 @@ from .paths import config_dir, state_dir
 
 SOURCE_TYPES = ("dictionary", "thesaurus", "translator")
 TRANSLATION_MODES = ("word", "text")
+AI_TRANSPORTS = ("cli", "api")
 
 FIELDS = ("id", "name", "enabled", "type", "kind", "driver", "url", "path", "format",
           "dataset", "translation_mode", "api_key", "api_key_env", "api_key_cmd", "has_key",
-          "languages", "pairs", "builtin", "notes")
+          "service", "transport", "model", "command", "languages", "pairs", "builtin", "notes")
 
 # Never written to disk: the secret itself lives in the keyring (see ob.secrets).
 SECRET_FIELDS = ("api_key",)
@@ -41,7 +42,9 @@ def default_sources() -> List[dict]:
         r = {"id": id, "name": name, "enabled": True, "type": type, "driver": driver,
              "kind": "local" if driver == "local" else "remote", "url": "", "path": "",
              "format": "", "dataset": "", "translation_mode": "text" if type == "translator" else "",
-             "api_key": "", "languages": [], "pairs": [], "builtin": True, "notes": ""}
+             "api_key": "", "api_key_env": "", "api_key_cmd": "", "has_key": False,
+             "service": "", "transport": "", "model": "", "command": "",
+             "languages": [], "pairs": [], "builtin": True, "notes": ""}
         r.update(kw)
         return r
 
@@ -101,6 +104,20 @@ def default_sources() -> List[dict]:
                     dataset="ecdict", translation_mode="word", pairs=[["en", "zh"], ["zh", "en"]]))
     rows.append(row("unihan", "Unihan characters", "dictionary", "local", path="unihan.sqlite", dataset="unihan",
                     languages=["zh", "ja"]))
+
+    # AI services.  Disabled by default: they need the service's CLI (signed
+    # in with the user's own free or paid plan) or an API key.  One row per
+    # mode, all pointing at the same service, so a user can enable just the
+    # mode they want it for.
+    ai_note = ("Uses the signed-in Claude CLI by default (a free or paid plan; no API key). "
+               "Switch the service to ChatGPT, Grok, Gemini or Muse, or set an API key and "
+               "switch the transport to the HTTP API.")
+    rows.append(row("ai-dictionary", "AI explanation", "dictionary", "ai", enabled=False,
+                    service="claude", transport="cli", notes=ai_note))
+    rows.append(row("ai-thesaurus", "AI synonyms and antonyms", "thesaurus", "ai", enabled=False,
+                    service="claude", transport="cli", notes=ai_note))
+    rows.append(row("ai-translator", "AI translation", "translator", "ai", enabled=False,
+                    service="claude", transport="cli", translation_mode="text", notes=ai_note))
     return rows
 
 
@@ -123,6 +140,12 @@ def normalize_source(src: dict) -> dict:
         # not a secret: whether one is in the keyring.  Without it every row
         # would need a keyring round trip on every request.
         "has_key": bool(src.get("has_key") or src.get("api_key")),
+        # AI sources (driver "ai"): which service, how it is reached, and the
+        # model / command overriding the service's defaults.
+        "service": str(src.get("service") or "").strip().lower(),
+        "transport": src.get("transport") if src.get("transport") in AI_TRANSPORTS else "",
+        "model": str(src.get("model") or "").strip(),
+        "command": str(src.get("command") or "").strip(),
         "builtin": bool(src.get("builtin", False)),
         "notes": str(src.get("notes") or ""),
     }

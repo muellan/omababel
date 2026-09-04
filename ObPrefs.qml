@@ -46,6 +46,18 @@ Item {
   signal historyMaxRequested(int value)
   signal clearHistoryRequested()
 
+  // AI services offered by the "ai" driver, as reported by the backend.
+  function aiServices() {
+    var info = driverInfo("ai")
+    return (info && info.services) ? info.services : []
+  }
+
+  function aiPreset(id) {
+    var list = root.aiServices()
+    for (var i = 0; i < list.length; i++) if (list[i].value === id) return list[i]
+    return null
+  }
+
   function driverInfo(name) {
     for (var i = 0; i < drivers.length; i++) if (drivers[i].driver === name) return drivers[i]
     return null
@@ -67,6 +79,7 @@ Item {
       id: "", name: "", enabled: true, type: "dictionary", kind: "remote", driver: "generic",
       url: "https://example.org/dictionary/{word}", path: "", format: "", dataset: "",
       translation_mode: "text", api_key: "", api_key_env: "", api_key_cmd: "",
+      service: "", transport: "", model: "", command: "",
       languages: [], pairs: [], builtin: false, notes: "", has_key: false, key_storage: ""
     }
     editingNew = true
@@ -105,6 +118,9 @@ Item {
     if (key === "driver") {
       var info = driverInfo(value)
       if (info && info.default_url && (!copy.url || copy.url.indexOf("example.org") >= 0)) copy.url = info.default_url
+      // an AI source is not a URL source: the endpoint is optional and only
+      // used by the API transport
+      if (value === "ai" && copy.url.indexOf("example.org") >= 0) copy.url = ""
     }
     editing = copy
   }
@@ -112,16 +128,18 @@ Item {
   function commitEdit() {
     var row = JSON.parse(JSON.stringify(editing))
     row.name = nameField.text.trim()
-    row.url = urlField.text.trim()
+    row.url = row.driver === "ai" ? aiEndpointField.text.trim() : urlField.text.trim()
     row.path = pathField.text.trim()
     row.languages = langField.text.split(/[,;\s]+/).filter(function(x) { return x !== "" })
     row.pairs = pairsField.text.split(/[,;\s]+/).filter(function(x) { return x !== "" })
     row.api_key = keyField.text
+    row.model = modelField.text.trim()
+    row.command = commandField.text.trim()
     row.api_key_env = keyEnvField.text.trim()
     row.api_key_cmd = keyCmdField.text.trim()
     row.notes = notesField.text.trim()
     if (row.name === "") { message = "Give the source a name."; messageError = true; return }
-    if (row.kind === "remote" && row.url === "") { message = "Enter the source URL."; messageError = true; return }
+    if (row.kind === "remote" && row.driver !== "ai" && row.url === "") { message = "Enter the source URL."; messageError = true; return }
     if (row.kind === "local" && row.path === "") { message = "Enter the file path (relative to the data directory)."; messageError = true; return }
     if (row.kind === "remote" && row.driver === "generic" && row.url.indexOf("{word}") < 0) {
       message = "The URL must contain {word} (and {from}/{to} for translators)."; messageError = true; return
@@ -438,8 +456,105 @@ Item {
           }
         }
 
+        // ------------------------------------------------------ AI service
         Column {
-          visible: !!(root.editing && root.editing.kind === "remote")
+          visible: !!(root.editing && root.editing.driver === "ai")
+          width: parent.width
+          spacing: Style.spacing.md
+
+          Row {
+            width: parent.width
+            spacing: Style.spacing.huge
+            Dropdown {
+              id: aiServicePicker
+              label: "Service"
+              width: Style.spacing.dropdownWidth
+              options: root.aiServices()
+              value: root.editing ? (root.editing.service || "claude") : "claude"
+              foreground: root.foreground
+              accent: root.accent
+              onChanged: function(v) { root.setEditField("service", v) }
+            }
+            Column {
+              spacing: Style.spacing.labelGap
+              anchors.bottom: parent.bottom
+              FieldLabel { text: "Access" }
+              ButtonGroup {
+                options: [{value: "cli", label: "Signed-in CLI", tooltip: "Runs the service's own command line tool, which uses your account – free plans included. No API key."},
+                          {value: "api", label: "HTTP API + key", tooltip: "Calls the service's API with the key stored in the keyring."}]
+                value: root.editing ? (root.editing.transport || "cli") : "cli"
+                foreground: root.foreground
+                background: "transparent"
+                accent: root.accent
+                onChanged: function(v) { root.setEditField("transport", v) }
+              }
+            }
+          }
+
+          Text {
+            width: parent.width
+            textFormat: Text.PlainText
+            wrapMode: Text.WordWrap
+            text: root.editing && root.editing.transport === "api"
+              ? "The API is billed per request by the service. The key is kept in the keyring, never in a file."
+              : "Uses the account you are signed in to in the service's CLI – a free plan works, a paid one (Claude Pro, for instance) is simply used as it is."
+            color: root.muted
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.caption
+          }
+
+          Row {
+            width: parent.width
+            spacing: Style.spacing.huge
+            Column {
+              width: (parent.width - Style.spacing.huge) / 2
+              spacing: Style.spacing.labelGap
+              FieldLabel { text: "Model  (empty = the service's small default)" }
+              TextField {
+                id: modelField
+                width: parent.width
+                text: root.editing ? (root.editing.model || "") : ""
+                placeholderText: root.editing && root.aiPreset(root.editing.service || "claude")
+                  ? root.aiPreset(root.editing.service || "claude").model : ""
+                foreground: root.foreground
+                accent: root.accent
+              }
+            }
+            Column {
+              width: (parent.width - Style.spacing.huge) / 2
+              spacing: Style.spacing.labelGap
+              FieldLabel { text: "Command  (empty = the service's CLI)" }
+              TextField {
+                id: commandField
+                width: parent.width
+                enabled: !(root.editing && root.editing.transport === "api")
+                text: root.editing ? (root.editing.command || "") : ""
+                placeholderText: root.editing && root.aiPreset(root.editing.service || "claude")
+                  ? root.aiPreset(root.editing.service || "claude").command : ""
+                foreground: root.foreground
+                accent: root.accent
+              }
+            }
+          }
+
+          Column {
+            visible: !!(root.editing && root.editing.transport === "api")
+            width: parent.width
+            spacing: Style.spacing.labelGap
+            FieldLabel { text: "API endpoint  (empty = the service's own; {model} is substituted)" }
+            TextField {
+              id: aiEndpointField
+              width: parent.width
+              text: root.editing ? (root.editing.url || "") : ""
+              placeholderText: "https://…"
+              foreground: root.foreground
+              accent: root.accent
+            }
+          }
+        }
+
+        Column {
+          visible: !!(root.editing && root.editing.kind === "remote" && root.editing.driver !== "ai")
           width: parent.width
           spacing: Style.spacing.labelGap
           FieldLabel { text: "URL  (use {word}; translators may also use {from} and {to})" }
