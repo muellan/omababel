@@ -488,8 +488,9 @@ Item {
               spacing: Style.spacing.md
               Text {
                 textFormat: Text.PlainText
-                text: (modelData.ok ? "✔ " : "✘ ") + modelData.source.name + "  ·  " + root.sourceLine(modelData)
-                color: modelData.ok ? root.muted : root.errorColor
+                text: (modelData.pending ? "󰑐 " : (modelData.ok ? "✔ " : "✘ "))
+                      + modelData.source.name + "  ·  " + root.sourceLine(modelData)
+                color: modelData.pending ? root.accent : (modelData.ok ? root.muted : root.errorColor)
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
               }

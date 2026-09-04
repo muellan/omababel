@@ -5,4 +5,4 @@ JSON request/response protocol (see ``backend/omababel.py``).  Everything
 in here is deliberately dependency free so the plugin stays self-contained.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"

@@ -310,7 +310,7 @@
    "path": "/home/user/.omababel/data/unihan.sqlite"
   },
   "mini-en": {
-   "path": "/home/user/.omababel/cache/mini-en-b0b60b2ba1e735dd.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-0000000000000000.sqlite",
    "entries": 4,
    "languages": [
     "en"
@@ -323,7 +323,7 @@
    "installed": true
   },
   "mini-en-thes": {
-   "path": "/home/user/.omababel/cache/mini-en-b0b60b2ba1e735dd.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-0000000000000000.sqlite",
    "entries": 4,
    "languages": [
     "en"
@@ -336,7 +336,7 @@
    "installed": true
   },
   "mini-de": {
-   "path": "/home/user/.omababel/cache/mini-de-0ec27a25c5db8971.sqlite",
+   "path": "/home/user/.omababel/cache/mini-de-0000000000000000.sqlite",
    "entries": 2,
    "languages": [
     "de"
@@ -349,7 +349,7 @@
    "installed": true
   },
   "mini-de-thes": {
-   "path": "/home/user/.omababel/cache/mini-de-0ec27a25c5db8971.sqlite",
+   "path": "/home/user/.omababel/cache/mini-de-0000000000000000.sqlite",
    "entries": 2,
    "languages": [
     "de"
@@ -362,7 +362,7 @@
    "installed": true
   },
   "mini-trans": {
-   "path": "/home/user/.omababel/cache/mini-en-b0b60b2ba1e735dd.sqlite",
+   "path": "/home/user/.omababel/cache/mini-en-0000000000000000.sqlite",
    "entries": 4,
    "languages": [
     "en"

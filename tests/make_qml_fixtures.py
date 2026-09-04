@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -96,6 +97,9 @@ def main() -> None:
         text = (json.dumps(_stable(obj), ensure_ascii=False, indent=1)
                 .replace(str(tmp), "/home/user/.omababel")
                 .replace(str(ROOT), "/home/user/omababel"))
+        # an index file is named after a hash of its source path, which is the
+        # throw-away directory of this run
+        text = re.sub(r"-[0-9a-f]{16}\.sqlite", "-0000000000000000.sqlite", text)
         (OUT / f"{name}.json").write_text(text + "\n", encoding="utf-8")
         print("wrote", OUT / f"{name}.json")
     shutil.rmtree(tmp, ignore_errors=True)
