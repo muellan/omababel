@@ -175,6 +175,22 @@ Item {
           harness.check(p.historyNavIndex === 0, "Ctrl+N stops at the newest entry")
           p.runSearch("fresh")
           harness.check(p.historyNav === null, "a fresh search resets the history walk")
+          // after a history walk the dropdown must show every entry again
+          p.historyStep(1)
+          harness.check(p.searchTyped === false, "history walk does not count as typing")
+          p.toggleHistoryPopup()
+          harness.check(p.historyView.opened === true, "history popup opened by keyboard")
+          harness.check(p.historyView.rows.length === p.history.length,
+                        "unfiltered after a history walk: " + p.historyView.rows.length + " of " + p.history.length)
+          p.toggleHistoryPopup()
+          // Ctrl+U scrolls instead of clearing the results (Qt binds it to
+          // delete-to-start-of-line inside the field)
+          p.result = harness.readJson(fx + "/lookup.json")
+          p.searching = false
+          harness.check(p.panelAction(Qt.Key_U, false) === true, "Ctrl+U handled by the panel")
+          harness.check(p.result !== null, "Ctrl+U keeps the results")
+          harness.check(p.panelAction(Qt.Key_D, false) === true, "Ctrl+D handled by the panel")
+          harness.check(p.result !== null, "Ctrl+D keeps the results")
           p.result = harness.readJson(fx + "/lookup.json")
           p.searching = false
           p.resultsView.scrollBy(0.5)

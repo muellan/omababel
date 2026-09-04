@@ -51,6 +51,10 @@ Item {
   // reshuffle the list under the cursor.
   property var historyNav: null
   property int historyNavIndex: -1
+  // True while the field holds something the user typed.  Text we put there
+  // ourselves (history walk, a clicked result word, a payload) must not
+  // filter the history dropdown – opening it then shows the full history.
+  property bool searchTyped: false
 
   // --- exposed for tests / IPC callers
   readonly property alias searchInput: searchField
@@ -120,6 +124,7 @@ Item {
     if (payload.lang2) root.lang2 = String(payload.lang2)
     if (payload.query !== undefined && String(payload.query).trim() !== "") {
       searchField.text = String(payload.query).trim()
+      root.searchTyped = false
       root.runSearch(searchField.text)
     }
   }
@@ -180,6 +185,7 @@ Item {
   function clearSearch() {
     historyPopup.close()
     searchField.text = ""
+    root.searchTyped = false
     root.clearResults()
     searchField.forceActiveFocus()
   }
@@ -201,11 +207,44 @@ Item {
     root.historyNavIndex = next
     var row = root.historyNav[next]
     searchField.text = row.query
+    root.searchTyped = false
     if (row.mode && ["lookup", "thesaurus", "translate"].indexOf(row.mode) >= 0) root.mode = row.mode
     if (row.lang) root.lang = row.lang
     if (row.lang2) root.lang2 = row.lang2
     root.runSearch(row.query, true)
     root.setStatus("History " + (next + 1) + " / " + root.historyNav.length + ": " + row.query, false)
+  }
+
+  function toggleHistoryPopup() {
+    if (historyPopup.opened) historyPopup.close()
+    else historyPopup.openWith(root.searchTyped ? searchField.text : "")
+  }
+
+  // Qt's line edit binds several Ctrl keys itself (Ctrl+U deletes to the
+  // start of the line, Ctrl+K to the end, Ctrl+C copies, Ctrl+H is
+  // backspace on X11 …) and consumes them before a window Shortcut is
+  // reached.  The field's key handler therefore dispatches through this
+  // function, which is also what every Shortcut below calls – so the two
+  // paths can never drift apart.  Returns true when the key was handled.
+  function panelAction(key, shift) {
+    if (root.prefsOpen) return false
+    switch (key) {
+    case Qt.Key_C:
+    case Qt.Key_Backspace: root.clearSearch(); return true
+    case Qt.Key_D: resultsView.scrollBy(0.5); return true
+    case Qt.Key_U: resultsView.scrollBy(-0.5); return true
+    case Qt.Key_H: root.toggleHistoryPopup(); return true
+    case Qt.Key_P: root.historyStep(1); return true
+    case Qt.Key_N: root.historyStep(-1); return true
+    case Qt.Key_S: root.swapLangs(); return true
+    case Qt.Key_BracketLeft: root.openLanguagePicker(false); return true
+    case Qt.Key_BracketRight: root.openLanguagePicker(true); return true
+    case Qt.Key_L: searchField.forceActiveFocus(); searchField.selectAll(); return true
+    case Qt.Key_1: root.setMode("lookup"); return true
+    case Qt.Key_2: root.setMode("thesaurus"); return true
+    case Qt.Key_3: root.setMode("translate"); return true
+    }
+    return false
   }
 
   function openLanguagePicker(secondary) {
@@ -308,6 +347,7 @@ Item {
     word = String(word || "").trim()
     if (!word) return
     searchField.text = word
+    root.searchTyped = false
     root.runSearch(word)
   }
 
@@ -396,21 +436,21 @@ Item {
     Rectangle { anchors.fill: parent; color: Color.menu.scrim }
     MouseArea { anchors.fill: parent; onClicked: root.dismiss() }
 
-    Shortcut { sequence: "Ctrl+1"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("lookup") }
-    Shortcut { sequence: "Ctrl+2"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("thesaurus") }
-    Shortcut { sequence: "Ctrl+3"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.setMode("translate") }
-    Shortcut { sequence: "Ctrl+S"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.swapLangs() }
-    Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: { searchField.forceActiveFocus(); searchField.selectAll() } }
+    Shortcut { sequence: "Ctrl+1"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_1, false) }
+    Shortcut { sequence: "Ctrl+2"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_2, false) }
+    Shortcut { sequence: "Ctrl+3"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_3, false) }
+    Shortcut { sequence: "Ctrl+S"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_S, false) }
+    Shortcut { sequence: "Ctrl+L"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_L, false) }
     Shortcut { sequence: "Ctrl+,"; context: Qt.WindowShortcut; enabled: root.opened; onActivated: root.prefsOpen ? root.closePrefs() : root.openPrefs() }
-    Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: historyPopup.opened ? historyPopup.close() : historyPopup.openWith(searchField.text) }
-    Shortcut { sequence: "Ctrl+C"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.clearSearch() }
-    Shortcut { sequence: "Ctrl+Backspace"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.clearSearch() }
-    Shortcut { sequence: "Ctrl+P"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.historyStep(1) }
-    Shortcut { sequence: "Ctrl+N"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.historyStep(-1) }
-    Shortcut { sequence: "Ctrl+["; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.openLanguagePicker(false) }
-    Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.openLanguagePicker(true) }
-    Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: resultsView.scrollBy(0.5) }
-    Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: resultsView.scrollBy(-0.5) }
+    Shortcut { sequence: "Ctrl+H"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_H, false) }
+    Shortcut { sequence: "Ctrl+C"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_C, false) }
+    Shortcut { sequence: "Ctrl+Backspace"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_Backspace, false) }
+    Shortcut { sequence: "Ctrl+P"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_P, false) }
+    Shortcut { sequence: "Ctrl+N"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_N, false) }
+    Shortcut { sequence: "Ctrl+["; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_BracketLeft, false) }
+    Shortcut { sequence: "Ctrl+]"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_BracketRight, false) }
+    Shortcut { sequence: "Ctrl+D"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_D, false) }
+    Shortcut { sequence: "Ctrl+U"; context: Qt.WindowShortcut; enabled: root.opened && !root.prefsOpen; onActivated: root.panelAction(Qt.Key_U, false) }
 
     BorderSurface {
       id: card
@@ -595,20 +635,20 @@ Item {
               else root.runSearch(text)
             }
             onTextEdited: {
+              root.searchTyped = true
               if (historyPopup.opened) historyPopup.filter(text)
               if (text.trim() === "" && (root.result !== null || root.searching)) root.clearResults()
             }
             Keys.priority: Keys.BeforeItem
             Keys.onPressed: function(event) {
-              // TextInput claims Ctrl+C (copy) and Ctrl+Backspace (delete
-              // word) before window shortcuts get a chance – intercept here.
-              if ((event.modifiers & Qt.ControlModifier) && (event.key === Qt.Key_C || event.key === Qt.Key_Backspace)) {
-                root.clearSearch()
-                event.accepted = true
-                return
+              if (event.modifiers & Qt.ControlModifier) {
+                if (root.panelAction(event.key, (event.modifiers & Qt.ShiftModifier) !== 0)) {
+                  event.accepted = true
+                  return
+                }
               }
               if (event.key === Qt.Key_Down) {
-                if (!historyPopup.opened) historyPopup.openWith(searchField.text)
+                if (!historyPopup.opened) root.toggleHistoryPopup()
                 else historyPopup.move(1)
                 event.accepted = true
               } else if (event.key === Qt.Key_Up) {
@@ -703,6 +743,7 @@ Item {
             function pick(row) {
               close()
               searchField.text = row.query
+              root.searchTyped = false
               if (row.mode && ["lookup", "thesaurus", "translate"].indexOf(row.mode) >= 0) root.mode = row.mode
               if (row.lang) root.lang = row.lang
               if (row.lang2) root.lang2 = row.lang2
