@@ -24,10 +24,15 @@ sys.path.insert(0, str(HERE))
 OUT = HERE / "qml" / "fixtures"
 
 
+# Values that differ on every run and say nothing about the shapes the QML
+# has to render: a measured duration, a build timestamp.
+_VOLATILE = {"ms": 12, "built": 1700000000}
+
+
 def _stable(obj):
-    """Replace measured durations with a fixed value."""
     if isinstance(obj, dict):
-        return {k: (12 if k == "ms" and isinstance(v, int) else _stable(v)) for k, v in obj.items()}
+        return {k: (_VOLATILE[k] if k in _VOLATILE and isinstance(v, (int, float)) else _stable(v))
+                for k, v in obj.items()}
     if isinstance(obj, list):
         return [_stable(v) for v in obj]
     return obj
@@ -88,7 +93,9 @@ def main() -> None:
         # The throw-away XDG tree and the measured durations change on every
         # run; keep both out of the fixtures so regenerating them shows only
         # real changes.
-        text = json.dumps(_stable(obj), ensure_ascii=False, indent=1).replace(str(tmp), "/home/user/.omababel")
+        text = (json.dumps(_stable(obj), ensure_ascii=False, indent=1)
+                .replace(str(tmp), "/home/user/.omababel")
+                .replace(str(ROOT), "/home/user/omababel"))
         (OUT / f"{name}.json").write_text(text + "\n", encoding="utf-8")
         print("wrote", OUT / f"{name}.json")
     shutil.rmtree(tmp, ignore_errors=True)
