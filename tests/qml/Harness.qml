@@ -287,25 +287,36 @@ Item {
           harness.check(p.historyMax === 1000, "history max default")
           break
         case 55:
-          // the sources filter bar
+          // the sources filter bar: one toggle per property, all engaged by
+          // default, and a Reset that puts them back
           var prefs55 = p.prefsView
           prefs55.tab = "sources"
           prefs55.resetFilters()
+          harness.check(prefs55.filtersAreDefault, "everything is shown by default")
           harness.check(prefs55.visibleSources.length === p.sources.length, "no filter shows every source")
           harness.check(prefs55.canReorder, "reordering is allowed with everything shown")
-          prefs55.filterEnabled = "enabled"
+          prefs55.showDisabled = false
+          harness.check(!prefs55.filtersAreDefault, "the reset button lights up")
           harness.check(prefs55.visibleSources.length > 0, "some sources are enabled")
           for (var e = 0; e < prefs55.visibleSources.length; e++)
             harness.check(prefs55.visibleSources[e].enabled, "only enabled sources shown")
           harness.check(prefs55.canReorder, "reordering is allowed with all enabled sources shown")
-          prefs55.filterEnabled = "disabled"
+          prefs55.showEnabled = false
+          prefs55.showDisabled = true
           harness.check(!prefs55.canReorder, "reordering is refused with a partial list")
-          prefs55.filterEnabled = "all"
-          prefs55.filterType = "thesaurus"
-          for (var t = 0; t < prefs55.visibleSources.length; t++)
+          for (var d2 = 0; d2 < prefs55.visibleSources.length; d2++)
+            harness.check(!prefs55.visibleSources[d2].enabled, "only disabled sources shown")
+          prefs55.showEnabled = true
+          // two toggles combine: enabled AND thesaurus
+          prefs55.showDictionary = false
+          prefs55.showTranslator = false
+          prefs55.showDisabled = false
+          for (var t = 0; t < prefs55.visibleSources.length; t++) {
             harness.check(prefs55.visibleSources[t].type === "thesaurus", "only thesaurus sources shown")
+            harness.check(prefs55.visibleSources[t].enabled, "... and only enabled ones")
+          }
           harness.check(!prefs55.canReorder, "a type filter blocks reordering")
-          prefs55.filterType = "all"
+          prefs55.resetFilters()
           prefs55.filterGroup = "ai"
           harness.check(prefs55.visibleSources.length === 3, "three AI sources: " + prefs55.visibleSources.length)
           for (var a = 0; a < prefs55.visibleSources.length; a++)
@@ -320,6 +331,7 @@ Item {
             harness.check(!prefs55.visibleSources[n].has_key, "only keyless sources shown")
           prefs55.resetFilters()
           harness.check(prefs55.visibleSources.length === p.sources.length, "filters reset")
+          harness.check(prefs55.filtersAreDefault, "reset restores the default")
           break
         case 56:
           // multi-select, bulk move and drag reordering

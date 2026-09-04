@@ -161,10 +161,13 @@ button to clear the history).
 (disabled sources are not queried), edited, moved, deleted, or tested with a
 sample word. **Add source** creates a new one.
 
-The **filter bar** above the list narrows it down by state (all / enabled /
-disabled), by type (all / dictionary / thesaurus / translation) and by kind
-(AI services, web sources, local dictionaries, Wiktionary, FreeDict, with or
-without a stored key). The result of the last action — a test, an install, a
+The **filter bar** above the list has one toggle per property — *Enabled*,
+*Disabled*, *Dictionary*, *Thesaurus*, *Translation* — each meaning "show
+sources with this property". All of them start engaged; switching *Disabled*
+off hides the disabled sources, leaving *Enabled* and *Thesaurus* on shows
+the enabled thesaurus sources, and **Reset filter** puts everything back. The
+dropdown next to them narrows by kind (AI services, web sources, local
+dictionaries, Wiktionary, Freedict, with or without a stored key). The result of the last action — a test, an install, a
 save — sits in its own strip above the list and stays there while the list
 scrolls.
 

@@ -34,8 +34,13 @@ Item {
   readonly property alias keyInput: keyField
 
   // --- source list: filters, selection, drag and drop
-  property string filterEnabled: "all"      // all | enabled | disabled
-  property string filterType: "all"         // all | dictionary | thesaurus | translator
+  // Each filter chip stands for "show sources with this property"; all of
+  // them are engaged by default, so everything is shown.
+  property bool showEnabled: true
+  property bool showDisabled: true
+  property bool showDictionary: true
+  property bool showThesaurus: true
+  property bool showTranslator: true
   property string filterGroup: "all"        // all | ai | web | local | wiktionary | freedict | key | nokey
   property var selectedIds: []
   property int lastClickedIndex: -1
@@ -47,8 +52,8 @@ Item {
   readonly property var visibleSources: root.filterSources()
   // Rows may only be reordered when the shown set is complete enough for a
   // new order to mean anything: every source, or every enabled one.
-  readonly property bool canReorder: root.filterType === "all" && root.filterGroup === "all"
-                                     && (root.filterEnabled === "all" || root.filterEnabled === "enabled")
+  readonly property bool allTypesShown: root.showDictionary && root.showThesaurus && root.showTranslator
+  readonly property bool canReorder: root.allTypesShown && root.filterGroup === "all" && root.showEnabled
 
   signal saveSource(var source, bool clearKey)
   signal deleteSource(string id)
@@ -79,23 +84,35 @@ Item {
     }
   }
 
+  function showsType(type) {
+    if (type === "thesaurus") return root.showThesaurus
+    if (type === "translator") return root.showTranslator
+    return root.showDictionary
+  }
+
   function filterSources() {
     var out = []
     for (var i = 0; i < root.sources.length; i++) {
       var row = root.sources[i]
-      if (root.filterEnabled === "enabled" && !row.enabled) continue
-      if (root.filterEnabled === "disabled" && row.enabled) continue
-      if (root.filterType !== "all" && row.type !== root.filterType) continue
+      if (!(row.enabled ? root.showEnabled : root.showDisabled)) continue
+      if (!root.showsType(row.type)) continue
       if (!root.matchesGroup(row)) continue
       out.push(row)
     }
     return out
   }
 
+  readonly property bool filtersAreDefault: root.showEnabled && root.showDisabled
+    && root.allTypesShown && root.filterGroup === "all"
+
   function resetFilters() {
-    root.filterEnabled = "all"
-    root.filterType = "all"
+    root.showEnabled = true
+    root.showDisabled = true
+    root.showDictionary = true
+    root.showThesaurus = true
+    root.showTranslator = true
     root.filterGroup = "all"
+    root.clearSelection()
   }
 
   // ------------------------------------------------------------- selection
@@ -473,39 +490,84 @@ Item {
       visible: root.tab === "sources"
       width: parent.width
       spacing: Style.spacing.md
+      // The same gap the main panel leaves between the mode row and the
+      // search field: one column spacing plus one of our own.
+      topPadding: Style.spacing.md
 
-      ButtonGroup {
-        options: [{value: "all", label: "All"}, {value: "enabled", label: "Enabled"},
-                  {value: "disabled", label: "Disabled"}]
-        value: root.filterEnabled
+      // Every chip means "show sources with this property"; all engaged is
+      // the default, and Reset puts them back.
+      Button {
+        id: resetFilter
+        text: "Reset filter"
+        iconText: "󰑓"
+        iconSize: Style.font.body
+        bordered: true
+        enabled: !root.filtersAreDefault
+        opacity: enabled ? 1 : 0.5
+        tooltipText: "Show every source again"
         foreground: root.foreground
-        background: "transparent"
         accent: root.accent
-        onChanged: function(v) { root.filterEnabled = v; root.clearSelection() }
+        onClicked: root.resetFilters()
       }
-      ButtonGroup {
-        options: [{value: "all", label: "All"}, {value: "dictionary", label: "Dictionary"},
-                  {value: "thesaurus", label: "Thesaurus"}, {value: "translator", label: "Translation"}]
-        value: root.filterType
+      // Twice the row's spacing between Reset and the chips it resets.
+      Item { width: Style.spacing.md; height: 1 }
+
+      ObToggleChip {
+        text: "Enabled"
+        checked: root.showEnabled
+        tooltipText: "Show sources that are switched on"
         foreground: root.foreground
-        background: "transparent"
         accent: root.accent
-        onChanged: function(v) { root.filterType = v; root.clearSelection() }
+        onToggled: { root.showEnabled = !root.showEnabled; root.clearSelection() }
+      }
+      ObToggleChip {
+        text: "Disabled"
+        checked: root.showDisabled
+        tooltipText: "Show sources that are switched off"
+        foreground: root.foreground
+        accent: root.accent
+        onToggled: { root.showDisabled = !root.showDisabled; root.clearSelection() }
+      }
+      ObToggleChip {
+        text: "Dictionary"
+        checked: root.showDictionary
+        tooltipText: "Show dictionary sources"
+        foreground: root.foreground
+        accent: root.accent
+        onToggled: { root.showDictionary = !root.showDictionary; root.clearSelection() }
+      }
+      ObToggleChip {
+        text: "Thesaurus"
+        checked: root.showThesaurus
+        tooltipText: "Show thesaurus sources"
+        foreground: root.foreground
+        accent: root.accent
+        onToggled: { root.showThesaurus = !root.showThesaurus; root.clearSelection() }
+      }
+      ObToggleChip {
+        text: "Translation"
+        checked: root.showTranslator
+        tooltipText: "Show translation sources"
+        foreground: root.foreground
+        accent: root.accent
+        onToggled: { root.showTranslator = !root.showTranslator; root.clearSelection() }
       }
       Dropdown {
         id: groupPicker
         showLabel: false
         width: Style.spacing.dropdownWidth
-        options: [{value: "all", label: "All sources"}, {value: "ai", label: "AI services"},
+        options: [{value: "all", label: "All source types"}, {value: "ai", label: "AI services"},
                   {value: "web", label: "Web sources"}, {value: "local", label: "Local dictionaries"},
-                  {value: "wiktionary", label: "Wiktionary"}, {value: "freedict", label: "FreeDict"},
+                  {value: "wiktionary", label: "Wiktionary (local)"}, {value: "freedict", label: "Freedict (local)"},
                   {value: "nokey", label: "Without a stored key"}, {value: "key", label: "With a stored key"}]
         value: root.filterGroup
         foreground: root.foreground
         accent: root.accent
         onChanged: function(v) { root.filterGroup = v; root.clearSelection() }
       }
+      // Sits on the chips' centre line rather than at the top of the row.
       Row {
+        height: resetFilter.height
         spacing: Style.spacing.md
         Text {
           objectName: "filterSummary"
