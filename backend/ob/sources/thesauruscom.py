@@ -59,6 +59,15 @@ class ThesaurusCom(Source):
             groups = cls._from_dom(markup)
         return [g for g in groups if g["synonyms"] or g["antonyms"]]
 
+    # Tab labels and cross-links that are not words ("Definitions" points at
+    # dictionary.com, which shares the /browse/ path shape).
+    _JUNK_WORD = re.compile(r"(?i)^(definitions?|synonyms?|antonyms?|examples?|see more|show more|"
+                            r"more|quiz|word of the day)$")
+
+    @classmethod
+    def _clean_words(cls, words: List[str]) -> List[str]:
+        return [w for w in words if w and len(w) < 60 and not cls._JUNK_WORD.match(w.strip())]
+
     @staticmethod
     def _terms(blob: str) -> List[str]:
         try:
@@ -109,7 +118,7 @@ class ThesaurusCom(Source):
                 pos_idx = idx + len(key) + (len(blob) if blob else 0)
                 if not blob:
                     continue
-                terms = cls._terms(blob)
+                terms = cls._clean_words(cls._terms(blob))
                 if is_syn or current is None:
                     window = text[max(0, idx - 600):idx]
                     label = ""
@@ -164,10 +173,10 @@ class ThesaurusCom(Source):
             if node.closest("nav") or node.closest("footer") or node.closest("header"):
                 continue
             if node.tag == "a":
-                if current is not None and target and "/browse/" in node.get("href", ""):
-                    word = node.inline_text()
+                if current is not None and target and cls._is_word_link(node):
+                    word = cls._clean_words([node.inline_text()])
                     if word:
-                        current[target].append(word)
+                        current[target].append(word[0])
                 continue
             if node.tag in ("h1", "h2", "h3", "h4", "h5", "h6", "p", "strong", "span", "div", "button"):
                 if any(c.tag in ("a", "ul", "ol", "div", "section") for c in node.children):
@@ -206,7 +215,13 @@ class ThesaurusCom(Source):
             g["antonyms"] = R.dedupe(g["antonyms"])
         return groups
 
+    @classmethod
+    def _links(cls, node) -> List[str]:
+        return cls._clean_words([a.inline_text() for a in node.find_all("a") if cls._is_word_link(a)])
+
     @staticmethod
-    def _links(node) -> List[str]:
-        return [a.inline_text() for a in node.find_all("a")
-                if "/browse/" in a.get("href", "") and a.inline_text()]
+    def _is_word_link(a) -> bool:
+        href = a.get("href", "")
+        # dictionary.com uses the same /browse/ path, so its "Definitions" tab
+        # link would otherwise look like a synonym.
+        return "/browse/" in href and "dictionary.com" not in href

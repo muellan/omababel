@@ -46,7 +46,7 @@ Item {
         ["Right click", "Copy the clicked word (or a whole translation)"],
         ["Ctrl+J  ·  Ctrl+K", "Select the next / previous result card"],
         ["Ctrl+D  ·  Ctrl+U", "Scroll the result list down / up"],
-        ["Ctrl+I  ·  Ctrl+O", "Collapse / expand the selected card"],
+        ["Ctrl+O", "Collapse or expand the selected card (double click does the same)"],
         ["Ctrl+Shift+I  ·  Ctrl+Shift+O", "Collapse / expand every card"],
         ["Ctrl+A  ·  Ctrl+Z", "Thesaurus mode: sort alphabetically / by length"]
       ]
@@ -60,111 +60,111 @@ Item {
     }
   ]
 
-  Column {
-    id: layout
-    anchors.fill: parent
+  Row {
+    id: topRow
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
     spacing: Style.spacing.md
-
-    Row {
-      id: topRow
-      width: parent.width
-      spacing: Style.spacing.md
-      Button {
-        id: docButton
-        anchors.verticalCenter: parent.verticalCenter
-        text: "Documentation"
-        iconText: "󰈙"
-        iconSize: Style.font.body
-        bordered: true
-        tooltipText: root.documentationUrl
-        foreground: root.foreground
-        accent: root.accent
-        onClicked: Qt.openUrlExternally(root.documentationUrl)
-      }
-      Text {
-        anchors.verticalCenter: parent.verticalCenter
-        textFormat: Text.PlainText
-        text: "Opens the README of the plugin repository in the browser."
-          + (root.version !== "" ? "   ·   version " + root.version : "")
-        color: root.muted
-        font.family: root.fontFamily
-        font.pixelSize: Style.font.caption
-      }
+    Button {
+      id: docButton
+      anchors.verticalCenter: parent.verticalCenter
+      text: "Documentation"
+      iconText: "󰈙"
+      iconSize: Style.font.body
+      bordered: true
+      tooltipText: root.documentationUrl
+      foreground: root.foreground
+      accent: root.accent
+      onClicked: Qt.openUrlExternally(root.documentationUrl)
     }
+    Text {
+      anchors.verticalCenter: parent.verticalCenter
+      textFormat: Text.PlainText
+      text: "Opens the README of the plugin repository in the browser."
+        + (root.version !== "" ? "   ·   version " + root.version : "")
+      color: root.muted
+      font.family: root.fontFamily
+      font.pixelSize: Style.font.caption
+    }
+  }
 
-    Flickable {
-      id: helpFlick
-      width: parent.width
-      height: layout.height - topRow.height - layout.spacing
-      contentWidth: width
-      contentHeight: helpCol.implicitHeight
-      clip: true
-      boundsBehavior: Flickable.StopAtBounds
-      ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+  Flickable {
+    id: helpFlick
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    anchors.top: topRow.bottom
+    // twice the usual gap between the Documentation button and the list
+    anchors.topMargin: Style.spacing.md * 2
+    contentWidth: width
+    contentHeight: helpCol.implicitHeight
+    clip: true
+    boundsBehavior: Flickable.StopAtBounds
+    ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
-      Column {
-        id: helpCol
-        width: helpFlick.width - Style.spacing.md
-        spacing: Style.spacing.lg
+    Column {
+      id: helpCol
+      width: helpFlick.width - Style.spacing.md
+      spacing: Style.spacing.lg
 
-        Repeater {
-          model: root.sections
-          delegate: Column {
-            id: section
-            required property var modelData
-            width: parent.width
-            spacing: Style.spacing.xs
+      Repeater {
+        model: root.sections
+        delegate: Column {
+          id: section
+          required property var modelData
+          width: parent.width
+          spacing: Style.spacing.xs
 
-            Text {
-              textFormat: Text.PlainText
-              text: section.modelData.title
-              color: root.foreground
-              font.family: root.fontFamily
-              font.pixelSize: Style.font.subtitle
-              font.bold: true
-              bottomPadding: Style.spacing.xxs
-            }
+          Text {
+            textFormat: Text.PlainText
+            text: section.modelData.title
+            color: root.foreground
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.subtitle
+            font.bold: true
+            bottomPadding: Style.spacing.xxs
+          }
 
-            Repeater {
-              model: section.modelData.rows
-              delegate: Row {
-                id: shortcutRow
-                required property var modelData
-                width: parent.width
-                spacing: Style.spacing.lg
-                Text {
-                  textFormat: Text.PlainText
-                  text: shortcutRow.modelData[0]
-                  color: root.accent
-                  font.family: root.fontFamily
-                  font.pixelSize: Style.font.body
-                  width: Math.round(shortcutRow.width * 0.32)
-                  elide: Text.ElideRight
-                }
-                Text {
-                  textFormat: Text.PlainText
-                  text: shortcutRow.modelData[1]
-                  color: root.foreground
-                  font.family: root.fontFamily
-                  font.pixelSize: Style.font.body
-                  width: shortcutRow.width - Math.round(shortcutRow.width * 0.32) - Style.spacing.lg
-                  wrapMode: Text.WordWrap
-                }
+          Repeater {
+            model: section.modelData.rows
+            delegate: Row {
+              id: shortcutRow
+              required property var modelData
+              width: parent.width
+              spacing: Style.spacing.lg
+              Text {
+                textFormat: Text.PlainText
+                text: shortcutRow.modelData[0]
+                color: root.accent
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.body
+                width: Math.round(shortcutRow.width * 0.32)
+                elide: Text.ElideRight
+              }
+              Text {
+                textFormat: Text.PlainText
+                text: shortcutRow.modelData[1]
+                color: root.foreground
+                font.family: root.fontFamily
+                font.pixelSize: Style.font.body
+                width: shortcutRow.width - Math.round(shortcutRow.width * 0.32) - Style.spacing.lg
+                wrapMode: Text.WordWrap
               }
             }
           }
         }
+      }
 
-        Text {
-          width: parent.width
-          textFormat: Text.PlainText
-          wrapMode: Text.WordWrap
-          text: "Open the panel from anywhere with:  omarchy-shell shell toggle muellan.omababel '{}'"
-          color: root.muted
-          font.family: root.fontFamily
-          font.pixelSize: Style.font.caption
-          topPadding: Style.spacing.md
-        }
+      Text {
+        width: parent.width
+        textFormat: Text.PlainText
+        wrapMode: Text.WordWrap
+        text: "Open the panel from anywhere with:  omarchy-shell shell toggle muellan.omababel '{}'"
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+        topPadding: Style.spacing.md
       }
     }
   }

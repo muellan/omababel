@@ -16,6 +16,8 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+  function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
 
   function readJson(path) {
@@ -23,6 +25,18 @@ Item {
     xhr.open("GET", "file://" + path, false)
     xhr.send()
     return JSON.parse(xhr.responseText)
+  }
+
+  // Collect every descendant with the given objectName (geometry checks).
+  function collect(item, name, out) {
+    out = out || []
+    if (!item) return out
+    var kids = item.children || []
+    for (var i = 0; i < kids.length; i++) {
+      if (kids[i].objectName === name) out.push(kids[i])
+      harness.collect(kids[i], name, out)
+    }
+    return out
   }
 
   function fail(msg) {
@@ -56,7 +70,8 @@ Item {
       var p = harness.panel
       var fx = harness.fixtureDir
       try {
-        switch (harness.step) {
+        // steps run in order; 51/52 are reached through the mapping below
+        switch (harness.stepId(harness.step)) {
         case 0:
           p.open("{}")
           harness.check(p.opened === true, "open() sets opened")
@@ -91,6 +106,40 @@ Item {
         case 5:
           p.mode = "translate"
           p.result = harness.readJson(fx + "/translate_text.json")
+          break
+        case 51:
+          // Word pairs: both columns are fixed per card, so every target entry
+          // starts at the same x, and a long target wraps inside its column
+          // instead of running under the next row.
+          var long1 = harness.readJson(fx + "/translate.json")
+          var pairs = long1.results[1].pairs      // the first source failed offline
+          var longWord = "ein sehr langes Übersetzungsergebnis mit ausgesprochen vielen Wörtern, "
+                       + "das in seiner eigenen Spalte umbrechen muss und nicht unter die Quellspalte "
+                       + "der nächsten Zeile laufen darf"
+          pairs.push({src: "Haus", dst: longWord, pos: "noun", note: "",
+                      src_html: "Haus", dst_html: longWord, note_html: ""})
+          p.mode = "translate"
+          p.result = long1
+          p.searching = false
+          break
+        case 52:
+          var rows = harness.collect(p.resultsView, "pairRow")
+          var dsts = harness.collect(p.resultsView, "pairDst")
+          harness.check(rows.length >= 2, "translation rows rendered: " + rows.length)
+          harness.check(dsts.length === rows.length, "one target column per row")
+          var x0 = dsts[0].x, w0 = dsts[0].width
+          harness.check(w0 > 0, "target column has a width")
+          for (var d = 1; d < dsts.length; d++) {
+            harness.check(dsts[d].x === x0, "target column aligned (row " + d + ": " + dsts[d].x + " vs " + x0 + ")")
+            harness.check(dsts[d].width === w0, "target column width equal (row " + d + ")")
+          }
+          var wrapped = -1
+          for (var w = 0; w < dsts.length; w++)
+            if (wrapped < 0 || dsts[w].contentHeight > dsts[wrapped].contentHeight) wrapped = w
+          harness.check(dsts[wrapped].contentHeight > dsts[0].contentHeight,
+                        "the long target wraps inside its column (" + dsts[wrapped].contentHeight + ")")
+          harness.check(rows[wrapped].height >= dsts[wrapped].contentHeight,
+                        "the row grows with the wrapped target")
           break
         case 6:
           p.rememberHistory("Haus")
@@ -203,10 +252,14 @@ Item {
           harness.check(view.selectedCard === Math.max(0, view.cardCount - 2), "Ctrl+K selects the previous card")
           for (var k = 0; k < view.cardCount + 2; k++) p.panelAction(Qt.Key_K, false)
           harness.check(view.selectedCard === 0, "Ctrl+K stops at the first card")
-          p.panelAction(Qt.Key_I, false)
-          harness.check(view.isCollapsed(0) === true, "Ctrl+I collapses the selected card")
+          harness.check(p.panelAction(Qt.Key_I, false) === false, "plain Ctrl+I is not a panel shortcut")
           p.panelAction(Qt.Key_O, false)
-          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands the selected card")
+          harness.check(view.isCollapsed(0) === true, "Ctrl+O collapses the selected card")
+          p.panelAction(Qt.Key_O, false)
+          harness.check(view.isCollapsed(0) === false, "Ctrl+O expands it again")
+          view.toggleCollapsed(0)
+          harness.check(view.isCollapsed(0) === true, "a double click toggles a card")
+          view.toggleCollapsed(0)
           p.panelAction(Qt.Key_I, true)
           harness.check(view.isCollapsed(0) && view.isCollapsed(view.cardCount - 1), "Ctrl+Shift+I collapses all")
           p.panelAction(Qt.Key_O, true)
@@ -248,7 +301,7 @@ Item {
             for (var ri = 0; ri < rows.length; ri++) shortcuts += rows[ri][0] + " | "
           }
           var expected = ["Ctrl+1", "Ctrl+[", "Ctrl+]", "Ctrl+S", "Ctrl+L", "Ctrl+C", "Ctrl+H", "Ctrl+P",
-                          "Ctrl+J", "Ctrl+D", "Ctrl+I", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
+                          "Ctrl+J", "Ctrl+D", "Ctrl+O", "Ctrl+Shift+I", "Ctrl+A", "Ctrl+.", "Ctrl+,"]
           for (var ei = 0; ei < expected.length; ei++)
             harness.check(shortcuts.indexOf(expected[ei]) >= 0, "help documents " + expected[ei])
           harness.check(p.helpView.documentationUrl.indexOf("github.com/muellan/omababel") >= 0, "documentation link")

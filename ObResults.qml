@@ -85,6 +85,13 @@ Item {
     root.collapsedCards = next
   }
 
+  // Ctrl+O and a double click on a card toggle the selected card.
+  function toggleSelected() {
+    if (root.selectedCard < 0 && root.countCards() > 0) root.selectedCard = 0
+    root.toggleCollapsed(root.selectedCard)
+    root.showCard(root.selectedCard)
+  }
+
   function collapseSelected(collapsed) {
     if (root.selectedCard < 0 && root.countCards() > 0) root.selectedCard = 0
     root.setCollapsed(root.selectedCard, collapsed)
@@ -178,14 +185,15 @@ Item {
 
     Component.onCompleted: if (cardIndex >= 0) root.registerCard(cardIndex, cardRoot)
 
-    // clicking anywhere on the card selects it
+    // Clicking anywhere on the card selects it, a double click folds it away.
+    // Chips, links and buttons sit above this area and keep their own clicks.
     MouseArea {
       anchors.fill: parent
       acceptedButtons: Qt.LeftButton
       propagateComposedEvents: true
-      onPressed: function(mouse) {
-        root.selectCard(cardRoot.cardIndex)
-        mouse.accepted = false
+      onPressed: function(mouse) { root.selectCard(cardRoot.cardIndex) }
+      onDoubleClicked: function(mouse) {
+        if (cardRoot.collapsible) root.toggleCollapsed(cardRoot.cardIndex)
       }
     }
 
@@ -308,9 +316,81 @@ Item {
     font.pixelSize: Style.font.bodySmall
   }
 
+  // ------------------------------------------------------- card toolbar
+  // Pinned above the list so it stays reachable while scrolling.
+  Row {
+    id: cardToolbar
+    anchors.top: parent.top
+    anchors.left: parent.left
+    anchors.right: parent.right
+    visible: root.cardCount > 0 && !root.searching
+    height: visible ? implicitHeight : 0
+    spacing: Style.spacing.md
+
+    Button {
+      id: collapseAllButton
+      text: "Collapse all"
+      iconText: "󰅃"
+      iconSize: Style.font.body
+      fontSize: Style.font.bodySmall
+      bordered: true
+      tooltipText: "Collapse every card (Ctrl+Shift+I)"
+      foreground: root.foreground
+      accent: root.accent
+      onClicked: root.setAllCollapsed(true)
+    }
+    Button {
+      id: expandAllButton
+      text: "Expand all"
+      iconText: "󰅀"
+      iconSize: Style.font.body
+      fontSize: Style.font.bodySmall
+      bordered: true
+      tooltipText: "Expand every card (Ctrl+Shift+O)"
+      foreground: root.foreground
+      accent: root.accent
+      onClicked: root.setAllCollapsed(false)
+    }
+
+    Item {
+      width: Math.max(0, cardToolbar.width - collapseAllButton.width - expandAllButton.width
+                          - (sortRow.visible ? sortRow.width : 0) - Style.spacing.md * 3)
+      height: 1
+    }
+
+    Row {
+      id: sortRow
+      visible: root.mode === "thesaurus"
+      spacing: Style.spacing.md
+      Text {
+        textFormat: Text.PlainText
+        text: "Sort"
+        color: root.muted
+        font.family: root.fontFamily
+        font.pixelSize: Style.font.caption
+        anchors.verticalCenter: parent.verticalCenter
+      }
+      ButtonGroup {
+        options: [{value: "alpha", label: "A–Z", tooltip: "Sort alphabetically (Ctrl+A)"},
+                  {value: "length", label: "Length", tooltip: "Sort by word length (Ctrl+Z)"}]
+        value: root.sortMode
+        foreground: root.foreground
+        background: "transparent"
+        accent: root.accent
+        fontSize: Style.font.bodySmall
+        onChanged: function(v) { root.sortRequested(v) }
+      }
+    }
+  }
+
   Flickable {
     id: flick
-    anchors.fill: parent
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    // the toolbar stays put while the list scrolls underneath it
+    anchors.top: cardToolbar.visible ? cardToolbar.bottom : parent.top
+    anchors.topMargin: cardToolbar.visible ? Style.spacing.md : 0
     contentWidth: width
     contentHeight: column.implicitHeight + Style.spacing.lg
     clip: true
@@ -342,69 +422,6 @@ Item {
           : "No source is configured for this language and mode. Open the preferences (󰒓) to add or enable sources."
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
-      }
-
-      // ------------------------------------------------------- card toolbar
-      Row {
-        id: cardToolbar
-        visible: root.cardCount > 0 && !root.searching
-        width: parent.width
-        spacing: Style.spacing.md
-
-        Button {
-          id: collapseAllButton
-          text: "Collapse all"
-          iconText: "󰅃"
-          iconSize: Style.font.body
-          fontSize: Style.font.bodySmall
-          bordered: true
-          tooltipText: "Collapse every card (Ctrl+Shift+I)"
-          foreground: root.foreground
-          accent: root.accent
-          onClicked: root.setAllCollapsed(true)
-        }
-        Button {
-          id: expandAllButton
-          text: "Expand all"
-          iconText: "󰅀"
-          iconSize: Style.font.body
-          fontSize: Style.font.bodySmall
-          bordered: true
-          tooltipText: "Expand every card (Ctrl+Shift+O)"
-          foreground: root.foreground
-          accent: root.accent
-          onClicked: root.setAllCollapsed(false)
-        }
-
-        Item {
-          width: Math.max(0, cardToolbar.width - collapseAllButton.width - expandAllButton.width
-                              - (sortRow.visible ? sortRow.width : 0) - Style.spacing.md * 3)
-          height: 1
-        }
-
-        Row {
-          id: sortRow
-          visible: root.mode === "thesaurus"
-          spacing: Style.spacing.md
-          Text {
-            textFormat: Text.PlainText
-            text: "Sort"
-            color: root.muted
-            font.family: root.fontFamily
-            font.pixelSize: Style.font.caption
-            anchors.verticalCenter: parent.verticalCenter
-          }
-          ButtonGroup {
-            options: [{value: "alpha", label: "A–Z", tooltip: "Sort alphabetically (Ctrl+A)"},
-                      {value: "length", label: "Length", tooltip: "Sort by word length (Ctrl+Z)"}]
-            value: root.sortMode
-            foreground: root.foreground
-            background: "transparent"
-            accent: root.accent
-            fontSize: Style.font.bodySmall
-            onChanged: function(v) { root.sortRequested(v) }
-          }
-        }
       }
 
       // -------------------------------------------------------- thesaurus
@@ -496,6 +513,21 @@ Item {
           required property var modelData
           required property int index
           cardIndex: index
+
+          // Geometry of the translation columns – computed once per card so
+          // all of its rows share it.
+          readonly property bool pairsHavePos: {
+            var ps = (root.mode === "translate" && modelData.pairs) ? modelData.pairs : []
+            for (var i = 0; i < ps.length; i++) if (ps[i].pos) return true
+            return false
+          }
+          readonly property real pairContentWidth: width - Style.spacing.lg * 2
+          readonly property real pairArrowWidth: Style.space(18)
+          readonly property real pairPosWidth: pairsHavePos ? Style.space(80) : 0
+          readonly property real pairSrcWidth: Math.floor((pairContentWidth - pairArrowWidth - pairPosWidth
+            - Style.spacing.md * (pairsHavePos ? 3 : 2)) * 0.5)
+          readonly property real pairDstWidth: pairContentWidth - pairSrcWidth - pairArrowWidth - pairPosWidth
+            - Style.spacing.md * (pairsHavePos ? 3 : 2)
           title: modelData.source.name
           detail: root.sourceLine(modelData) + (modelData.ms !== undefined ? "  ·  " + modelData.ms + " ms" : "")
           ok: modelData.ok
@@ -686,20 +718,29 @@ Item {
           }
 
           // ---- translation: word pairs
+          // Two fixed columns (source | target) plus an optional part-of-speech
+          // column.  Column widths come from the card, not from the row's own
+          // content, so every arrow and every target entry line up; long
+          // entries wrap inside their column instead of spilling under the
+          // next row.  Wrapped rich text reports its real height in
+          // contentHeight – implicitHeight is the unwrapped single line.
           Repeater {
             model: root.mode === "translate" ? (card.modelData.pairs || []) : []
             delegate: Item {
               id: pairRow
+              objectName: "pairRow"
               required property var modelData
               required property int index
               width: parent.width
-              implicitHeight: Math.max(srcText.implicitHeight, dstText.implicitHeight, posText.implicitHeight) + Style.spacing.xs
-              readonly property real half: (width - posText.width - Style.spacing.md * 2 - arrow.width) / 2
+              implicitHeight: Math.max(srcText.contentHeight, dstText.contentHeight, posText.contentHeight)
+                + Style.spacing.xs
 
               ObLinkText {
                 id: srcText
                 x: 0
-                width: pairRow.half
+                y: 0
+                width: card.pairSrcWidth
+                height: contentHeight
                 html: pairRow.modelData.src_html || ""
                 plainText: pairRow.modelData.src || ""
                 copyWhole: true
@@ -709,17 +750,23 @@ Item {
               }
               Text {
                 id: arrow
-                x: srcText.width + Style.spacing.md
+                x: card.pairSrcWidth + Style.spacing.md
+                y: 0
+                width: card.pairArrowWidth
                 textFormat: Text.PlainText
                 text: "→"
                 color: root.muted
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.body
+                horizontalAlignment: Text.AlignHCenter
               }
               ObLinkText {
                 id: dstText
-                x: arrow.x + arrow.width + Style.spacing.md
-                width: pairRow.half
+                objectName: "pairDst"
+                x: card.pairSrcWidth + card.pairArrowWidth + Style.spacing.md * 2
+                y: 0
+                width: card.pairDstWidth
+                height: contentHeight
                 html: (pairRow.modelData.dst_html || "")
                   + (pairRow.modelData.note_html ? "  <font color=\"" + root.muted + "\">" + pairRow.modelData.note_html + "</font>" : "")
                 plainText: pairRow.modelData.dst || ""
@@ -731,13 +778,16 @@ Item {
               Text {
                 id: posText
                 anchors.right: parent.right
+                y: 0
+                visible: card.pairPosWidth > 0
+                width: card.pairPosWidth
                 textFormat: Text.PlainText
                 text: pairRow.modelData.pos || ""
                 color: root.muted
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
                 font.italic: true
-                width: text === "" ? 0 : Math.min(implicitWidth, Style.space(140))
+                horizontalAlignment: Text.AlignRight
                 elide: Text.ElideRight
               }
             }
