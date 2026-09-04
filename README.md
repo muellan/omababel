@@ -162,6 +162,46 @@ sample word. **Add source** creates a new one. A source has:
 | Model / Command  | AI sources only: override the service's default model, or the command that is run for the CLI access                                          |
 
 
+### Talking to Web Sources Like a Browser
+
+The scraped sites (LEO, Duden, Merriam-Webster, Thesaurus.com …) start
+answering `403` to a plain script after a handful of requests. What gives one
+away is a stack of things, not one: the TLS handshake, the set *and the
+order* of the request headers, the absence of cookies, and a request rate no
+human produces. `backend/ob/impersonate.py` is the plugin's own answer, with
+nothing to install:
+
+| | |
+|---|---|
+| Cookies      | Kept in `~/.cache/omababel/browser-state.json` and replayed – a session cookie is what separates a returning browser from a fresh script |
+| Headers      | Chrome's exact set in Chrome's order (client hints, `Sec-Fetch-*`, `Referer`), sent through `http.client` so the order really is ours |
+| Rate         | One request per host at a time with a minimum gap and jitter; after a 403/429 a backoff (honouring `Retry-After`) that is **written to disk**, so the next lookup does not walk straight back into the block |
+| TLS          | Chrome's cipher list and curve preference, TLS 1.2+, no compression |
+| Real Chrome  | If [curl-impersonate](https://github.com/lwthiker/curl-impersonate) is installed (`curl_chrome131`, `curl-impersonate-chrome`), it is used for hosts that keep refusing – that is a byte-exact Chrome TLS fingerprint |
+
+This is the default for **every** web source. Two honest limits of a
+standard-library-only implementation: `Accept-Encoding` does not advertise
+`br`/`zstd` (python cannot decode either), and ALPN offers `http/1.1` only,
+since the standard library does not speak HTTP/2 – a server that selected
+`h2` would drop us. Installing `curl-impersonate` removes both.
+
+```bash
+omababel sources unblock          # forget cookies and pauses for every host
+omababel sources unblock dict.leo.org
+```
+
+| Environment variable | Effect |
+|----------------------|--------|
+| `OMABABEL_IMPERSONATE=0` | Send with plain urllib instead |
+| `OMABABEL_PROFILE=firefox` | Use the Firefox identity |
+| `OMABABEL_HOST_INTERVAL=2` | Minimum seconds between two requests to one host (default 0.8) |
+| `OMABABEL_CURL_IMPERSONATE=/path/to/curl_chrome131` | Where the impersonating curl is |
+
+`HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` are honoured; an https target is
+tunnelled through the proxy so the handshake is still with the site.
+
+
+
 ### Credentials
 
 **API keys and other credentials are never written to a file in plain text.**

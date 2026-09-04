@@ -56,6 +56,11 @@ class ManifestTest(unittest.TestCase):
         for heading in ("## install", "## adding your own sources", "## license"):
             self.assertIn(heading, lowered, heading)
 
+    def test_readme_documents_the_browser_transport(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        for needle in ("browser", "curl-impersonate", "omababel_impersonate", "cookies"):
+            self.assertIn(needle, readme, needle)
+
     def test_readme_documents_credential_storage(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
         for needle in ("keyring", "secret-tool", "never written to a file in plain text",
@@ -63,8 +68,9 @@ class ManifestTest(unittest.TestCase):
             self.assertIn(needle, readme, needle)
 
     def test_backend_is_stdlib_only(self):
-        stdlib_ok = {"__future__", "annotations", "argparse", "concurrent", "csv", "gzip", "hashlib", "html", "io", "json",
-                     "lzma", "os", "pathlib", "random", "re", "shlex", "shutil", "socket", "sqlite3", "subprocess", "sys",
+        stdlib_ok = {"__future__", "annotations", "argparse", "base64", "concurrent", "csv", "email", "gzip",
+                     "hashlib", "html", "http", "io", "json",
+                     "lzma", "os", "pathlib", "random", "re", "shlex", "shutil", "socket", "sqlite3", "ssl", "subprocess", "sys",
                      "tarfile", "tempfile", "time", "traceback", "typing", "unicodedata", "urllib", "xml",
                      "zipfile", "zlib", "ob"}
         import ast

@@ -1,9 +1,13 @@
-"""Thin urllib wrapper with browser-like headers.
+"""The one door every remote source goes through.
 
-All remote sources go through :func:`fetch` so time-outs, user agent,
-gzip handling and error mapping are consistent.  ``OMABABEL_OFFLINE=1``
-turns every network access into a :class:`FetchError`, which keeps the test
-suite hermetic.
+:func:`fetch` keeps time-outs, headers, gzip handling and error mapping
+consistent.  By default the request is sent by :mod:`ob.impersonate`, which
+speaks HTTP the way a browser does -- Chrome's header set in Chrome's
+order, a Chrome-shaped TLS handshake, cookies kept between runs and one
+request per host at a time -- because the scraped sites answer 403 to
+anything that obviously is not a browser.  ``OMABABEL_IMPERSONATE=0`` falls
+back to plain urllib, and ``OMABABEL_OFFLINE=1`` turns every network access
+into a :class:`FetchError`, which keeps the test suite hermetic.
 """
 
 from __future__ import annotations
@@ -18,6 +22,8 @@ import urllib.parse
 import urllib.request
 import zlib
 from typing import Dict, Optional, Union
+
+from . import impersonate
 
 DEFAULT_UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -104,6 +110,10 @@ def fetch(
     elif isinstance(data, bytes):
         payload = data
 
+    if impersonate.enabled():
+        return _fetch_as_browser(url, payload, headers or {}, method,
+                                 timeout or DEFAULT_TIMEOUT, accept_language)
+
     req = urllib.request.Request(url, data=payload, headers=hdrs, method=method)
     try:
         with urllib.request.urlopen(req, timeout=timeout or DEFAULT_TIMEOUT) as resp:
@@ -128,6 +138,38 @@ def fetch(
         raise FetchError(f"timeout ({url})", url=url)
     except (ConnectionError, OSError) as e:
         raise FetchError(f"{e} ({url})", url=url)
+
+
+def _fetch_as_browser(url: str, payload: Optional[bytes], headers: Dict[str, str],
+                      method: Optional[str], timeout: float, accept_language: str) -> Response:
+    """Send through ob.impersonate, escalating to a real Chrome handshake
+    (curl-impersonate) for a host that refuses us anyway."""
+    host = urllib.parse.urlsplit(url).hostname or ""
+    attempts = ["python"]
+    if impersonate.state().refusals(host) and impersonate.impersonate_binary():
+        attempts.insert(0, "binary")
+    elif impersonate.impersonate_binary():
+        attempts.append("binary")
+    last: Optional[impersonate.ImpersonateError] = None
+    for how in attempts:
+        try:
+            if how == "binary":
+                reply = impersonate.fetch_with_binary(url, headers=headers, data=payload,
+                                                      method=method, timeout=timeout)
+            else:
+                reply = impersonate.fetch(url, data=payload, headers=headers, method=method,
+                                          timeout=timeout, accept_language=accept_language)
+            return Response(reply.url, reply.status,
+                            {k.lower(): v for k, v in reply.headers}, reply.body)
+        except impersonate.ImpersonateError as e:
+            last = e
+            # Only a refusal is worth a second identity; a 404 stays a 404.
+            if e.status not in (403, 429, 503, None):
+                break
+    err = FetchError(str(last), status=getattr(last, "status", None), url=url)
+    err.body = getattr(last, "body", b"")            # type: ignore[attr-defined]
+    err.headers = {k.lower(): v for k, v in getattr(last, "headers", [])}   # type: ignore[attr-defined]
+    raise err
 
 
 def quote(value: str) -> str:

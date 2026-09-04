@@ -34,7 +34,7 @@ from typing import Callable, Dict
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ob import __version__, clipboard, data, languages, paths, render, search, secrets  # noqa: E402
+from ob import __version__, clipboard, data, impersonate, languages, paths, render, search, secrets  # noqa: E402
 from ob import sources as S  # noqa: E402
 from ob.config import Prefs, SourcesConfig  # noqa: E402
 from ob.history import History  # noqa: E402
@@ -394,7 +394,7 @@ def cli(argv) -> int:
 
     p = sub.add_parser("sources", help="manage search sources")
     p.add_argument("action", choices=["list", "enable", "disable", "delete", "reset", "test", "path",
-                                      "key", "forget-key", "keyring"])
+                                      "key", "forget-key", "keyring", "unblock"])
     p.add_argument("ids", nargs="*")
 
     p = sub.add_parser("history", help="search history")
@@ -502,6 +502,19 @@ def cli(argv) -> int:
             return rc
         if args.action == "path":
             print(str(paths.config_dir() / "sources.json"))
+            return 0
+        if args.action == "unblock":
+            # Forget the cookies and the per-host pause the browser transport
+            # keeps – the way out when a site has refused us and the backoff
+            # is longer than one's patience.
+            st = impersonate.state()
+            hosts = args.ids or list(st.data.get("hosts", {}))
+            for host in hosts:
+                st.data.get("hosts", {}).pop(host, None)
+                st.data.get("cookies", {}).pop(host, None)
+            st.dirty = True
+            st.save()
+            print("cleared: " + (", ".join(hosts) if hosts else "nothing was blocked"))
             return 0
         if args.action == "keyring":
             if secrets.available():
