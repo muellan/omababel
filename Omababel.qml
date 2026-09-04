@@ -667,10 +667,11 @@ Item {
         Item {
           id: searchRow
           visible: root.searchActive
-          // One extra spacing unit above the field, so the gap to the mode /
-          // language row is roughly twice the normal column spacing.
+          // One extra spacing unit above *and* below the field, so the gaps to
+          // the mode / language row and to the result list are both twice the
+          // normal column spacing.
           width: parent.width
-          height: visible ? searchField.height + Style.spacing.md : 0
+          height: visible ? searchField.height + Style.spacing.md * 2 : 0
 
           // Fallback fonts for CJK glyphs have taller line boxes than the
           // theme font; size the field from the font metrics with head room
@@ -682,7 +683,7 @@ Item {
             anchors.left: parent.left
             anchors.right: clearButton.left
             anchors.rightMargin: Style.spacing.sm
-            anchors.bottom: parent.bottom
+            anchors.verticalCenter: parent.verticalCenter
             font.pixelSize: Style.font.title
             height: Math.round(searchMetrics.height * 1.5) + topPadding + bottomPadding
             verticalAlignment: TextInput.AlignVCenter
@@ -761,7 +762,7 @@ Item {
           Popup {
             id: historyPopup
             x: 0
-            y: searchRow.height + Style.spacing.xxs
+            y: searchField.y + searchField.height + Style.spacing.xxs
             width: searchRow.width
             property var rows: []
             property int currentIndex: -1
