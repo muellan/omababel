@@ -173,18 +173,31 @@ class QmlStructureTest(unittest.TestCase):
     def test_backend_never_starts_a_process_from_an_exit_handler(self):
         """Re-arming a Process from inside its own `onExited` (directly or
         through a reply callback that issues the next request) crashed the
-        shell on the first open.  Every start goes through `pump()`, which
-        only ever runs from the event loop."""
+        shell on the first open.  Every start goes through `pump()`, and even
+        the reply is assembled from the event loop."""
         src = self.strip((ROOT / "ObBackend.qml").read_text(encoding="utf-8"))
         exited = self.body_of(src, "onExited:")
         self.assertNotIn("running = true", exited)
         self.assertNotIn("root.pump()", exited)
-        self.assertIn("root.schedule()", exited)
+        self.assertIn("Qt.callLater(root.finish)", exited)
+        finish = self.body_of(src, "function finish(")
+        self.assertIn("root.schedule()", finish)
+        self.assertNotIn("running = true", finish)
         self.assertIn("Qt.callLater(root.pump)", self.body_of(src, "function schedule("))
         pump = self.body_of(src, "function pump(")
         self.assertIn("if (root.inCallback || root.busy || proc.running) return", pump)
         # the only place `running` is set
         self.assertEqual(src.count("proc.running = true"), 1)
+
+    def test_the_backend_can_stream(self):
+        """A search shows each source as it answers, so one slow AI service
+        cannot hold up the sources that are already done."""
+        src = self.strip((ROOT / "ObBackend.qml").read_text(encoding="utf-8"))
+        self.assertIn("SplitParser", src)                 # line by line, not in one lump
+        self.assertIn("function call(op, params, done, onProgress)", src)
+        panel = self.strip((ROOT / "Omababel.qml").read_text(encoding="utf-8"))
+        self.assertIn("stream: true", panel)
+        self.assertIn("function applySearchEvent(", panel)
         # the installer defers its `finished` signal for the same reason
         inst = self.strip((ROOT / "ObInstaller.qml").read_text(encoding="utf-8"))
         self.assertNotIn("root.finished(reply)", self.body_of(inst, "onExited:"))

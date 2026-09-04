@@ -4,10 +4,13 @@ import Quickshell.Io
 // Bridge to backend/omababel.py.
 //
 // One python process per request: the request is a single JSON line on
-// stdin, the reply a single JSON line on stdout.  Requests are queued so
+// stdin, the reply the *last* JSON line on stdout.  Requests are queued so
 // they never interleave; `busy` is true while one is running.
-// Long running operations that stream progress (data.install) use
-// ObInstaller instead.
+//
+// A request may stream: every line before the reply that carries an `event`
+// is handed to the call's `onProgress` callback as it arrives.  That is how
+// a search shows each source's result while the slow ones are still running.
+// The long install operation still uses ObInstaller.
 //
 // A process is *never* started from inside another process' `onExited`
 // handler, neither directly nor through a reply callback that issues the
@@ -29,8 +32,10 @@ Item {
 
   signal failed(string message)
 
-  function call(op, params, done) {
-    pending = pending.concat([{req: {op: op, params: params || {}}, done: done}])
+  // `onProgress` is optional and receives every streamed event object.
+  function call(op, params, done, onProgress) {
+    pending = pending.concat([{req: {op: op, params: params || {}}, done: done,
+                               progress: onProgress || null}])
     schedule()
   }
 
@@ -48,6 +53,45 @@ Item {
 
   function schedule() { Qt.callLater(root.pump) }
 
+  // Hands the reply to the caller and lets the queue move on.  Runs from the
+  // event loop after the process has exited (see Process.onExited).
+  function finish() {
+    if (!root.busy) return
+    var reply = null
+    try {
+      reply = proc.responseText ? JSON.parse(proc.responseText) : null
+    } catch (e) {
+      reply = null
+    }
+    if (!reply || typeof reply !== "object") {
+      var msg = proc.errorText.trim()
+      if (msg.length > 400) msg = msg.slice(-400)
+      reply = {ok: false, error: {code: "helper_failed",
+                                  message: proc.exitCode === 0 ? "The backend returned no valid reply."
+                                    : ("Backend failed (exit " + proc.exitCode + "): " + (msg || "no output"))}}
+    }
+    if (!reply.error) reply.error = {code: "unknown", message: "unknown error"}
+    var cb = proc.done
+    proc.done = null
+    proc.progress = null
+    proc.responseText = ""
+    proc.errorText = ""
+    root.busy = false
+    root.inCallback = true
+    try {
+      if (!reply.ok) {
+        root.lastError = reply.error.message || "unknown error"
+        root.failed(root.lastError)
+      }
+      if (cb) cb(reply)
+    } catch (e2) {
+      console.warn("omababel: reply handler threw:", e2)
+    }
+    root.inCallback = false
+    // Never start the next process from a reply callback – let the event loop.
+    root.schedule()
+  }
+
   // The single place a backend process is started.  Only ever reached from
   // the event loop (Qt.callLater), so the previous process is fully gone.
   function pump() {
@@ -58,6 +102,7 @@ Item {
     root.busy = true
     proc.payload = JSON.stringify(item.req)
     proc.done = item.done
+    proc.progress = item.progress
     proc.responseText = ""
     proc.errorText = ""
     proc.command = [pythonBin, helperPath]
@@ -76,6 +121,7 @@ Item {
     id: proc
     property string payload: ""
     property var done: null
+    property var progress: null
     property string responseText: ""
     property string errorText: ""
     stdinEnabled: true
@@ -83,50 +129,34 @@ Item {
       write(payload + "\n")
       payload = ""
     }
-    stdout: StdioCollector {
-      waitForEnd: true
-      onStreamFinished: proc.responseText = text
+    // Line by line rather than in one lump: a streamed event has to reach
+    // the panel while the process is still running.
+    stdout: SplitParser {
+      onRead: function(line) {
+        var text = String(line).trim()
+        if (!text) return
+        var obj = null
+        try { obj = JSON.parse(text) } catch (e) { obj = null }
+        if (obj && typeof obj === "object" && obj.event !== undefined) {
+          if (proc.progress) {
+            try { proc.progress(obj) } catch (e) { console.warn("omababel: progress handler threw:", e) }
+          }
+          return
+        }
+        proc.responseText = text          // the reply is the last non-event line
+      }
     }
     stderr: StdioCollector {
       waitForEnd: true
       onStreamFinished: proc.errorText = text
     }
+    property int exitCode: 0
+    // The reply is assembled from the event loop, not from the exit handler:
+    // it lets any stdout line the parser still holds land first, and keeps
+    // the rule that nothing which may start another process runs here.
     onExited: function(code, status) {
-      var reply = null
-      var text = proc.responseText.trim()
-      // Only the last line is the reply (earlier lines may be progress events).
-      var lines = text.split("\n")
-      var last = lines.length ? lines[lines.length - 1] : ""
-      try {
-        reply = last ? JSON.parse(last) : null
-      } catch (e) {
-        reply = null
-      }
-      if (!reply || typeof reply !== "object") {
-        var msg = proc.errorText.trim()
-        if (msg.length > 400) msg = msg.slice(-400)
-        reply = {ok: false, error: {code: "helper_failed",
-                                    message: code === 0 ? "The backend returned no valid reply." : ("Backend failed (exit " + code + "): " + (msg || "no output"))}}
-      }
-      if (!reply.error) reply.error = {code: "unknown", message: "unknown error"}
-      var cb = proc.done
-      proc.done = null
-      proc.responseText = ""
-      proc.errorText = ""
-      root.busy = false
-      root.inCallback = true
-      try {
-        if (!reply.ok) {
-          root.lastError = reply.error.message || "unknown error"
-          root.failed(root.lastError)
-        }
-        if (cb) cb(reply)
-      } catch (e) {
-        console.warn("omababel: reply handler threw:", e)
-      }
-      root.inCallback = false
-      // Never start the next process from here – let the event loop do it.
-      root.schedule()
+      proc.exitCode = code
+      Qt.callLater(root.finish)
     }
   }
 }

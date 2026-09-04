@@ -100,7 +100,15 @@ def _run_one(src: S.Source, mode: str, query: str, lang: str, lang2: str) -> dic
 
 def run(mode: str, query: str, lang: str, lang2: str = "", cfg: Optional[SourcesConfig] = None,
         only: Optional[List[str]] = None, timeout: float = SOURCE_TIMEOUT,
-        include_disabled: bool = False) -> dict:
+        include_disabled: bool = False, on_start=None, on_result=None) -> dict:
+    """Query every source that serves this mode and language.
+
+    Sources run concurrently and a slow one (an AI service can take tens of
+    seconds) must not hold up the rest: `on_start(chosen, skipped)` is called
+    once the set is known, and `on_result(result, index, total)` as each
+    source finishes -- `index` is its place in the final, configured order, so
+    a caller can fill a list it has already laid out.
+    """
     if mode not in MODES:
         raise ValueError(f"unknown mode '{mode}'")
     query = " ".join(str(query).split())
@@ -124,30 +132,44 @@ def run(mode: str, query: str, lang: str, lang2: str = "", cfg: Optional[Sources
         "mode": mode, "query": query, "lang": lang, "lang2": lang2 if mode == "translate" else "",
         "results": [], "skipped": skipped,
     }
+    if on_start:
+        on_start([s.describe() for s in chosen], skipped)
     if not query or not chosen:
         if mode == "thesaurus":
             out["consolidated"] = R.consolidate([])
         return out
+    # The place each source has in the answer is known before any of them
+    # runs, so a streamed result can be put straight into its slot.
+    order = {s.id: i for i, s in enumerate(chosen)}
+    total = len(chosen)
+
+    def emit(res: dict) -> None:
+        if on_result:
+            on_result(res, order.get(res["source"]["id"], total - 1), total)
+
     results: List[dict] = []
     if len(chosen) == 1:
         results.append(_run_one(chosen[0], mode, query, lang, lang2))
+        emit(results[0])
     else:
         pool = cf.ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(chosen)))
         futs = {pool.submit(_run_one, s, mode, query, lang, lang2): s for s in chosen}
         try:
             for fut in cf.as_completed(futs, timeout=timeout):
-                results.append(fut.result())
+                res = fut.result()
+                results.append(res)
+                emit(res)
         except cf.TimeoutError:
             for fut, s in futs.items():
                 if not fut.done():
-                    results.append({"source": s.describe(), "ok": False,
-                                    "error": f"timed out after {int(timeout)}s", "count": 0})
+                    res = {"source": s.describe(), "ok": False,
+                           "error": f"timed out after {int(timeout)}s", "count": 0}
+                    results.append(res)
+                    emit(res)
                     fut.cancel()
         finally:
             # Never wait for a hung source; the caller exits the process anyway.
             pool.shutdown(wait=False, cancel_futures=True)
-    # keep configured order
-    order = {s.id: i for i, s in enumerate(chosen)}
     results.sort(key=lambda r: order.get(r["source"]["id"], 999))
     out["results"] = results
     if mode == "thesaurus":

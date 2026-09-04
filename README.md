@@ -457,7 +457,12 @@ backend/ob/          sources/ (drivers), formats/ (importers), store.py (SQLite)
 
 Every request spawns `python3 backend/omababel.py`, which queries all
 applicable sources concurrently, normalises the results, pre-renders the
-clickable words and returns JSON. Local formats are converted into one SQLite
+clickable words and returns JSON. A search **streams**: the set of sources
+comes first, then one line per source as it finishes, and the reply carries
+the complete answer — so the panel shows a card per source right away and
+fills each one in as it answers, instead of waiting for the slowest (an AI
+service can take tens of seconds). A spinning 󰑐 in the accent colour marks a
+query that is still running. Local formats are converted into one SQLite
 schema so lookups, thesaurus queries and word translations share the same code.
 
 

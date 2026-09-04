@@ -30,11 +30,12 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Callable, Dict
+from typing import Callable, Dict, List
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ob import __version__, clipboard, data, impersonate, languages, paths, render, search, secrets  # noqa: E402
+from ob import results as R  # noqa: E402
 from ob import sources as S  # noqa: E402
 from ob.config import Prefs, SourcesConfig  # noqa: E402
 from ob.history import History  # noqa: E402
@@ -82,8 +83,34 @@ def op_search(params: dict) -> dict:
     if mode == "translate" and not lang2:
         raise RequestError("missing_language", "Choose a target language.")
     only = params.get("only") or None
-    result = search.run(mode, query, lang, lang2, only=only)
-    if params.get("html", True):
+    html = bool(params.get("html", True))
+    # A slow source (an AI service can take tens of seconds) must not hold up
+    # the ones that are already done: with `stream`, each result is emitted as
+    # it arrives -- in its final slot -- and the reply that follows carries
+    # the complete, ordered answer.
+    on_start = on_result = None
+    if params.get("stream"):
+        done: List[dict] = []
+
+        def on_start(sources, skipped):        # noqa: F811 - deliberate
+            _emit({"event": "start", "mode": mode, "query": query, "lang": lang,
+                   "lang2": lang2 if mode == "translate" else "",
+                   "sources": sources, "skipped": skipped, "total": len(sources)})
+
+        def on_result(res, index, total):      # noqa: F811 - deliberate
+            if html:
+                render.decorate({"mode": mode, "results": [res]})
+            done.append(res)
+            event = {"event": "result", "index": index, "total": total, "result": res}
+            if mode == "thesaurus":
+                # the cards are built from the consolidation, so it has to
+                # grow with every source that answers
+                event["consolidated"] = R.consolidate(r for r in done if r.get("ok"))
+            _emit(event)
+
+    result = search.run(mode, query, lang, lang2, only=only,
+                        on_start=on_start, on_result=on_result)
+    if html:
         render.decorate(result)
     if not params.get("no_history"):
         History().add(query, mode=mode, lang=lang, lang2=lang2)

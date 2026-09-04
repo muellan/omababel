@@ -16,7 +16,7 @@ Item {
   property string pluginDir: ""        // set via HARNESS_PLUGIN_DIR (see run.sh)
   property string fixtureDir: ""
   property int step: 0
-  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 6, 7, 8, 9, 55, 56, 10, 11, 12, 13, 14]
+  readonly property var stepOrder: [0, 1, 2, 3, 4, 5, 51, 52, 53, 54, 57, 58, 6, 7, 8, 9, 55, 56, 10, 11, 12, 13, 14]
   function stepId(i) { return i < stepOrder.length ? stepOrder[i] : 999 }
   property var panel: null
 
@@ -198,6 +198,63 @@ Item {
           }
           p.modeSelector.accent = p.accent
           p.setMode("lookup")
+          break
+        case 57:
+          // streamed results: the sources appear as pending cards and are
+          // filled in one by one, in their final order
+          var lookup57 = harness.readJson(fx + "/lookup.json")
+          p.mode = "lookup"
+          p.result = null
+          p.searching = true
+          p.applySearchEvent({event: "start", mode: "lookup", query: "Haus", lang: "de", lang2: "",
+                              total: lookup57.results.length,
+                              sources: lookup57.results.map(function(r) { return r.source }),
+                              skipped: lookup57.skipped || []})
+          harness.check(p.result !== null, "the start event lays the list out")
+          harness.check(p.result.results.length === lookup57.results.length,
+                        "one card per source from the start: " + p.result.results.length)
+          harness.check(p.result.results[0].pending === true, "cards start out pending")
+          harness.check(p.expected === lookup57.results.length && p.answered === 0, "nothing answered yet")
+          harness.check(p.resultsView.cardCount === lookup57.results.length,
+                        "the pending cards are rendered while the search runs")
+          var pendingRows = harness.collect(p.resultsView, "pendingRow").filter(function(x) { return x.visible })
+          harness.check(pendingRows.length === lookup57.results.length,
+                        "every pending card says so: " + pendingRows.length)
+          // the last source answers first: it must still land in its own slot
+          var last57 = lookup57.results.length - 1
+          p.applySearchEvent({event: "result", index: last57, total: lookup57.results.length,
+                              result: lookup57.results[last57]})
+          harness.check(p.result.results[last57].pending === undefined,
+                        "the answered source is no longer pending")
+          harness.check(p.result.results[0].pending === true, "the others still are")
+          harness.check(p.answered === 1, "one source answered")
+          harness.check(p.status.indexOf("still running") >= 0, "the status counts the rest: " + p.status)
+          for (var r57 = 0; r57 < last57; r57++)
+            p.applySearchEvent({event: "result", index: r57, total: lookup57.results.length,
+                                result: lookup57.results[r57]})
+          harness.check(p.answered === lookup57.results.length, "every source answered")
+          harness.check(p.status.indexOf("still running") < 0, "the status stops counting: " + p.status)
+          var stillPending = harness.collect(p.resultsView, "pendingRow").filter(function(x) { return x.visible })
+          harness.check(stillPending.length === 0, "no card is pending any more")
+          p.searching = false
+          break
+        case 58:
+          // the busy indicator: accent coloured, spinning, and centred in the
+          // gap between the mode chips and the language selectors
+          var spinner = p.busyIndicator
+          harness.check(!!spinner && spinner.objectName === "busySpinner", "the busy indicator exists")
+          harness.check(!spinner.visible, "it is hidden while nothing runs")
+          p.searching = true
+          harness.check(spinner.visible, "it shows while a search runs")
+          harness.check(String(spinner.color) === String(p.accent), "it is accent coloured")
+          harness.check(spinner.text === "󰑐", "it is the refresh glyph")
+          var modeRight = p.modeSelector.x + p.modeSelector.width
+          var langLeft = p.langPickerView.mapToItem(p.modeSelector.parent, 0, 0).x
+          var gapCentre = modeRight + (langLeft - modeRight) / 2
+          harness.check(Math.abs(spinner.x + spinner.width / 2 - gapCentre) <= 2,
+                        "centred in the gap: " + (spinner.x + spinner.width / 2) + " vs " + gapCentre)
+          p.searching = false
+          harness.check(!spinner.visible, "it goes away when the search is done")
           break
         case 6:
           p.rememberHistory("Haus")

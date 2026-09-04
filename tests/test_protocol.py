@@ -78,6 +78,47 @@ class ProtocolTest(TempEnv):
         reply, _, _ = self.call("copy", {"text": ""})
         self.assertFalse(reply["ok"])
 
+    def test_search_streams_one_line_per_source(self):
+        """With `stream`, a result is emitted as soon as its source is done –
+        an AI service that takes half a minute must not hold up the rest."""
+        reply, events, _ = self.call("search", {"mode": "lookup", "query": "Haus", "lang": "de",
+                                                "stream": True})
+        self.assertTrue(reply["ok"], reply)
+        parsed = [json.loads(line) for line in events]
+        self.assertTrue(parsed, "nothing was streamed")
+        start = parsed[0]
+        self.assertEqual(start["event"], "start")
+        self.assertEqual(start["query"], "Haus")
+        self.assertEqual(start["total"], len(start["sources"]))
+        results = [e for e in parsed if e["event"] == "result"]
+        self.assertEqual(len(results), start["total"])
+        # every streamed result names the slot it takes in the final answer,
+        # and the reply carries exactly the same rows in that order
+        final = [r["source"]["id"] for r in reply["data"]["results"]]
+        self.assertEqual(len(final), len(results))
+        for event in results:
+            self.assertEqual(final[event["index"]], event["result"]["source"]["id"])
+        # streamed rows are rendered like the final ones
+        entries = [e for e in results if e["result"].get("entries")]
+        for event in entries:
+            self.assertIn("gloss_html", event["result"]["entries"][0]["senses"][0])
+        # without `stream` nothing is emitted before the reply
+        reply, events, _ = self.call("search", {"mode": "lookup", "query": "Haus", "lang": "de"})
+        self.assertEqual(events, [])
+
+    def test_thesaurus_streams_a_growing_consolidation(self):
+        reply, events, _ = self.call("search", {"mode": "thesaurus", "query": "house", "lang": "en",
+                                                "stream": True})
+        self.assertTrue(reply["ok"], reply)
+        results = [json.loads(line) for line in events if json.loads(line)["event"] == "result"]
+        for event in results:
+            # the cards come from the consolidation, so every event carries one
+            self.assertIn("consolidated", event)
+            self.assertIn("groups", event["consolidated"])
+        if results:
+            self.assertLessEqual(len(results[0]["consolidated"]["groups"]),
+                                 len(reply["data"]["consolidated"]["groups"]))
+
     def test_source_editing_ops(self):
         reply, _, _ = self.call("sources.enable", {"id": "duden", "enabled": False})
         self.assertTrue(reply["data"]["updated"])

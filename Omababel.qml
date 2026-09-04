@@ -40,6 +40,10 @@ Item {
   property var result: null
   property bool searching: false
   property int searchSeq: 0
+  // How many sources a running search is waiting for, and how many have
+  // already answered (streamed results).
+  property int expected: 0
+  property int answered: 0
   property string lastQuery: ""
   property string status: ""
   property bool statusError: false
@@ -69,6 +73,7 @@ Item {
   readonly property alias helpView: help
   readonly property alias modeSelector: modeGroup
   readonly property alias langPickerView: langPicker
+  readonly property alias busyIndicator: busySpinner
 
   // --- look
   readonly property color background: Color.menu.background
@@ -382,9 +387,11 @@ Item {
     historyPopup.close()
     root.lastQuery = query
     root.searching = true
+    root.answered = 0
+    root.expected = 0
     root.setStatus("Searching " + query + "…", false)
     var seq = ++root.searchSeq
-    var params = {mode: root.mode, query: query, lang: root.lang, lang2: root.lang2}
+    var params = {mode: root.mode, query: query, lang: root.lang, lang2: root.lang2, stream: true}
     backend.dropPending("search")
     backend.call("search", params, function(reply) {
       if (seq !== root.searchSeq) return   // superseded
@@ -394,22 +401,79 @@ Item {
         root.setStatus(reply.error.message, true)
         return
       }
+      // The reply carries the complete, ordered answer; it replaces whatever
+      // the stream has already put on screen.
       root.result = reply.data
       root.rememberHistory(query)
-      var rs = reply.data.results || []
-      var okCount = 0, errCount = 0, hits = 0, ms = 0
-      for (var i = 0; i < rs.length; i++) {
-        if (rs[i].ok) okCount++; else errCount++
-        hits += rs[i].count || 0
-        ms = Math.max(ms, rs[i].ms || 0)
-      }
-      var text = rs.length === 0
-        ? "No source available for " + root.langName(root.lang) + (root.mode === "translate" ? " → " + root.langName(root.lang2) : "") + "."
-        : hits + (hits === 1 ? " result" : " results") + " from " + okCount + (okCount === 1 ? " source" : " sources")
-          + (errCount ? " · " + errCount + " failed" : "") + " · " + ms + " ms"
-      root.setStatus(text, errCount > 0 && okCount === 0)
+      root.setStatus(root.searchSummary(reply.data.results || []), root.searchFailed(reply.data.results || []))
       resultsView.scrollToTop()
+    }, function(event) {
+      if (seq !== root.searchSeq) return   // superseded
+      root.applySearchEvent(event)
     })
+  }
+
+  // Streamed search events: the set of sources first, then one result per
+  // source as it finishes.  A slow source (an AI service takes tens of
+  // seconds) no longer holds up the ones that are already done.
+  function applySearchEvent(event) {
+    if (!event) return
+    if (event.event === "start") {
+      root.expected = event.total || 0
+      root.answered = 0
+      var placeholders = []
+      for (var i = 0; i < (event.sources || []).length; i++) {
+        placeholders.push({source: event.sources[i], pending: true, ok: true, count: 0,
+                           entries: [], pairs: [], synonyms: [], antonyms: [], groups: []})
+      }
+      root.result = {mode: event.mode, query: event.query, lang: event.lang, lang2: event.lang2,
+                     results: placeholders, skipped: event.skipped || [],
+                     consolidated: {synonyms: [], antonyms: [], groups: []}, streaming: true}
+      if (root.expected > 0) root.setStatus("Searching " + event.query + " – 0 of " + root.expected + " sources…", false)
+      return
+    }
+    if (event.event !== "result" || !root.result) return
+    // Each result goes into the slot it will occupy in the final answer, so
+    // the list never reshuffles under the reader.
+    var results = (root.result.results || []).slice()
+    var index = event.index !== undefined ? event.index : results.length
+    while (results.length <= index)
+      results.push({source: {id: "", name: "…"}, pending: true, ok: true, count: 0})
+    results[index] = event.result
+    var next = {}
+    for (var k in root.result) next[k] = root.result[k]
+    next.results = results
+    if (event.consolidated) next.consolidated = event.consolidated
+    root.result = next
+    root.answered = Math.min(root.expected, root.answered + 1)
+    root.setStatus(root.searchSummary(results) + (root.answered < root.expected
+      ? "  ·  " + (root.expected - root.answered) + " still running…" : ""), false)
+  }
+
+  function searchSummary(rs) {
+    var okCount = 0, errCount = 0, hits = 0, ms = 0, pending = 0
+    for (var i = 0; i < rs.length; i++) {
+      var r = rs[i]
+      if (!r || r.pending) { pending++; continue }
+      if (r.ok) okCount++; else errCount++
+      hits += r.count || 0
+      ms = Math.max(ms, r.ms || 0)
+    }
+    if (rs.length === 0)
+      return "No source available for " + root.langName(root.lang)
+        + (root.mode === "translate" ? " → " + root.langName(root.lang2) : "") + "."
+    return hits + (hits === 1 ? " result" : " results") + " from " + okCount
+      + (okCount === 1 ? " source" : " sources")
+      + (errCount ? " · " + errCount + " failed" : "") + " · " + ms + " ms"
+  }
+
+  function searchFailed(rs) {
+    var okCount = 0, errCount = 0
+    for (var i = 0; i < rs.length; i++) {
+      if (!rs[i] || rs[i].pending) continue
+      if (rs[i].ok) okCount++; else errCount++
+    }
+    return errCount > 0 && okCount === 0
   }
 
   function rememberHistory(query) {
@@ -690,7 +754,35 @@ Item {
             onChanged: function(v) { root.setMode(v) }
           }
 
+          // Busy indicator: centred in the gap between the mode chips and the
+          // language selectors, so it sits in the middle of the row without
+          // moving anything.
+          Text {
+            id: busySpinner
+            objectName: "busySpinner"
+            visible: root.searching
+            textFormat: Text.PlainText
+            text: "󰑐"
+            color: root.accent
+            font.family: root.fontFamily
+            font.pixelSize: Style.font.icon
+            anchors.verticalCenter: parent.verticalCenter
+            x: modeGroup.x + modeGroup.width
+               + Math.max(0, (langRow.x - modeGroup.x - modeGroup.width - width) / 2)
+            transformOrigin: Item.Center
+            RotationAnimation on rotation {
+              running: busySpinner.visible
+              from: 0; to: 360; duration: 1100; loops: Animation.Infinite
+            }
+            ObToolTip {
+              visible: busyHover.hovered && root.expected > 0
+              text: root.answered + " of " + root.expected + " sources answered"
+            }
+            HoverHandler { id: busyHover }
+          }
+
           Row {
+            id: langRow
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             spacing: Style.spacing.sm

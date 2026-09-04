@@ -146,11 +146,12 @@ Item {
   function isEmpty() {
     if (!result) return true
     var rs = result.results || []
-    for (var i = 0; i < rs.length; i++) if (rs[i].count > 0) return false
+    for (var i = 0; i < rs.length; i++) if (rs[i] && (rs[i].pending || rs[i].count > 0)) return false
     return true
   }
 
   function sourceLine(r) {
+    if (r.pending) return "searching…"
     if (!r.ok) return "error"
     if (root.mode === "lookup") return r.count + (r.count === 1 ? " entry" : " entries")
     if (root.mode === "thesaurus") return (r.synonyms ? r.synonyms.length : 0) + " syn · " + (r.antonyms ? r.antonyms.length : 0) + " ant"
@@ -323,7 +324,7 @@ Item {
     anchors.top: parent.top
     anchors.left: parent.left
     anchors.right: parent.right
-    visible: root.cardCount > 0 && !root.searching
+    visible: root.cardCount > 0
     height: visible ? implicitHeight : 0
     spacing: Style.spacing.md
 
@@ -409,8 +410,10 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
       }
+      // Only until the first source has answered: from then on the cards
+      // themselves say what is still running.
       Hint {
-        visible: root.searching
+        visible: root.searching && !(root.result && root.result.results && root.result.results.length > 0)
         text: "Searching…"
         horizontalAlignment: Text.AlignHCenter
         topPadding: Style.spacing.huge
@@ -426,7 +429,7 @@ Item {
 
       // -------------------------------------------------------- thesaurus
       Column {
-        visible: root.mode === "thesaurus" && !!root.result && !root.searching && !!root.result.consolidated
+        visible: root.mode === "thesaurus" && !!root.result && !!root.result.consolidated
         width: parent.width
         spacing: Style.spacing.lg
 
@@ -493,7 +496,7 @@ Item {
               Text {
                 visible: !modelData.ok
                 textFormat: Text.PlainText
-                text: modelData.error
+                text: modelData.error || ""
                 color: root.errorColor
                 font.family: root.fontFamily
                 font.pixelSize: Style.font.caption
@@ -507,7 +510,7 @@ Item {
 
       // ------------------------------------------------- lookup / translate
       Repeater {
-        model: root.result && !root.searching && root.mode !== "thesaurus" ? root.result.results : []
+        model: root.result && root.mode !== "thesaurus" ? root.result.results : []
         delegate: Card {
           id: card
           required property var modelData
@@ -538,8 +541,37 @@ Item {
           ok: modelData.ok
           url: modelData.url || ""
 
+          // A source that has not answered yet keeps its place in the list
+          // and says so, so the ones that are done can be read already.
+          Row {
+            objectName: "pendingRow"
+            visible: !!card.modelData.pending
+            spacing: Style.spacing.md
+            Text {
+              id: pendingSpinner
+              textFormat: Text.PlainText
+              text: "󰑐"
+              color: root.accent
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.body
+              anchors.verticalCenter: parent.verticalCenter
+              RotationAnimation on rotation {
+                running: !!card.modelData.pending && card.visible
+                from: 0; to: 360; duration: 1100; loops: Animation.Infinite
+              }
+            }
+            Text {
+              textFormat: Text.PlainText
+              text: "Waiting for " + card.modelData.source.name + "…"
+              color: root.muted
+              font.family: root.fontFamily
+              font.pixelSize: Style.font.bodySmall
+              anchors.verticalCenter: parent.verticalCenter
+            }
+          }
+
           Text {
-            visible: !card.modelData.ok
+            visible: !card.modelData.ok && !card.modelData.pending
             width: parent.width
             textFormat: Text.PlainText
             wrapMode: Text.WordWrap
@@ -550,7 +582,7 @@ Item {
           }
 
           Hint {
-            visible: card.modelData.ok && card.modelData.count === 0
+            visible: card.modelData.ok && !card.modelData.pending && card.modelData.count === 0
             text: "No match."
           }
 
@@ -805,7 +837,7 @@ Item {
 
       // ---------------------------------------------- not-installed notice
       Column {
-        visible: !!(root.result && !root.searching && root.result.skipped && root.result.skipped.length > 0)
+        visible: !!(root.result && root.result.skipped && root.result.skipped.length > 0)
         width: parent.width
         spacing: Style.spacing.xs
         topPadding: Style.spacing.huge

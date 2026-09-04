@@ -165,6 +165,38 @@ class SearchRunTest(TempEnv):
         # an uninstalled local dictionary does not make its language available
         self.assertNotIn("zh", cov["lookup"]["langs"])
 
+    def test_results_are_streamed_as_each_source_finishes(self):
+        cfg = cfg_with(self.rows())
+        started = []
+        streamed = []
+        res = search.run("thesaurus", "x", "en", cfg=cfg,
+                         on_start=lambda sources, skipped: started.append((sources, skipped)),
+                         on_result=lambda r, i, n: streamed.append((r["source"]["id"], i, n)))
+        # the set of sources is known before any of them runs
+        self.assertEqual(len(started), 1)
+        self.assertEqual([s["id"] for s in started[0][0]], ["t1", "t2", "t3"])
+        # every source reports exactly once, with the slot it will occupy in
+        # the finished answer (arrival order is whatever finishes first)
+        self.assertEqual(len(streamed), 3)
+        self.assertEqual(sorted(streamed), [("t1", 0, 3), ("t2", 1, 3), ("t3", 2, 3)])
+        final = [r["source"]["id"] for r in res["results"]]
+        self.assertEqual(final, ["t1", "t2", "t3"])
+        for source_id, index, _ in streamed:
+            self.assertEqual(final[index], source_id)
+
+    def test_a_single_source_and_a_timeout_are_streamed_too(self):
+        rows = [{"id": "only", "name": "Only", "type": "dictionary", "driver": "fake"}]
+        seen = []
+        search.run("lookup", "x", "en", cfg=cfg_with(rows),
+                   on_result=lambda r, i, n: seen.append((r["source"]["id"], i, n)))
+        self.assertEqual(seen, [("only", 0, 1)])
+        slow = [{"id": "slow", "name": "Slow", "type": "dictionary", "driver": "fake", "notes": opts(delay=5)},
+                {"id": "quick", "name": "Quick", "type": "dictionary", "driver": "fake"}]
+        seen = []
+        search.run("lookup", "x", "en", cfg=cfg_with(slow), timeout=0.2,
+                   on_result=lambda r, i, n: seen.append((r["source"]["id"], r["ok"])))
+        self.assertEqual(sorted(seen), [("quick", True), ("slow", False)])
+
     def test_thesaurus_consolidation(self):
         res = search.run("thesaurus", "x", "en", cfg=cfg_with(self.rows()))
         self.assertEqual(res["consolidated"]["synonyms"], ["a", "b", "c", "d"])
