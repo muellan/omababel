@@ -49,6 +49,7 @@ import shutil
 import socket
 import ssl
 import subprocess
+import tempfile
 import time
 import urllib.parse
 import zlib
@@ -667,6 +668,33 @@ def impersonate_binary() -> str:
     return ""
 
 
+def _curl_config(url: str, header_lines: List[Tuple[str, str]], method: str,
+                 body: bool, timeout: float, impersonate_target: str) -> str:
+    """A curl config file: everything a command line would carry, except that
+    a file is not in the process table.
+
+    `-H "Authorization: ..."` in the argv is readable by every process on the
+    machine for as long as the request runs, so the headers, the cookies and
+    the URL go into a private file that curl reads with `-K` and that is
+    deleted as soon as it has.
+    """
+    def quoted(value: str) -> str:
+        return '"' + str(value).replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+    lines = ["silent", "show-error", "include", "compressed",
+             "max-time = " + str(int(timeout)),
+             "url = " + quoted(url)]
+    if impersonate_target:
+        lines.append("impersonate = " + quoted(impersonate_target))
+    if method:
+        lines.append("request = " + quoted(method))
+    if body:
+        lines.append('data-binary = "@-"')
+    for key, value in header_lines:
+        lines.append("header = " + quoted(f"{key}: {value}"))
+    return "\n".join(lines) + "\n"
+
+
 def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
                       data: Optional[bytes] = None, method: Optional[str] = None,
                       timeout: float = 20.0, profile: Optional[Profile] = None) -> Reply:
@@ -676,24 +704,29 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
         raise ImpersonateError("no curl-impersonate on this system", url=url)
     require_secure(url, headers)
     prof = profile or profile_for()
-    argv = [binary, "-sS", "-i", "--compressed", "--max-time", str(int(timeout))]
-    if os.path.basename(binary).startswith("curl-impersonate"):
-        argv += ["--impersonate", prof.impersonate]
-    for key, value in _merge_headers(prof, url, headers, "", data,
-                                     state().cookies_for(urllib.parse.urlsplit(url).hostname or "",
-                                                         "/", True)):
-        if key.lower() in ("host", "content-length", "connection"):
-            continue
-        argv += ["-H", f"{key}: {value}"]
-    if data is not None:
-        argv += ["--data-binary", "@-"]
-    if method:
-        argv += ["-X", method]
-    argv.append(url)
+    header_lines = [(key, value) for key, value in
+                    _merge_headers(prof, url, headers, "", data,
+                                   state().cookies_for(urllib.parse.urlsplit(url).hostname or "",
+                                                       "/", True))
+                    if key.lower() not in ("host", "content-length", "connection")]
+    config = _curl_config(url, header_lines, method or "", data is not None, timeout,
+                          prof.impersonate if os.path.basename(binary).startswith("curl-impersonate") else "")
+    fd, config_path = tempfile.mkstemp(prefix="omababel-curl-", suffix=".conf")
     try:
-        proc = subprocess.run(argv, input=data or b"", capture_output=True, timeout=timeout + 5)
+        os.fchmod(fd, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(config)
+        # -K reads the request from the file: the argv holds no secret, and
+        # the file is gone before this function returns.
+        proc = subprocess.run([binary, "-K", config_path], input=data or b"",
+                              capture_output=True, timeout=timeout + 5)
     except (OSError, subprocess.SubprocessError) as e:
         raise ImpersonateError(str(e), url=url)
+    finally:
+        try:
+            os.unlink(config_path)
+        except OSError:
+            pass
     if proc.returncode != 0:
         raise ImpersonateError((proc.stderr.decode("utf-8", "replace").strip()
                                 or f"curl exited {proc.returncode}"), url=url)

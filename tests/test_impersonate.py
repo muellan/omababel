@@ -372,6 +372,33 @@ class CredentialSafetyTest(TempEnv):
                          {"Accept": "y"})
 
     # ------------------------------------------------- process table
+    def test_the_curl_path_keeps_secrets_out_of_the_argv(self):
+        script = Path(self.tmp) / "fake-curl"
+        log = Path(self.tmp) / "argv.log"
+        script.write_text("#!/bin/sh\n"
+                          f"echo \"$@\" >> {log}\n"
+                          "printf 'HTTP/1.1 200 OK\\r\\nX: 1\\r\\n\\r\\nbody'\n",
+                          encoding="utf-8")
+        script.chmod(0o755)
+        os.environ["OMABABEL_CURL_IMPERSONATE"] = str(script)
+        try:
+            reply = impersonate.fetch_with_binary("https://api.example.org/v1",
+                                                  headers={"X-Api-Key": "sk-super-secret"},
+                                                  data=b"{}", method="POST", timeout=5)
+        finally:
+            os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
+        self.assertEqual(reply.body, b"body")
+        argv = log.read_text(encoding="utf-8")
+        self.assertNotIn("sk-super-secret", argv)
+        self.assertIn("-K", argv)
+        # the config file is gone again
+        for token in argv.split():
+            if token.endswith(".conf"):
+                self.assertFalse(Path(token).exists(), "the curl config was left behind")
+        # ... and it did hold the header
+        config = impersonate._curl_config("https://x/y", [("X-Api-Key", "sk-1")], "POST", True, 5, "")
+        self.assertIn('header = "X-Api-Key: sk-1"', config)
+
     def test_the_curl_path_also_refuses_plain_http_with_a_key(self):
         os.environ["OMABABEL_CURL_IMPERSONATE"] = "/bin/true"
         try:
