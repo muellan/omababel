@@ -395,6 +395,12 @@ text and a right click copies all of it.
 
 ## Security
 
+The plugin itself is installed and updated by `omarchy plugin add|update`,
+which tracks the repository's default branch. There is no signature or pin in
+that model, so an update is trust in this repository – as it is for every
+plugin.
+
+
 ### Credentials
 
 **API keys and other credentials are never written to a file in plain text.**
@@ -479,11 +485,6 @@ written by somebody else. So:
   the catalogue;
 * a downloaded archive's members are written `0600` with the `data` extraction
   filter, so an archive cannot leave a setuid or world-writable file behind.
-
-The plugin itself is installed and updated by `omarchy plugin add|update`,
-which tracks the repository's default branch. There is no signature or pin in
-that model, so an update is trust in this repository – as it is for every
-plugin.
 
 
 
