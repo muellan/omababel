@@ -199,6 +199,7 @@ A source has:
 | Model / Command  | AI sources only: override the service's default model, or the command that is run for the CLI access                                                                                           |
 
 
+
 ### Web Sources
 
 Scraped sites (LEO, Duden, Merriam-Webster, Thesaurus.com …) start
@@ -234,120 +235,6 @@ omababel sources unblock dict.leo.org
 
 `HTTP_PROXY` / `HTTPS_PROXY` / `NO_PROXY` are honoured; an https target is
 tunnelled through the proxy so the handshake is still with the site.
-
-
-
-### Security and credentials
-
-**API keys and other credentials are never written to a file in plain text.**
-They are stored in the login keyring of the session – Omarchy runs
-gnome-keyring, which provides the freedesktop Secret Service – under the
-attributes `service=omababel, id=<source id>`, and are read back only when a
-source is actually queried. `sources.json` keeps the *fact* that a key exists
-(`"has_key": true`), never the key itself.
-
-The keyring is reached through `secret-tool` (libsecret), so no third-party
-Python module is needed:
-
-```bash
-omababel    sources keyring           # is a keyring available?
-omababel    sources key deepl         # reads the key from stdin, stores it
-omababel    sources forget-key deepl  # removes it from the keyring
-secret-tool search service omababel   # everything omababel stored
-```
-
-Two alternatives are offered for setups without a running keyring, and for
-people who keep their secrets elsewhere:
-
-* **Key from env** – the name of an environment variable (`DEEPL_API_KEY`),
-* **Key from command** – a command whose first output line is the key
-  (`pass show omababel/deepl`, `gopass …`, `age -d …`).
-
-Both are consulted before the keyring, and neither stores the secret itself.
-**Key from command runs through the shell on every search that uses the row**
-– it is a line of your configuration the way an alias in `.bashrc` is, so put
-only a command there you would type yourself.
-
-Keys written to `sources.json` by an earlier version are moved into the
-keyring the first time the new version reads the file. If no keyring can be
-reached, such a key stays where it is and both the preferences panel and
-`omababel sources list` flag it – set it again once a keyring is running.
-Never put a key into the URL of a custom source: URLs *are* stored in
-`sources.json`.
-
-A stored key still has to survive the trip to the service:
-
-* **https or nothing.** A request that carries a credential (an API key, an
-  `Authorization` header, a cookie) is refused unless the URL is `https://`.
-  That covers the built-in services, a custom AI endpoint and a custom source
-  with a key alike: the panel says so instead of putting the key on the wire
-  in the clear.
-* **Credentials never survive a redirect.** Every `Location` is validated
-  before it is followed – only `http(s)`, never a downgrade from https to
-  http. A redirect to *another* origin while the request carries a credential
-  is refused outright; a redirect to another origin without one is followed
-  with all sensitive headers stripped. Only a same-origin redirect keeps the
-  key.
-* **No secret in the process table.** The optional `curl-impersonate` path
-  is handed to curl through a config file created with mode `0600` and 
-  removed again afterwards, so nothing confidential appears in `/proc`.
-  Curl is run with `-q`, so an `--insecure` or a `--proxy` left in your
-  `~/.curlrc` for something else cannot apply to a keyed request.
-* **A key never appears in a message.** Some services only take a key in the
-  query string (`?key=…`). Before a URL goes into an error message, into a
-  result the panel shows, or into the browser via a card's *open ↗*, the value
-  of any parameter that names a secret is replaced by `***`. A wrong key is
-  exactly the case that produces the error you would otherwise paste into a
-  bug report.
-
-
-A dictionary site, an AI answer and a downloaded dictionary file are all
-written by somebody else. So:
-
-* nothing scraped reaches the panel as markup – every result field is escaped
-  before rendering, and the one rich-text element additionally drops any tag
-  outside a small allowlist, because Qt's rich text would fetch an
-  `<img src="…">` for whoever put it there;
-* a link a card offers to open is checked for `http(s)` first, and a scraped
-  link is resolved against the site it came from rather than followed
-  wherever it points;
-* copied text has terminal control sequences removed, since a paste into a
-  terminal is where it usually ends up;
-* nothing a remote party sends can name a local path: a dataset's file name is
-  reduced to a plain name and the result is asserted to be inside the download
-  directory, and a dataset may only be fetched over https from the hosts in
-  the catalogue;
-* a downloaded archive's members are written `0600` with the `data` extraction
-  filter, so an archive cannot leave a setuid or world-writable file behind.
-
-The plugin itself is installed and updated by `omarchy plugin add|update`,
-which tracks the repository's default branch. There is no signature or pin in
-that model, so an update is trust in this repository – as it is for every
-plugin.
-
-
-
-### Response limits
-
-A remote service could otherwise decide how much memory the plugin uses.
-Everything coming back is therefore read against a ceiling, and going over one
-ends the request with an ordinary error message:
-
-| Limit                       | Default | Environment variable      |
-|-----------------------------|---------|---------------------------|
-| Compressed bytes read       | 8 MiB   | `OMABABEL_MAX_BODY`       |
-| Bytes after gzip/deflate    | 32 MiB  | `OMABABEL_MAX_DECODED`    |
-| An AI CLI's answer          | 2 MiB   | `OMABABEL_AI_MAX_REPLY`   |
-| One backend line to the panel | 4 MiB | `OMABABEL_MAX_REPLY`      |
-| One dataset download        | 4 GiB   | `OMABABEL_MAX_DOWNLOAD`   |
-
-Error bodies are cut at 64 KiB (only a line of them is ever shown), gzip and
-deflate are inflated incrementally so a decompression bomb is refused after
-the first chunks rather than after the last, and the `curl-impersonate`
-subprocess is drained through the same capped reader and killed when it goes
-past it. A search result that would exceed the line limit keeps its place in
-the list and carries an error instead, so the panel never receives a line it
-cannot parse.
 
 
 
@@ -456,8 +343,7 @@ You can also feed a file you downloaded yourself:
 
 
 
-
-## Adding Your Own Sources
+### Adding Your Own Sources
 
 **A web dictionary** - choose *Remote (URL)* with the *Custom URL* driver and
 enter the page URL with `{word}` where the query goes, e.g.
@@ -490,6 +376,7 @@ pairs and a right click copies one side; full-text services show the translated
 text and a right click copies all of it.
 
 
+
 ### Where data is stored
 
 | File                                   | Purpose                                                                                                                                      |
@@ -504,6 +391,125 @@ text and a right click copies all of it.
 | login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                                                   |
 
 `omababel sources reset` restores the built-in list.
+
+
+
+
+## Security
+
+### Credentials
+
+**API keys and other credentials are never written to a file in plain text.**
+They are stored in the login keyring of the session – Omarchy runs
+gnome-keyring, which provides the freedesktop Secret Service – under the
+attributes `service=omababel, id=<source id>`, and are read back only when a
+source is actually queried. `sources.json` keeps the *fact* that a key exists
+(`"has_key": true`), never the key itself.
+
+The keyring is reached through `secret-tool` (libsecret), so no third-party
+Python module is needed:
+
+```bash
+omababel    sources keyring           # is a keyring available?
+omababel    sources key deepl         # reads the key from stdin, stores it
+omababel    sources forget-key deepl  # removes it from the keyring
+secret-tool search service omababel   # everything omababel stored
+```
+
+Two alternatives are offered for setups without a running keyring, and for
+people who keep their secrets elsewhere:
+
+* **Key from env** – the name of an environment variable (`DEEPL_API_KEY`),
+* **Key from command** – a command whose first output line is the key
+  (`pass show omababel/deepl`, `gopass …`, `age -d …`).
+
+Both are consulted before the keyring, and neither stores the secret itself.
+**Key from command runs through the shell on every search that uses the row**
+– it is a line of your configuration the way an alias in `.bashrc` is, so put
+only a command there you would type yourself.
+
+Keys written to `sources.json` by an earlier version are moved into the
+keyring the first time the new version reads the file. If no keyring can be
+reached, such a key stays where it is and both the preferences panel and
+`omababel sources list` flag it – set it again once a keyring is running.
+Never put a key into the URL of a custom source: URLs *are* stored in
+`sources.json`.
+
+A stored key still has to survive the trip to the service:
+
+* **https or nothing.** A request that carries a credential (an API key, an
+  `Authorization` header, a cookie) is refused unless the URL is `https://`.
+  That covers the built-in services, a custom AI endpoint and a custom source
+  with a key alike: the panel says so instead of putting the key on the wire
+  in the clear.
+* **Credentials never survive a redirect.** Every `Location` is validated
+  before it is followed – only `http(s)`, never a downgrade from https to
+  http. A redirect to *another* origin while the request carries a credential
+  is refused outright; a redirect to another origin without one is followed
+  with all sensitive headers stripped. Only a same-origin redirect keeps the
+  key.
+* **No secret in the process table.** The optional `curl-impersonate` path
+  is handed to curl through a config file created with mode `0600` and 
+  removed again afterwards, so nothing confidential appears in `/proc`.
+  Curl is run with `-q`, so an `--insecure` or a `--proxy` left in your
+  `~/.curlrc` for something else cannot apply to a keyed request.
+* **A key never appears in a message.** Some services only take a key in the
+  query string (`?key=…`). Before a URL goes into an error message, into a
+  result the panel shows, or into the browser via a card's *open ↗*, the value
+  of any parameter that names a secret is replaced by `***`. A wrong key is
+  exactly the case that produces the error you would otherwise paste into a
+  bug report.
+
+
+### Protections against code injection
+
+A dictionary site, an AI answer and a downloaded dictionary file are all
+written by somebody else. So:
+
+* nothing scraped reaches the panel as markup; very result field is escaped
+  before rendering, and the one rich-text element additionally drops any tag
+  outside a small allowlist, because Qt's rich text would fetch an
+  `<img src="…">` for whoever put it there;
+* a link a card offers to open is checked for `http(s)` first, and a scraped
+  link is resolved against the site it came from rather than followed
+  wherever it points;
+* copied text has terminal control sequences removed, since a paste into a
+  terminal is where it usually ends up;
+* nothing a remote party sends can name a local path: a dataset's file name is
+  reduced to a plain name and the result is asserted to be inside the download
+  directory, and a dataset may only be fetched over https from the hosts in
+  the catalogue;
+* a downloaded archive's members are written `0600` with the `data` extraction
+  filter, so an archive cannot leave a setuid or world-writable file behind.
+
+The plugin itself is installed and updated by `omarchy plugin add|update`,
+which tracks the repository's default branch. There is no signature or pin in
+that model, so an update is trust in this repository – as it is for every
+plugin.
+
+
+
+### Response limits
+
+A remote service could otherwise decide how much memory the plugin uses.
+Everything coming back is therefore read against a ceiling, and going over one
+ends the request with an ordinary error message:
+
+| Limit                       | Default | Environment variable      |
+|-----------------------------|---------|---------------------------|
+| Compressed bytes read       | 8 MiB   | `OMABABEL_MAX_BODY`       |
+| Bytes after gzip/deflate    | 32 MiB  | `OMABABEL_MAX_DECODED`    |
+| An AI CLI's answer          | 2 MiB   | `OMABABEL_AI_MAX_REPLY`   |
+| One backend line to the panel | 4 MiB | `OMABABEL_MAX_REPLY`      |
+| One dataset download        | 4 GiB   | `OMABABEL_MAX_DOWNLOAD`   |
+
+Error bodies are cut at 64 KiB (only a line of them is ever shown), gzip and
+deflate are inflated incrementally so a decompression bomb is refused after
+the first chunks rather than after the last, and the `curl-impersonate`
+subprocess is drained through the same capped reader and killed when it goes
+past it. A search result that would exceed the line limit keeps its place in
+the list and carries an error instead, so the panel never receives a line it
+cannot parse.
 
 
 
