@@ -271,6 +271,46 @@ reached, such a key stays where it is and both the preferences panel and
 Never put a key into the URL of a custom source: URLs *are* stored in
 `sources.json`.
 
+A stored key is only half of it – it must not leak on its way out either:
+
+* **https or nothing.** A request that carries a credential (an API key, an
+  `Authorization` header, a cookie) is refused unless the URL is `https://`.
+  That covers the built-in services, a custom AI endpoint and a custom source
+  with a key alike: the panel says so instead of putting the key on the wire
+  in the clear.
+* **Credentials never survive a redirect.** Every `Location` is validated
+  before it is followed – only `http(s)`, never a downgrade from https to
+  http. A redirect to *another* origin while the request carries a credential
+  is refused outright; a redirect to another origin without one is followed
+  with all sensitive headers stripped. Only a same-origin redirect keeps the
+  key.
+* **No secret in the process table.** The optional `curl-impersonate` path
+  used to pass headers as command-line arguments, where anyone running `ps`
+  could read them. The request is now handed to curl through a config file
+  created with mode `0600` and removed again afterwards, so nothing
+  confidential appears in `/proc`.
+
+### Response limits
+
+A remote service could otherwise decide how much memory the plugin uses – a
+timeout is not a byte limit. Everything coming back is therefore read against
+a ceiling, and going over one ends the request with an ordinary error message:
+
+| Limit                       | Default | Environment variable      |
+|-----------------------------|---------|---------------------------|
+| Compressed bytes read       | 8 MiB   | `OMABABEL_MAX_BODY`       |
+| Bytes after gzip/deflate    | 32 MiB  | `OMABABEL_MAX_DECODED`    |
+| An AI CLI's answer          | 2 MiB   | `OMABABEL_AI_MAX_REPLY`   |
+| One backend line to the panel | 4 MiB | `OMABABEL_MAX_REPLY`      |
+
+Error bodies are cut at 64 KiB (only a line of them is ever shown), gzip and
+deflate are inflated incrementally so a decompression bomb is refused after
+the first chunks rather than after the last, and the `curl-impersonate`
+subprocess is drained through the same capped reader and killed when it goes
+past it. A search result that would exceed the line limit keeps its place in
+the list and carries an error instead, so the panel never receives a line it
+cannot parse.
+
 
 
 ### Built-in Remote Sources
@@ -328,7 +368,9 @@ site. They are **disabled by default**; enable the ones you want in
   it is retired. A model that stops existing is looked up again and retried
   once; a `404` that survives that names the models the key can actually use.
   Fill *Model* in to pin one, and *API endpoint* to point at something else
-  entirely, such as a self-hosted OpenAI-compatible server.
+  entirely, such as a self-hosted OpenAI-compatible server – it has to be an
+  `https://` URL, since the key travels with every request (see
+  [Credentials](#credentials)).
 
 The plugin asks for a strict JSON answer and parses it defensively (code
 fences, a chatty preamble or a CLI banner are all tolerated), so a talkative
@@ -384,7 +426,8 @@ enter the page URL with `{word}` where the query goes, e.g.
 `https://www.dwds.de/wb/{word}`. The page's readable text is shown as the
 result; JSON APIs are flattened (and `synonyms`/`antonyms` arrays are picked
 up for thesaurus rows). An API key is sent as `Authorization: Bearer ...` or
-substituted for `{key}` in the URL.
+substituted for `{key}` in the URL; a source with a key needs an `https://`
+URL.
 
 **A local dictionary file** - put the file into `~/.local/share/omababel/`
 (or use an absolute path) and add a *Local file* source pointing at it. The

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "muellan.omababel",
   "name": "Omababel",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "author": "André Müller",
   "license": "MIT",
   "description": "Dictionary, thesaurus and translation panel.",
