@@ -64,6 +64,35 @@ class Response:
         return json.loads(self.text)
 
 
+class _SafeRedirects(urllib.request.HTTPRedirectHandler):
+    """urllib follows a redirect by replaying the original request.
+
+    That includes the Authorization or X-Api-Key header, so a redirect to
+    another origin would hand our credentials to whoever the remote party
+    names.  Every hop is checked (`impersonate.check_redirect`) and anything
+    that authenticates us is dropped when the origin changes.
+    """
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        sensitive = {k: v for k, v in req.header_items() if impersonate.is_sensitive(k)}
+        try:
+            target = impersonate.check_redirect(req.full_url, newurl, sensitive)
+        except impersonate.ImpersonateError as e:
+            raise urllib.error.HTTPError(req.full_url, code, str(e), headers, fp)
+        new = super().redirect_request(req, fp, code, msg, headers, target)
+        if new is not None and not impersonate.same_origin(req.full_url, target):
+            for name in list(new.headers):
+                if impersonate.is_sensitive(name):
+                    del new.headers[name]
+            for name in list(getattr(new, "unredirected_hdrs", {})):
+                if impersonate.is_sensitive(name):
+                    del new.unredirected_hdrs[name]
+        return new
+
+
+_opener = urllib.request.build_opener(_SafeRedirects())
+
+
 def _decompress(body: bytes, encoding: str) -> bytes:
     enc = (encoding or "").lower()
     if enc == "gzip" or enc == "x-gzip":
@@ -88,6 +117,11 @@ def fetch(
 ) -> Response:
     if os.environ.get("OMABABEL_OFFLINE"):
         raise FetchError("offline mode (OMABABEL_OFFLINE is set)", url=url)
+    # A credential belongs on an encrypted connection or nowhere.
+    try:
+        impersonate.require_secure(url, headers)
+    except impersonate.ImpersonateError as e:
+        raise FetchError(str(e), url=url)
 
     hdrs = {
         "User-Agent": DEFAULT_UA,
@@ -116,7 +150,7 @@ def fetch(
 
     req = urllib.request.Request(url, data=payload, headers=hdrs, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=timeout or DEFAULT_TIMEOUT) as resp:
+        with _opener.open(req, timeout=timeout or DEFAULT_TIMEOUT) as resp:
             raw = resp.read()
             rh = {k.lower(): v for k, v in resp.headers.items()}
             body = _decompress(raw, rh.get("content-encoding", ""))

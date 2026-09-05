@@ -12,6 +12,9 @@ host with a backoff that survives the process.
 
 What it does, in the order it matters:
 
+* **Credentials.**  A request that authenticates us goes over https or not
+  at all, and neither an API key nor a cookie ever survives a redirect to
+  another origin.
 * **Cookies.**  A session cookie is what separates a returning browser from
   a fresh script.  They are kept in the cache directory and replayed.
 * **Header set and order.**  Chrome's exact list, in Chrome's order,
@@ -151,6 +154,76 @@ MIN_INTERVAL = float(os.environ.get("OMABABEL_HOST_INTERVAL", "0.8"))
 MAX_RETRIES = int(os.environ.get("OMABABEL_HTTP_RETRIES", "2"))
 BLOCK_BACKOFF = (20.0, 60.0, 300.0)      # after 1, 2, 3+ refusals in a row
 MAX_REDIRECTS = 5
+
+# ----------------------------------------------------------- credentials
+#
+# Headers that authenticate us.  They are never sent over plaintext http and
+# never survive a redirect to another origin: where the next request goes is
+# the remote party's suggestion, and it must not be able to name itself as
+# the recipient of our API key.
+SENSITIVE_HEADERS = frozenset({
+    "authorization", "proxy-authorization", "cookie", "x-api-key", "api-key",
+    "x-goog-api-key", "x-goog-iam-authorization-token", "x-auth-token",
+    "x-access-token", "x-session-token", "x-amz-security-token",
+    "openai-organization", "anthropic-version",
+})
+
+
+def is_sensitive(name: str) -> bool:
+    return str(name).lower() in SENSITIVE_HEADERS
+
+
+def has_credentials(headers) -> bool:
+    if not headers:
+        return False
+    names = headers.keys() if hasattr(headers, "keys") else [k for k, _ in headers]
+    return any(is_sensitive(k) for k in names)
+
+
+def origin_of(url: str):
+    parts = urllib.parse.urlsplit(url)
+    scheme = (parts.scheme or "").lower()
+    port = parts.port or (443 if scheme == "https" else (80 if scheme == "http" else 0))
+    return (scheme, (parts.hostname or "").lower(), port)
+
+
+def same_origin(a: str, b: str) -> bool:
+    return origin_of(a) == origin_of(b)
+
+
+def require_secure(url: str, headers=None) -> None:
+    """Refuse to put a credential on the wire in the clear."""
+    if not has_credentials(headers):
+        return
+    if origin_of(url)[0] != "https":
+        raise ImpersonateError(
+            "refusing to send credentials over plain http; use an https endpoint", url=url)
+
+
+def strip_credentials(headers):
+    """The caller's headers without anything that authenticates us."""
+    if not headers:
+        return headers
+    if hasattr(headers, "items"):
+        return {k: v for k, v in headers.items() if not is_sensitive(k)}
+    return [(k, v) for k, v in headers if not is_sensitive(k)]
+
+
+def check_redirect(url: str, location: str, headers=None) -> str:
+    """The absolute target of a redirect, or an error when it must not be
+    followed: only http(s), never a downgrade from https, and never a
+    credentialed request to another origin."""
+    target = urllib.parse.urljoin(url, str(location or ""))
+    scheme, host, _ = origin_of(target)
+    if scheme not in ("http", "https") or not host:
+        raise ImpersonateError(f"refusing to follow a redirect to {target!r}", url=url)
+    if origin_of(url)[0] == "https" and scheme != "https":
+        raise ImpersonateError("refusing to follow a redirect from https to plain http", url=url)
+    if has_credentials(headers) and not same_origin(url, target):
+        raise ImpersonateError(
+            "refusing to follow a cross-origin redirect on a request that carries credentials",
+            url=url)
+    return target
 
 
 def enabled() -> bool:
@@ -488,6 +561,7 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
           _redirects: int = 0) -> Reply:
     """One request, as a browser would send it."""
     prof = profile or profile_for()
+    require_secure(url, headers)          # no credentials over plain http
     st = state()
     parts = urllib.parse.urlsplit(url)
     host = parts.hostname or ""
@@ -539,12 +613,16 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
     if status in (301, 302, 303, 307, 308) and _redirects < MAX_REDIRECTS:
         location = reply.header("location")
         if location:
+            # Where the next request goes is the remote party's suggestion, so
+            # it is checked before it is taken, and nothing that authenticates
+            # us travels to another origin.
+            target = check_redirect(url, location, headers)
             st.mark_ok(host)
             st.save()
-            nxt = urllib.parse.urljoin(url, location)
+            follow_headers = headers if same_origin(url, target) else strip_credentials(headers)
             follow_data = None if status in (301, 302, 303) else data
             follow_method = "GET" if status in (301, 302, 303) else verb
-            return fetch(nxt, data=follow_data, headers=headers, method=follow_method,
+            return fetch(target, data=follow_data, headers=follow_headers, method=follow_method,
                          timeout=timeout, accept_language=accept_language, profile=prof,
                          _redirects=_redirects + 1)
 
@@ -596,6 +674,7 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
     binary = impersonate_binary()
     if not binary:
         raise ImpersonateError("no curl-impersonate on this system", url=url)
+    require_secure(url, headers)
     prof = profile or profile_for()
     argv = [binary, "-sS", "-i", "--compressed", "--max-time", str(int(timeout))]
     if os.path.basename(binary).startswith("curl-impersonate"):

@@ -89,6 +89,10 @@ class Generic(Source):
     def _get(self, word: str, src: str = "", dst: str = ""):
         if "{word}" not in self.url and "{q}" not in self.url:
             raise SourceError(f"{self.name}: URL must contain {{word}}")
+        # The key goes into the URL or into an Authorization header; either
+        # way it must not travel in the clear.
+        if self.api_key and not self.url.lower().startswith("https://"):
+            raise SourceError(f"{self.name}: a source with an API key needs an https URL")
         url = http.fill_template(self.url.replace("{q}", "{word}"), word=word, **{"from": src, "to": dst})
         url = url.replace("{key}", http.quote(self.api_key))
         headers = {}

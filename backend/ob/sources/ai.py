@@ -133,6 +133,11 @@ def forget_models(service: str) -> None:
         _cache_write(data)
 
 
+def secure_url(url: str) -> str:
+    """A URL we are willing to put a key on, or "" ."""
+    return url if str(url).lower().startswith("https://") else ""
+
+
 def list_models(service: str, key: str, endpoint: str = "") -> List[str]:
     """Chat model ids this key may use, newest first, cached for a day.
 
@@ -145,7 +150,7 @@ def list_models(service: str, key: str, endpoint: str = "") -> List[str]:
     cached = _cache_read().get(service)
     if isinstance(cached, dict) and time.time() - float(cached.get("ts", 0)) < MODEL_CACHE_TTL:
         return [str(m) for m in cached.get("models", [])]
-    url = MODEL_LISTS.get(service) or _models_url_for(endpoint)
+    url = secure_url(MODEL_LISTS.get(service) or _models_url_for(endpoint))
     if not url:
         return []
     try:
@@ -236,9 +241,16 @@ class AI(Source):
         self.model_cfg = str(cfg.get("model") or "").strip()
         self.fallback_model = preset[3]
         self._model = self.model_cfg
-        # the URL field is an *endpoint override*, and only the API transport
-        # has an endpoint at all
-        override = self.url if (self.transport == "api" and self.url.startswith("http")) else ""
+        # The URL field is an *endpoint override*, and only the API transport
+        # has an endpoint at all.  It must be https: the request carries an
+        # API key, and any string starting with "http" was accepted before.
+        override = ""
+        if self.transport == "api" and self.url:
+            if self.url.lower().startswith("https://"):
+                override = self.url
+            elif self.url.lower().startswith("http://"):
+                raise SourceError(f"{self.name}: the API endpoint must be https – an API key "
+                                  "must not travel over plain http")
         self.endpoint = override or preset[2]
 
     @staticmethod

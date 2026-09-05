@@ -283,6 +283,25 @@ class AiConfigTest(unittest.TestCase):
                        "transport": "api", "url": "https://self.hosted/v1/chat/completions"})
         self.assertEqual(api.endpoint, "https://self.hosted/v1/chat/completions")
 
+    def test_a_plain_http_endpoint_is_refused(self):
+        """The request carries an API key, so the endpoint must be https."""
+        with self.assertRaises(SourceError) as ctx:
+            S.build({"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai",
+                     "transport": "api", "url": "http://self.hosted/v1/chat/completions"})
+        self.assertIn("must be https", str(ctx.exception))
+        # https is taken, and a plain-http URL on the CLI transport is simply
+        # ignored (it is not an endpoint there)
+        self.assertEqual(S.build({"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai",
+                                  "transport": "api",
+                                  "url": "https://self.hosted/v1/chat/completions"}).endpoint,
+                         "https://self.hosted/v1/chat/completions")
+        self.assertEqual(S.build({"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai",
+                                  "url": "http://self.hosted/v1/chat/completions"}).endpoint,
+                         ai.SERVICES["claude"][2])
+        # and the model listing is only fetched over https
+        self.assertEqual(ai.secure_url("http://x/v1/models"), "")
+        self.assertEqual(ai.secure_url("https://x/v1/models"), "https://x/v1/models")
+
     def test_unknown_service_or_transport_falls_back(self):
         src = S.build({"id": "ai", "name": "AI", "type": "dictionary", "driver": "ai",
                        "service": "nope", "transport": "carrier-pigeon"})

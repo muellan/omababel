@@ -5,6 +5,7 @@ import os
 import ssl
 import time
 import unittest
+from pathlib import Path
 
 from helpers import TempEnv
 
@@ -16,9 +17,16 @@ class FakeResponseObj:
         self.status = status
         self._headers = headers or [("Content-Type", "text/html")]
         self._body = body
+        self._pos = 0
 
-    def read(self):
-        return self._body
+    def read(self, amount=None):
+        """Chunked like a socket, so the caller's size cap is exercised."""
+        if amount is None:
+            chunk, self._pos = self._body[self._pos:], len(self._body)
+            return chunk
+        chunk = self._body[self._pos:self._pos + amount]
+        self._pos += len(chunk)
+        return chunk
 
     def getheaders(self):
         return list(self._headers)
@@ -272,6 +280,107 @@ class HttpIntegrationTest(TempEnv):
         finally:
             os.environ.pop("OMABABEL_IMPERSONATE", None)
         self.assertTrue(impersonate.enabled())
+
+
+class CredentialSafetyTest(TempEnv):
+    """Credentials must not leak: not over http, not across a redirect, and
+    not through the process table."""
+
+    def setUp(self):
+        super().setUp()
+        impersonate.reset_state()
+        self._factory = impersonate.connection_factory
+        impersonate.MIN_INTERVAL = 0.0
+        os.environ.pop("OMABABEL_OFFLINE", None)
+
+    def tearDown(self):
+        impersonate.connection_factory = self._factory
+        impersonate.reset_state()
+        os.environ["OMABABEL_OFFLINE"] = "1"
+        super().tearDown()
+
+    def serve(self, *replies):
+        queue = list(replies)
+        self.seen = []
+
+        def factory(host, port, secure, timeout, profile):
+            conn = FakeConnection(host, port, secure, timeout, profile, queue)
+            self.seen.append(conn)
+            return conn
+
+        impersonate.connection_factory = factory
+
+    # ------------------------------------------------------------- https
+    def test_a_credential_never_goes_over_plain_http(self):
+        self.serve(FakeResponseObj())
+        for header in ({"Authorization": "Bearer sk-1"}, {"X-Api-Key": "sk-2"},
+                       {"x-goog-api-key": "sk-3"}, {"Cookie": "session=1"}):
+            with self.assertRaises(impersonate.ImpersonateError) as ctx:
+                impersonate.fetch("http://api.example.org/v1", headers=header)
+            self.assertIn("credentials over plain http", str(ctx.exception))
+        # ob.http refuses it too, and nothing was sent
+        with self.assertRaises(http.FetchError):
+            http.fetch("http://api.example.org/v1", headers={"Authorization": "Bearer sk-1"})
+        self.assertEqual(self.seen, [])
+        # without a credential plain http is still fine (a scraped page)
+        impersonate.fetch("http://example.org/page")
+        self.assertEqual(len(self.seen), 1)
+
+    # --------------------------------------------------------- redirects
+    def test_a_cross_origin_redirect_never_carries_credentials(self):
+        creds = {"Authorization": "Bearer sk-secret"}
+        self.serve(FakeResponseObj(status=302, headers=[("Location", "https://evil.example/steal")]))
+        with self.assertRaises(impersonate.ImpersonateError) as ctx:
+            impersonate.fetch("https://api.example.org/v1", headers=creds)
+        self.assertIn("cross-origin redirect", str(ctx.exception))
+        self.assertEqual(len(self.seen), 1)          # the second hop never happened
+
+    def test_a_redirect_without_credentials_is_followed_but_stripped(self):
+        self.serve(FakeResponseObj(status=302, headers=[("Location", "https://cdn.example/page")]),
+                   FakeResponseObj(body=b"<html>moved</html>"))
+        reply = impersonate.fetch("https://www.example.org/page", headers={"X-Trace": "1"})
+        self.assertEqual(reply.body, b"<html>moved</html>")
+        sent = dict(FakeConnection.last.headers)
+        self.assertEqual(sent["X-Trace"], "1")       # a harmless header travels
+        self.assertNotIn("Authorization", sent)
+
+    def test_same_origin_redirects_keep_the_credential(self):
+        self.serve(FakeResponseObj(status=307, headers=[("Location", "/v1/messages")]),
+                   FakeResponseObj(body=b"{}"))
+        impersonate.fetch("https://api.example.org/v1", headers={"Authorization": "Bearer sk-1"})
+        self.assertEqual(dict(FakeConnection.last.headers)["Authorization"], "Bearer sk-1")
+
+    def test_a_downgrade_or_a_junk_target_is_refused(self):
+        self.serve(FakeResponseObj(status=302, headers=[("Location", "http://example.org/plain")]))
+        with self.assertRaises(impersonate.ImpersonateError) as ctx:
+            impersonate.fetch("https://example.org/page")
+        self.assertIn("https to plain http", str(ctx.exception))
+        for junk in ("file:///etc/passwd", "javascript:alert(1)", "ftp://example.org/x"):
+            self.serve(FakeResponseObj(status=302, headers=[("Location", junk)]))
+            with self.assertRaises(impersonate.ImpersonateError) as ctx:
+                impersonate.fetch("https://example.org/page")
+            self.assertIn("refusing to follow", str(ctx.exception))
+
+    def test_the_redirect_check_itself(self):
+        ok = impersonate.check_redirect("https://a.example/x", "/y", {"Accept": "*/*"})
+        self.assertEqual(ok, "https://a.example/y")
+        self.assertEqual(impersonate.check_redirect("https://a.example/x", "https://b.example/y"),
+                         "https://b.example/y")
+        self.assertTrue(impersonate.has_credentials({"X-Api-Key": "k"}))
+        self.assertFalse(impersonate.has_credentials({"Accept": "*/*"}))
+        self.assertEqual(impersonate.strip_credentials({"Authorization": "x", "Accept": "y"}),
+                         {"Accept": "y"})
+
+    # ------------------------------------------------- process table
+    def test_the_curl_path_also_refuses_plain_http_with_a_key(self):
+        os.environ["OMABABEL_CURL_IMPERSONATE"] = "/bin/true"
+        try:
+            with self.assertRaises(impersonate.ImpersonateError) as ctx:
+                impersonate.fetch_with_binary("http://api.example.org/v1",
+                                              headers={"Authorization": "Bearer k"})
+        finally:
+            os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
+        self.assertIn("credentials over plain http", str(ctx.exception))
 
 
 if __name__ == "__main__":
