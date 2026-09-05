@@ -113,7 +113,13 @@ Item {
           // starts at the same x, and a long target wraps inside its column
           // instead of running under the next row.
           var long1 = harness.readJson(fx + "/translate.json")
-          var pairs = long1.results[1].pairs      // the first source failed offline
+          // The first card with pairs, not a fixed index: the remote sources
+          // in the fixture failed offline and how many of them there are
+          // depends on which ones ship enabled.
+          var pairs = null
+          for (var q = 0; q < long1.results.length && !pairs; q++)
+            if (long1.results[q].pairs && long1.results[q].pairs.length) pairs = long1.results[q].pairs
+          harness.check(!!pairs, "the fixture has a card with word pairs")
           var longWord = "ein sehr langes Übersetzungsergebnis mit ausgesprochen vielen Wörtern, "
                        + "das in seiner eigenen Spalte umbrechen muss und nicht unter die Quellspalte "
                        + "der nächsten Zeile laufen darf"

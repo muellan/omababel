@@ -392,7 +392,7 @@
    ]
   },
   "translate": {
-   "any": false,
+   "any": true,
    "langs": [
     "de",
     "en",

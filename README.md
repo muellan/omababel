@@ -264,12 +264,18 @@ people who keep their secrets elsewhere:
   (`pass show omababel/deepl`, `gopass …`, `age -d …`).
 
 Both are consulted before the keyring, and neither stores the secret itself.
+**Key from command runs through the shell on every search that uses the row**
+– it is a line of your configuration the way an alias in `.bashrc` is, so put
+only a command there you would type yourself.
+
 Keys written to `sources.json` by an earlier version are moved into the
 keyring the first time the new version reads the file. If no keyring can be
 reached, such a key stays where it is and both the preferences panel and
 `omababel sources list` flag it – set it again once a keyring is running.
 Never put a key into the URL of a custom source: URLs *are* stored in
 `sources.json`.
+
+A stored key still has to survive the trip to the service:
 
 * **https or nothing.** A request that carries a credential (an API key, an
   `Authorization` header, a cookie) is refused unless the URL is `https://`.
@@ -285,6 +291,40 @@ Never put a key into the URL of a custom source: URLs *are* stored in
 * **No secret in the process table.** The optional `curl-impersonate` path
   is handed to curl through a config file created with mode `0600` and 
   removed again afterwards, so nothing confidential appears in `/proc`.
+  Curl is run with `-q`, so an `--insecure` or a `--proxy` left in your
+  `~/.curlrc` for something else cannot apply to a keyed request.
+* **A key never appears in a message.** Some services only take a key in the
+  query string (`?key=…`). Before a URL goes into an error message, into a
+  result the panel shows, or into the browser via a card's *open ↗*, the value
+  of any parameter that names a secret is replaced by `***`. A wrong key is
+  exactly the case that produces the error you would otherwise paste into a
+  bug report.
+
+### What the plugin refuses to trust
+
+A dictionary site, an AI answer and a downloaded dictionary file are all
+written by somebody else. So:
+
+* nothing scraped reaches the panel as markup – every result field is escaped
+  before rendering, and the one rich-text element additionally drops any tag
+  outside a small allowlist, because Qt's rich text would fetch an
+  `<img src="…">` for whoever put it there;
+* a link a card offers to open is checked for `http(s)` first, and a scraped
+  link is resolved against the site it came from rather than followed
+  wherever it points;
+* copied text has terminal control sequences removed, since a paste into a
+  terminal is where it usually ends up;
+* nothing a remote party sends can name a local path: a dataset's file name is
+  reduced to a plain name and the result is asserted to be inside the download
+  directory, and a dataset may only be fetched over https from the hosts in
+  the catalogue;
+* a downloaded archive's members are written `0600` with the `data` extraction
+  filter, so an archive cannot leave a setuid or world-writable file behind.
+
+The plugin itself is installed and updated by `omarchy plugin add|update`,
+which tracks the repository's default branch. There is no signature or pin in
+that model, so an update is trust in this repository – as it is for every
+plugin.
 
 
 
@@ -300,6 +340,7 @@ ends the request with an ordinary error message:
 | Bytes after gzip/deflate    | 32 MiB  | `OMABABEL_MAX_DECODED`    |
 | An AI CLI's answer          | 2 MiB   | `OMABABEL_AI_MAX_REPLY`   |
 | One backend line to the panel | 4 MiB | `OMABABEL_MAX_REPLY`      |
+| One dataset download        | 4 GiB   | `OMABABEL_MAX_DOWNLOAD`   |
 
 Error bodies are cut at 64 KiB (only a line of them is ever shown), gzip and
 deflate are inflated incrementally so a decompression bomb is refused after

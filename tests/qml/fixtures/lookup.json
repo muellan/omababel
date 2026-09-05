@@ -54,7 +54,8 @@
         "<a href=\"w:ein\">ein</a> <a href=\"w:gro%C3%9Fes\">großes</a> <a href=\"w:Haus\">Haus</a>"
        ],
        "synonyms_html": "<a href=\"w:Geb%C3%A4ude\">Gebäude</a>, <a href=\"w:Bau\">Bau</a>, <a href=\"w:Anwesen\">Anwesen</a>",
-       "antonyms_html": ""
+       "antonyms_html": "",
+       "tags_html": []
       },
       {
        "gloss": "Familie, Geschlecht",
@@ -68,7 +69,8 @@
        "gloss_html": "<a href=\"w:Familie\">Familie</a>, <a href=\"w:Geschlecht\">Geschlecht</a>",
        "examples_html": [],
        "synonyms_html": "<a href=\"w:Dynastie\">Dynastie</a>",
-       "antonyms_html": ""
+       "antonyms_html": "",
+       "tags_html": []
       }
      ],
      "extra": {},

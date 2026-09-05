@@ -26,8 +26,9 @@ OUT = HERE / "qml" / "fixtures"
 
 
 # Values that differ on every run and say nothing about the shapes the QML
-# has to render: a measured duration, a build timestamp.
-_VOLATILE = {"ms": 12, "built": 1700000000}
+# has to render: a measured duration, a build timestamp, when a history entry
+# was recorded.
+_VOLATILE = {"ms": 12, "built": 1700000000, "time": 1700000000}
 
 
 def _stable(obj):
@@ -45,6 +46,10 @@ def main() -> None:
         "OMABABEL_CONFIG_DIR": str(tmp / "config"), "OMABABEL_DATA_DIR": str(tmp / "data"),
         "OMABABEL_STATE_DIR": str(tmp / "state"), "OMABABEL_CACHE_DIR": str(tmp / "cache"),
         "OMABABEL_OFFLINE": "1",
+        # The keyring stub, so the generated state does not depend on whether
+        # the machine that regenerates the fixtures happens to run one.
+        "OMABABEL_SECRET_TOOL": str(HERE / "fake_secret_tool.py"),
+        "OMABABEL_FAKE_KEYRING": str(tmp / "keyring.json"),
     })
     for d in ("config", "data", "state", "cache"):
         (tmp / d).mkdir(parents=True)

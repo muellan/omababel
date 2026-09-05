@@ -21,6 +21,21 @@
   },
   {
    "source": {
+    "id": "google-translate",
+    "name": "Google Translate",
+    "type": "translator",
+    "driver": "google",
+    "kind": "remote",
+    "translation_mode": "text"
+   },
+   "ok": false,
+   "error": "Google Translate: offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 12,
+   "alternatives_html": []
+  },
+  {
+   "source": {
     "id": "freedict-deu-eng",
     "name": "FreeDict German → English",
     "type": "translator",
