@@ -31,12 +31,21 @@ DEFAULT_TIMEOUT = float(os.environ.get("OMABABEL_TIMEOUT", "12"))
 
 
 class FetchError(Exception):
-    """Network / HTTP failure.  ``status`` is the HTTP code when known."""
+    """Network / HTTP failure.  ``status`` is the HTTP code when known.
+
+    The URL is redacted here rather than at each raise site: a service that
+    only takes its key in the query string would otherwise put that key into
+    a message the panel shows and the CLI prints.
+    """
 
     def __init__(self, message: str, status: Optional[int] = None, url: str = ""):
-        super().__init__(message)
+        safe = impersonate.redact_url(url) if url else ""
+        text = str(message)
+        if url and safe != url:
+            text = text.replace(url, safe)
+        super().__init__(text)
         self.status = status
-        self.url = url
+        self.url = safe
 
 
 class Response:

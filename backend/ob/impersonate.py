@@ -209,6 +209,51 @@ def check_url(url: str) -> None:
         raise ImpersonateError("refusing to request a URL with a control character in it")
 
 
+# Query parameters that carry a secret.  A key belongs in a header, but some
+# services only take it in the query string, and a URL travels much further
+# than a header does: into an error message, into a result the panel shows,
+# into the browser when the user clicks "open".
+SECRET_PARAMS = frozenset({
+    "key", "api_key", "apikey", "api-key", "access_token", "accesstoken",
+    "auth_token", "authtoken", "token", "auth", "password", "passwd", "pwd",
+    "secret", "client_secret", "signature", "sig", "subscription-key",
+})
+REDACTED = "***"
+
+
+def redact_url(url: str) -> str:
+    """``url`` with anything secret in it replaced by ``***``.
+
+    Used everywhere a URL leaves the request itself – error messages, the
+    ``url`` field of a result, the CLI's output.  Nothing that authenticates
+    the user should be readable from a message on screen.
+    """
+    text = str(url or "")
+    try:
+        parts = urllib.parse.urlsplit(text)
+    except ValueError:
+        return text
+    changed = False
+    netloc = parts.netloc
+    if "@" in netloc:                       # user:password@host
+        netloc = REDACTED + "@" + netloc.rsplit("@", 1)[1]
+        changed = True
+    query = parts.query
+    if query:
+        pairs = urllib.parse.parse_qsl(query, keep_blank_values=True)
+        if any(k.lower() in SECRET_PARAMS for k, _ in pairs):
+            # Built by hand rather than with urlencode: the point of the
+            # message is to be read, and an escaped `%2A%2A%2A` is not.
+            query = "&".join(
+                urllib.parse.quote(k, safe="") + "=" +
+                (REDACTED if k.lower() in SECRET_PARAMS else urllib.parse.quote(v, safe=""))
+                for k, v in pairs)
+            changed = True
+    if not changed:
+        return text
+    return urllib.parse.urlunsplit((parts.scheme, netloc, parts.path, query, parts.fragment))
+
+
 def is_sensitive(name: str) -> bool:
     return str(name).lower() in SENSITIVE_HEADERS
 
@@ -503,11 +548,23 @@ class Reply:
 
 
 class ImpersonateError(Exception):
+    """A failed request.
+
+    The URL is redacted on the way in, here rather than at each of the two
+    dozen places that raise: an API key that a service only accepts in the
+    query string would otherwise ride the message into the panel, into the
+    CLI's output and into the log the user pastes into a bug report.
+    """
+
     def __init__(self, message: str, status: Optional[int] = None, url: str = "",
                  body: bytes = b"", headers: Optional[List[Tuple[str, str]]] = None):
-        super().__init__(message)
+        safe = redact_url(url) if url else ""
+        text = str(message)
+        if url and safe != url:
+            text = text.replace(url, safe)
+        super().__init__(text)
         self.status = status
-        self.url = url
+        self.url = safe
         self.body = body
         self.headers = headers or []
 

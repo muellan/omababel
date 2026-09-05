@@ -567,5 +567,33 @@ class HeaderInjectionTest(TempEnv):
             os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
 
 
+class RedactionTest(unittest.TestCase):
+    """A key some services only take in the query string must not ride an
+    error message into the panel, the CLI or a bug report."""
+
+    def test_a_secret_query_parameter_is_replaced(self):
+        self.assertEqual(impersonate.redact_url("https://api.example.org/d?key=sk-SECRET&q=haus"),
+                         "https://api.example.org/d?key=***&q=haus")
+        for name in ("api_key", "access_token", "token", "password", "signature"):
+            self.assertIn("***", impersonate.redact_url(f"https://x.example/y?{name}=s3cret"))
+
+    def test_userinfo_is_replaced(self):
+        self.assertEqual(impersonate.redact_url("https://user:pw@example.org/x"),
+                         "https://***@example.org/x")
+
+    def test_an_ordinary_url_is_untouched(self):
+        url = "https://www.duden.de/rechtschreibung/Haus?q=1"
+        self.assertEqual(impersonate.redact_url(url), url)
+
+    def test_the_error_message_and_attribute_are_both_redacted(self):
+        url = "https://api.example.org/v3/haus?key=sk-SECRET"
+        err = http.FetchError(f"HTTP 403 for {url}", status=403, url=url)
+        self.assertNotIn("sk-SECRET", str(err))
+        self.assertNotIn("sk-SECRET", err.url)
+        err2 = impersonate.ImpersonateError(f"HTTP 403 for {url}", status=403, url=url)
+        self.assertNotIn("sk-SECRET", str(err2))
+        self.assertNotIn("sk-SECRET", err2.url)
+
+
 if __name__ == "__main__":
     unittest.main()

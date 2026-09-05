@@ -13,7 +13,7 @@ import json
 import re
 from typing import List
 
-from .. import http, htmlutil
+from .. import http, htmlutil, impersonate
 from .. import results as R
 from .base import Source, SourceError, register
 
@@ -98,13 +98,16 @@ class Generic(Source):
         headers = {}
         if self.api_key and "{key}" not in self.url:
             headers["Authorization"] = "Bearer " + self.api_key
+        # What the caller gets back is what ends up in the result, and the
+        # panel offers to open it in a browser: the key stays in the request.
+        shown = impersonate.redact_url(url)
         try:
             resp = http.fetch(url, headers=headers)
         except http.FetchError as e:
             if e.status == 404:
-                return url, None
+                return shown, None
             raise SourceError(f"{self.name}: {e}")
-        return url, resp
+        return shown, resp
 
     def lookup(self, word: str, lang: str) -> dict:
         url, resp = self._get(word.strip())
