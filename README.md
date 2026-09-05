@@ -237,7 +237,7 @@ tunnelled through the proxy so the handshake is still with the site.
 
 
 
-### Credentials
+### Security and credentials
 
 **API keys and other credentials are never written to a file in plain text.**
 They are stored in the login keyring of the session – Omarchy runs
@@ -250,9 +250,9 @@ The keyring is reached through `secret-tool` (libsecret), so no third-party
 Python module is needed:
 
 ```bash
-omababel sources keyring          # is a keyring available?
-omababel sources key deepl        # reads the key from stdin, stores it
-omababel sources forget-key deepl # removes it from the keyring
+omababel    sources keyring           # is a keyring available?
+omababel    sources key deepl         # reads the key from stdin, stores it
+omababel    sources forget-key deepl  # removes it from the keyring
 secret-tool search service omababel   # everything omababel stored
 ```
 
@@ -271,8 +271,6 @@ reached, such a key stays where it is and both the preferences panel and
 Never put a key into the URL of a custom source: URLs *are* stored in
 `sources.json`.
 
-A stored key is only half of it – it must not leak on its way out either:
-
 * **https or nothing.** A request that carries a credential (an API key, an
   `Authorization` header, a cookie) is refused unless the URL is `https://`.
   That covers the built-in services, a custom AI endpoint and a custom source
@@ -285,16 +283,16 @@ A stored key is only half of it – it must not leak on its way out either:
   with all sensitive headers stripped. Only a same-origin redirect keeps the
   key.
 * **No secret in the process table.** The optional `curl-impersonate` path
-  used to pass headers as command-line arguments, where anyone running `ps`
-  could read them. The request is now handed to curl through a config file
-  created with mode `0600` and removed again afterwards, so nothing
-  confidential appears in `/proc`.
+  is handed to curl through a config file created with mode `0600` and 
+  removed again afterwards, so nothing confidential appears in `/proc`.
+
+
 
 ### Response limits
 
-A remote service could otherwise decide how much memory the plugin uses – a
-timeout is not a byte limit. Everything coming back is therefore read against
-a ceiling, and going over one ends the request with an ordinary error message:
+A remote service could otherwise decide how much memory the plugin uses.
+Everything coming back is therefore read against a ceiling, and going over one
+ends the request with an ordinary error message:
 
 | Limit                       | Default | Environment variable      |
 |-----------------------------|---------|---------------------------|
