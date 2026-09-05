@@ -47,6 +47,7 @@ import io
 import json
 import os
 import random
+import re
 import shutil
 import socket
 import ssl
@@ -185,6 +186,29 @@ class TooLarge(Exception):
     """A remote party sent more than we are willing to hold."""
 
 
+# Control characters have no place in a header name, a header value or a URL.
+# A CR or an LF in particular ends a line, and a line is a whole instruction
+# in the curl config file we hand to curl-impersonate – a header value that
+# carries one would let the remote party add options of its own.
+_CONTROL = re.compile(r"[\x00-\x1f\x7f]")
+
+
+def has_control(value: str) -> bool:
+    return _CONTROL.search(str(value)) is not None
+
+
+def check_header(name: str, value: str) -> None:
+    """Refuse a header that could break out of the line it belongs on."""
+    if has_control(name) or has_control(value):
+        raise ImpersonateError(
+            f"refusing to send a header with a control character in it: {name!r}")
+
+
+def check_url(url: str) -> None:
+    if has_control(url):
+        raise ImpersonateError("refusing to request a URL with a control character in it")
+
+
 def is_sensitive(name: str) -> bool:
     return str(name).lower() in SENSITIVE_HEADERS
 
@@ -290,6 +314,12 @@ class _State:
                     continue
                 if c.get("secure") and not secure:
                     continue
+                # Also checked when the cookie is stored; checked again here
+                # so a jar written by an older version cannot poison a request.
+                if has_control(name) or has_control(c.get("value", "")):
+                    del jar[name]
+                    self.dirty = True
+                    continue
                 out.append(f"{name}={c['value']}")
         return "; ".join(out)
 
@@ -379,6 +409,11 @@ def _domain_match(host: str, domain: str) -> bool:
 
 
 def _parse_set_cookie(value: str, host: str):
+    # A folded header keeps its CR/LF, and this value is replayed on every
+    # later request to the host and written into the cookie jar.  A cookie
+    # with a control character in it is dropped rather than carried around.
+    if has_control(value):
+        return None
     parts = [p.strip() for p in value.split(";") if p.strip()]
     if not parts or "=" not in parts[0]:
         return None
@@ -720,7 +755,12 @@ IMPERSONATE_BINARIES = ("curl_chrome131", "curl_chrome124", "curl_chrome116",
 def impersonate_binary() -> str:
     override = os.environ.get("OMABABEL_CURL_IMPERSONATE")
     if override:
-        return override if os.access(override, os.X_OK) else (shutil.which(override) or "")
+        # An absolute path, or a name looked up on PATH.  A bare relative path
+        # would resolve against whatever directory the shell happens to have
+        # been started in, which is not something to run a request through.
+        if os.path.isabs(override):
+            return override if os.access(override, os.X_OK) else ""
+        return shutil.which(override) or ""
     for name in IMPERSONATE_BINARIES:
         found = shutil.which(name)
         if found:
@@ -737,9 +777,23 @@ def _curl_config(url: str, header_lines: List[Tuple[str, str]], method: str,
     on the machine for as long as the request runs, so headers, cookies and
     the URL go into a private file that curl reads with `-K` and that is
     deleted as soon as it has.
+
+    A curl config file is read one instruction per line, so a value that
+    contains a newline would let whoever supplied it add options of its own –
+    `output = ~/.bashrc`, `upload-file = ~/.ssh/id_rsa`.  A cookie value comes
+    from a remote `Set-Cookie` header, which means the value is exactly the
+    kind of thing that must not be trusted here.  Everything that goes into
+    the file is checked for control characters first, and a value that has one
+    ends the request instead of being escaped into something plausible.
     """
     def quoted(value: str) -> str:
         return '"' + str(value).replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+    check_url(url)
+    for key, value in header_lines:
+        check_header(key, value)
+    if has_control(method or "") or has_control(impersonate_target or ""):
+        raise ImpersonateError("refusing to build a request with a control character in it")
 
     lines = ["silent", "show-error", "include", "compressed",
              "max-time = " + str(int(timeout)),
@@ -800,7 +854,10 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
             fh.write(config)
         # -K reads the request from the file: the argv holds no secret, and
         # the file is gone before this function returns.
-        code, out, err = _run_capped([binary, "-K", config_path], data or b"", timeout + 5)
+        # -q first: curl must not read ~/.curlrc, where an --insecure or a
+        # --proxy left over from something else would silently apply to a
+        # request that carries an API key.
+        code, out, err = _run_capped([binary, "-q", "-K", config_path], data or b"", timeout + 5)
     except TooLarge as e:
         raise ImpersonateError(f"{url}: {e}", url=url)
     except (OSError, subprocess.SubprocessError) as e:

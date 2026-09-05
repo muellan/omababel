@@ -485,6 +485,87 @@ class SizeLimitTest(TempEnv):
             impersonate.MAX_BODY_BYTES = limit
             os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
 
+class HeaderInjectionTest(TempEnv):
+    """Nothing a remote party sends may become an instruction of its own."""
+
+    def setUp(self):
+        super().setUp()
+        impersonate.reset_state()
+        self._factory = impersonate.connection_factory
+        impersonate.MIN_INTERVAL = 0.0
+        os.environ.pop("OMABABEL_OFFLINE", None)
+
+    def tearDown(self):
+        impersonate.connection_factory = self._factory
+        impersonate.reset_state()
+        os.environ["OMABABEL_OFFLINE"] = "1"
+        super().tearDown()
+
+    def serve(self, *replies):
+        queue = list(replies)
+        self.seen = []
+
+        def factory(host, port, secure, timeout, profile):
+            conn = FakeConnection(host, port, secure, timeout, profile, queue)
+            self.seen.append(conn)
+            return conn
+
+        impersonate.connection_factory = factory
+
+    # A curl config file is one instruction per line, so a newline in a
+    # header value would let the remote party add options of its own --
+    # `output = ~/.bashrc` writes a file, `upload-file` sends one away.
+    def test_a_folded_cookie_never_reaches_the_curl_config(self):
+        poison = "sid=abc\r\noutput = /tmp/omababel-pwned\r\nupload-file = /etc/passwd"
+        with self.assertRaises(impersonate.ImpersonateError) as ctx:
+            impersonate._curl_config("https://example.org/x", [("Cookie", poison)],
+                                     "GET", False, 10, "chrome131")
+        self.assertIn("control character", str(ctx.exception))
+
+    def test_a_clean_header_still_builds_a_config(self):
+        config = impersonate._curl_config("https://example.org/x", [("Accept", "text/html")],
+                                          "GET", False, 10, "chrome131")
+        self.assertIn('header = "Accept: text/html"', config)
+        self.assertIn('url = "https://example.org/x"', config)
+
+    def test_a_set_cookie_with_control_characters_is_dropped(self):
+        self.assertIsNone(impersonate._parse_set_cookie(
+            "sid=abc\r\n\toutput = /tmp/x; Path=/", "example.org"))
+        self.assertIsNotNone(impersonate._parse_set_cookie("sid=abc; Path=/", "example.org"))
+
+    def test_a_poisoned_cookie_jar_is_not_replayed(self):
+        state = impersonate.state()
+        state.data.setdefault("cookies", {})["example.org"] = {
+            "sid": {"value": "abc\r\noutput = /tmp/x", "path": "/", "secure": False, "expires": 0},
+            "ok": {"value": "fine", "path": "/", "secure": False, "expires": 0},
+        }
+        sent = state.cookies_for("example.org", "/", True)
+        self.assertEqual(sent, "ok=fine")
+
+    def test_a_control_character_in_the_url_is_refused(self):
+        with self.assertRaises(impersonate.ImpersonateError):
+            impersonate._curl_config("https://example.org/\r\nproxy = evil:8080",
+                                     [], "GET", False, 10, "")
+
+    def test_curl_does_not_read_the_users_curlrc(self):
+        script = Path(self.tmp) / "echo-argv"
+        script.write_text("#!/bin/sh\nprintf 'HTTP/1.1 200 OK\\r\\n\\r\\n'\necho \"$@\"\n",
+                          encoding="utf-8")
+        script.chmod(0o755)
+        os.environ["OMABABEL_CURL_IMPERSONATE"] = str(script)
+        try:
+            reply = impersonate.fetch_with_binary("https://example.org/x", timeout=10)
+            self.assertIn("-q", reply.body.decode())
+        finally:
+            os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
+
+    def test_a_relative_curl_override_is_not_run(self):
+        os.environ["OMABABEL_CURL_IMPERSONATE"] = "./curl_chrome131"
+        try:
+            self.assertEqual(impersonate.impersonate_binary(), "")
+        finally:
+            os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
+
 
 if __name__ == "__main__":
     unittest.main()
