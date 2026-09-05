@@ -76,11 +76,11 @@ def default_sources() -> List[dict]:
                     url="https://www.thesaurus.com/browse/{word}", languages=["en"]))
     # ---- remote translators
     rows.append(row("leo", "LEO", "translator", "leo", url="https://dict.leo.org/", translation_mode="word"))
-    # The key-less web endpoints of both services rate-limit within a handful
-    # of requests, so they ship disabled; enable them after adding an API key.
-    rows.append(row("google-translate", "Google Translate", "translator", "google", enabled=False,
+    rows.append(row("google-translate", "Google Translate", "translator", "google",
                     url="https://translate.googleapis.com/translate_a/single", translation_mode="text",
-                    notes="Disabled by default: the free endpoint rate-limits quickly. Add a Cloud Translation API key, then enable."))
+                    notes="The key-less endpoint rate-limits after a handful of requests; add a Cloud Translation API key for steady use."))
+    # DeepL's key-less web endpoint rate-limits within a handful of requests,
+    # so it ships disabled; enable it after adding an API key.
     rows.append(row("deepl", "DeepL", "translator", "deepl", enabled=False, url="https://www.deepl.com/translator",
                     translation_mode="text",
                     notes="Disabled by default: the free endpoint rate-limits quickly. Add a DeepL API key, then enable."))

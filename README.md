@@ -320,7 +320,7 @@ cannot parse.
 | [Oxford English Dictionary](https://www.oed.com/)   | dictionary (en)             | Subscription site - **disabled by default**; free access only yields search snippets, an OED Researcher API credential (`app_id:app_key`) gives full entries |
 | [Thesaurus.com](https://www.thesaurus.com/)         | thesaurus (en)              |                                                                                                                                                              |
 | [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
-| Google Translate                                    | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a Cloud Translation API key and enable it                             |
+| Google Translate                                    | translator, text            | The key-less endpoint rate-limits after a few requests; add a Cloud Translation API key for steady use                                                       |
 | DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
 | AI service                                          | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                             |
 

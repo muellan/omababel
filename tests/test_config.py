@@ -20,8 +20,8 @@ class SourcesConfigTest(TempEnv):
             self.assertIn(required, ids)
         self.assertEqual(len(ids), len(set(ids)), "duplicate source ids")
         self.assertFalse(cfg.get("oed")["enabled"])
-        self.assertFalse(cfg.get("deepl")["enabled"])            # free endpoints rate-limit
-        self.assertFalse(cfg.get("google-translate")["enabled"])
+        self.assertFalse(cfg.get("deepl")["enabled"])            # its free endpoint rate-limits
+        self.assertTrue(cfg.get("google-translate")["enabled"])
         self.assertTrue(cfg.get("leo")["enabled"])
         self.assertEqual(oct(cfg.path.stat().st_mode & 0o777), "0o600")
         for s in cfg.sources:
