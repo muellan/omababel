@@ -300,7 +300,6 @@ A stored key still has to survive the trip to the service:
   exactly the case that produces the error you would otherwise paste into a
   bug report.
 
-### What the plugin refuses to trust
 
 A dictionary site, an AI answer and a downloaded dictionary file are all
 written by somebody else. So:
