@@ -47,8 +47,37 @@ class RequestError(Exception):
         self.code = code
 
 
+# What the panel is willing to swallow in one line.  A source that answers
+# with megabytes of markup must not be able to turn the shell's QML side into
+# a memory problem, so the line is measured before it is written and a reply
+# that does not fit is replaced by one that says so.
+MAX_LINE_BYTES = int(os.environ.get("OMABABEL_MAX_REPLY", str(4 * 1024 * 1024)))
+
+
+def _too_big(op: str, size: int) -> dict:
+    return {"ok": False, "op": op,
+            "error": {"code": "too_large",
+                      "message": f"the answer is {size // 1024} kB, more than this panel accepts "
+                                 f"({MAX_LINE_BYTES // 1024} kB); narrow the query or disable the "
+                                 "source that produced it"}}
+
+
 def _emit(obj: dict) -> None:
-    sys.stdout.write(json.dumps(obj, ensure_ascii=False) + "\n")
+    line = json.dumps(obj, ensure_ascii=False)
+    if len(line.encode("utf-8", "surrogatepass")) > MAX_LINE_BYTES:
+        if obj.get("event"):
+            # A streamed result: drop the payload, keep the slot, say why.
+            slim = {k: v for k, v in obj.items() if k not in ("result", "consolidated")}
+            src = (obj.get("result") or {}).get("source", {})
+            slim["result"] = {"source": src, "ok": False, "count": 0,
+                              "error": "the source answered with more than "
+                                       f"{MAX_LINE_BYTES // 1024} kB"}
+            line = json.dumps(slim, ensure_ascii=False)
+        else:
+            line = json.dumps(_too_big(str(obj.get("op") or ""),
+                                       len(line.encode("utf-8", "surrogatepass"))),
+                              ensure_ascii=False)
+    sys.stdout.write(line + "\n")
     sys.stdout.flush()
 
 

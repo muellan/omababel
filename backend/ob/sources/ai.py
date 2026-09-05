@@ -84,6 +84,8 @@ _NOT_CHAT = re.compile(r"(?i)(embed|whisper|tts|audio|image|vision-only|dall|mod
 DEFAULT_SERVICE = "claude"
 TRANSPORTS = ("cli", "api")
 MAX_TOKENS = 900
+# One JSON object is the whole answer; anything beyond this is not one.
+MAX_REPLY_BYTES = int(os.environ.get("OMABABEL_AI_MAX_REPLY", str(2 * 1024 * 1024)))
 CLI_TIMEOUT = float(os.environ.get("OMABABEL_AI_TIMEOUT", "60"))
 MODEL_CACHE_TTL = float(os.environ.get("OMABABEL_AI_MODEL_TTL", "86400"))
 
@@ -243,7 +245,7 @@ class AI(Source):
         self._model = self.model_cfg
         # The URL field is an *endpoint override*, and only the API transport
         # has an endpoint at all.  It must be https: the request carries an
-        # API key, and any string starting with "http" was accepted before.
+        # API key, and "http" was accepted here before.
         override = ""
         if self.transport == "api" and self.url:
             if self.url.lower().startswith("https://"):
@@ -359,15 +361,22 @@ class AI(Source):
                               f"{SERVICES[self.service][0]} CLI and sign in, or switch the "
                               "source to the API transport")
         try:
-            proc = subprocess.run([binary] + argv[1:], input=prompt, capture_output=True,
-                                  text=True, timeout=CLI_TIMEOUT)
+            proc = subprocess.run([binary] + argv[1:], input=prompt.encode("utf-8"),
+                                  capture_output=True, timeout=CLI_TIMEOUT)
         except subprocess.TimeoutExpired:
             raise SourceError(f"{self.name}: '{argv[0]}' timed out after {int(CLI_TIMEOUT)}s")
         except OSError as e:
             raise SourceError(f"{self.name}: {e}")
+        # A local tool is friendlier than a web service, but not unbounded:
+        # the answer is one small JSON object either way.
+        if len(proc.stdout) > MAX_REPLY_BYTES:
+            raise SourceError(f"{self.name}: '{argv[0]}' answered with more than "
+                              f"{MAX_REPLY_BYTES} bytes")
+        out = proc.stdout.decode("utf-8", "replace")
+        err = proc.stderr[:4096].decode("utf-8", "replace")
         if proc.returncode != 0:
-            raise SourceError(f"{self.name}: {_snippet(proc.stderr or proc.stdout) or 'command failed'}")
-        return proc.stdout or ""
+            raise SourceError(f"{self.name}: {_snippet(err or out) or 'command failed'}")
+        return out
 
     # -- API: the service's HTTP endpoint with a key from the keyring
     def _api_call(self, prompt: str, retried: bool = False) -> str:

@@ -15,6 +15,8 @@ What it does, in the order it matters:
 * **Credentials.**  A request that authenticates us goes over https or not
   at all, and neither an API key nor a cookie ever survives a redirect to
   another origin.
+* **Limits.**  Nothing a remote party sends is read, inflated or held
+  without a ceiling.
 * **Cookies.**  A session cookie is what separates a returning browser from
   a fresh script.  They are kept in the cache directory and replayed.
 * **Header set and order.**  Chrome's exact list, in Chrome's order,
@@ -156,8 +158,17 @@ MAX_RETRIES = int(os.environ.get("OMABABEL_HTTP_RETRIES", "2"))
 BLOCK_BACKOFF = (20.0, 60.0, 300.0)      # after 1, 2, 3+ refusals in a row
 MAX_REDIRECTS = 5
 
-# ----------------------------------------------------------- credentials
+# --------------------------------------------------------------- limits
 #
+# A source is a remote party we do not control: nothing it sends may be read
+# into memory without a ceiling, and a compression bomb must not be inflated
+# past one either.  The caps are generous for a dictionary page and tiny
+# compared to what an unbounded read can cost.
+MAX_BODY_BYTES = int(os.environ.get("OMABABEL_MAX_BODY", str(8 * 1024 * 1024)))
+MAX_DECODED_BYTES = int(os.environ.get("OMABABEL_MAX_DECODED", str(32 * 1024 * 1024)))
+MAX_ERROR_BYTES = 64 * 1024              # of an error body we only ever show a line
+READ_CHUNK = 64 * 1024
+
 # Headers that authenticate us.  They are never sent over plaintext http and
 # never survive a redirect to another origin: where the next request goes is
 # the remote party's suggestion, and it must not be able to name itself as
@@ -168,6 +179,10 @@ SENSITIVE_HEADERS = frozenset({
     "x-access-token", "x-session-token", "x-amz-security-token",
     "openai-organization", "anthropic-version",
 })
+
+
+class TooLarge(Exception):
+    """A remote party sent more than we are willing to hold."""
 
 
 def is_sensitive(name: str) -> bool:
@@ -515,19 +530,58 @@ def _connection(host: str, port: int, secure: bool, timeout: float, profile: Pro
 connection_factory = _connection
 
 
-def _decompress(body: bytes, encoding: str) -> bytes:
+def read_capped(reader, limit: Optional[int] = None) -> bytes:
+    """Read at most `limit` bytes, then give up on the rest.
+
+    `read()` on a socket is as long as the other side wants it to be; a
+    dictionary page that does not fit in eight megabytes is not a dictionary
+    page.
+    """
+    limit = MAX_BODY_BYTES if limit is None else limit
+    chunks = []
+    total = 0
+    while True:
+        chunk = reader.read(min(READ_CHUNK, limit - total + 1))
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > limit:
+            raise TooLarge(f"the reply exceeds {limit} bytes")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _decompress(body: bytes, encoding: str, limit: Optional[int] = None) -> bytes:
+    """Inflate in steps, stopping at `limit`.
+
+    A few kilobytes of gzip can carry gigabytes of zeros, so the decoded size
+    is capped as well -- one-shot `zlib.decompress` would allocate all of it
+    before we ever saw it.
+    """
+    limit = MAX_DECODED_BYTES if limit is None else limit
     enc = (encoding or "").lower()
+    if enc not in ("gzip", "x-gzip", "deflate"):
+        return body
     try:
-        if enc in ("gzip", "x-gzip"):
-            return gzip.GzipFile(fileobj=io.BytesIO(body)).read()
         if enc == "deflate":
             try:
-                return zlib.decompress(body)
+                obj = zlib.decompressobj()
+                out = obj.decompress(body, limit + 1)
             except zlib.error:
-                return zlib.decompress(body, -zlib.MAX_WBITS)
+                obj = zlib.decompressobj(-zlib.MAX_WBITS)
+                out = obj.decompress(body, limit + 1)
+            if len(out) > limit or obj.unconsumed_tail:
+                raise TooLarge(f"the reply inflates past {limit} bytes")
+            return out
+        with gzip.GzipFile(fileobj=io.BytesIO(body)) as fh:
+            out = fh.read(limit + 1)
+        if len(out) > limit:
+            raise TooLarge(f"the reply inflates past {limit} bytes")
+        return out
+    except TooLarge:
+        raise
     except (OSError, zlib.error):
         return body
-    return body
 
 
 def _merge_headers(profile: Profile, url: str, extra: Optional[Dict[str, str]],
@@ -596,9 +650,11 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
         conn.endheaders(data if data else None)
         st.mark_request(host)
         resp = conn.getresponse()
-        raw = resp.read()
+        raw = read_capped(resp)
         reply_headers = list(resp.getheaders())
         status = resp.status
+    except TooLarge as e:
+        raise ImpersonateError(f"{url}: {e}", url=url)
     except (OSError, http.client.HTTPException) as e:
         raise ImpersonateError(f"{e} ({url})", url=url)
     finally:
@@ -608,7 +664,10 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
             pass
 
     st.store_cookies(host, reply_headers)
-    body = _decompress(raw, dict((k.lower(), v) for k, v in reply_headers).get("content-encoding", ""))
+    try:
+        body = _decompress(raw, dict((k.lower(), v) for k, v in reply_headers).get("content-encoding", ""))
+    except TooLarge as e:
+        raise ImpersonateError(f"{url}: {e}", url=url)
     reply = Reply(url, status, reply_headers, body)
 
     if status in (301, 302, 303, 307, 308) and _redirects < MAX_REDIRECTS:
@@ -616,7 +675,7 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
         if location:
             # Where the next request goes is the remote party's suggestion, so
             # it is checked before it is taken, and nothing that authenticates
-            # us travels to another origin.
+            # us travels to another origin (see `check_redirect`).
             target = check_redirect(url, location, headers)
             st.mark_ok(host)
             st.save()
@@ -636,12 +695,13 @@ def fetch(url: str, *, data: Optional[bytes] = None, headers: Optional[Dict[str,
         pause = st.mark_refused(host, retry_after)
         st.save()
         raise ImpersonateError(f"HTTP {status} for {url} (rate limited; pausing {int(pause)}s)",
-                               status=status, url=url, body=body, headers=reply_headers)
+                               status=status, url=url, body=body[:MAX_ERROR_BYTES],
+                               headers=reply_headers)
     if status >= 400:
         st.mark_ok(host)
         st.save()
         raise ImpersonateError(f"HTTP {status} for {url}", status=status, url=url,
-                               body=body, headers=reply_headers)
+                               body=body[:MAX_ERROR_BYTES], headers=reply_headers)
     st.mark_ok(host)
     st.save()
     return reply
@@ -673,8 +733,8 @@ def _curl_config(url: str, header_lines: List[Tuple[str, str]], method: str,
     """A curl config file: everything a command line would carry, except that
     a file is not in the process table.
 
-    `-H "Authorization: ..."` in the argv is readable by every process on the
-    machine for as long as the request runs, so the headers, the cookies and
+    `-H "Authorization: ..."` on the command line is readable by every process
+    on the machine for as long as the request runs, so headers, cookies and
     the URL go into a private file that curl reads with `-K` and that is
     deleted as soon as it has.
     """
@@ -683,6 +743,7 @@ def _curl_config(url: str, header_lines: List[Tuple[str, str]], method: str,
 
     lines = ["silent", "show-error", "include", "compressed",
              "max-time = " + str(int(timeout)),
+             "max-filesize = " + str(MAX_BODY_BYTES),
              "url = " + quoted(url)]
     if impersonate_target:
         lines.append("impersonate = " + quoted(impersonate_target))
@@ -693,6 +754,27 @@ def _curl_config(url: str, header_lines: List[Tuple[str, str]], method: str,
     for key, value in header_lines:
         lines.append("header = " + quoted(f"{key}: {value}"))
     return "\n".join(lines) + "\n"
+
+
+def _run_capped(argv, payload: bytes, timeout: float, limit: Optional[int] = None):
+    """Run a command, reading at most `limit` bytes of its output.
+
+    `subprocess.run` holds whatever the child writes; a remote party that
+    keeps sending must not be able to grow this process without bound.
+    """
+    limit = MAX_BODY_BYTES if limit is None else limit
+    proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    try:
+        out, err = proc.communicate(input=payload, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.communicate()
+        raise ImpersonateError(f"timed out after {int(timeout)}s")
+    if len(out) > limit:
+        proc.returncode = proc.returncode or 0
+        raise TooLarge(f"the reply exceeds {limit} bytes")
+    return proc.returncode, out, err[:MAX_ERROR_BYTES]
 
 
 def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
@@ -718,8 +800,9 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
             fh.write(config)
         # -K reads the request from the file: the argv holds no secret, and
         # the file is gone before this function returns.
-        proc = subprocess.run([binary, "-K", config_path], input=data or b"",
-                              capture_output=True, timeout=timeout + 5)
+        code, out, err = _run_capped([binary, "-K", config_path], data or b"", timeout + 5)
+    except TooLarge as e:
+        raise ImpersonateError(f"{url}: {e}", url=url)
     except (OSError, subprocess.SubprocessError) as e:
         raise ImpersonateError(str(e), url=url)
     finally:
@@ -727,10 +810,10 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
             os.unlink(config_path)
         except OSError:
             pass
-    if proc.returncode != 0:
-        raise ImpersonateError((proc.stderr.decode("utf-8", "replace").strip()
-                                or f"curl exited {proc.returncode}"), url=url)
-    head, _, body = proc.stdout.partition(b"\r\n\r\n")
+    if code != 0:
+        raise ImpersonateError((err.decode("utf-8", "replace").strip()
+                                or f"curl exited {code}"), url=url)
+    head, _, body = out.partition(b"\r\n\r\n")
     lines = head.decode("iso-8859-1").split("\r\n")
     status = 0
     out_headers: List[Tuple[str, str]] = []
@@ -744,7 +827,7 @@ def fetch_with_binary(url: str, *, headers: Optional[Dict[str, str]] = None,
             out_headers.append((key.strip(), value.strip()))
     if status >= 400:
         raise ImpersonateError(f"HTTP {status} for {url}", status=status, url=url,
-                               body=body, headers=out_headers)
+                               body=body[:MAX_ERROR_BYTES], headers=out_headers)
     return Reply(url, status or 200, out_headers, body)
 
 

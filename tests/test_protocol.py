@@ -119,6 +119,38 @@ class ProtocolTest(TempEnv):
             self.assertLessEqual(len(results[0]["consolidated"]["groups"]),
                                  len(reply["data"]["consolidated"]["groups"]))
 
+    def test_an_oversized_answer_is_replaced_by_an_error(self):
+        """A source that answers with megabytes must not be handed to the
+        panel as one enormous line."""
+        shutil.copy(fixture("mini-de.json"), self.data_dir / "mini-de.json")
+        reply, _, _ = self.call("sources.save", {"source": {"name": "Mini DE", "type": "dictionary",
+                                                            "driver": "local", "path": "mini-de.json",
+                                                            "languages": ["de"]}})
+        self.assertTrue(reply["ok"], reply)
+        env = self.env()
+        env["OMABABEL_MAX_REPLY"] = "600"
+        payload = json.dumps({"op": "search", "params": {"mode": "lookup", "query": "Haus",
+                                                         "lang": "de", "only": ["mini-de"]}})
+        proc = subprocess.run([sys.executable, SCRIPT], input=payload + "\n", capture_output=True,
+                              text=True, env=env, timeout=60)
+        reply = json.loads([ln for ln in proc.stdout.splitlines() if ln.strip()][-1])
+        self.assertFalse(reply["ok"])
+        self.assertEqual(reply["error"]["code"], "too_large")
+        self.assertLess(len(proc.stdout), 4096)
+        # a streamed event keeps its slot but drops the payload
+        payload = json.dumps({"op": "search", "params": {"mode": "lookup", "query": "Haus",
+                                                         "lang": "de", "only": ["mini-de"],
+                                                         "stream": True}})
+        proc = subprocess.run([sys.executable, SCRIPT], input=payload + "\n", capture_output=True,
+                              text=True, env=env, timeout=60)
+        events = [json.loads(ln) for ln in proc.stdout.splitlines() if ln.strip()]
+        results = [e for e in events if e.get("event") == "result"]
+        self.assertTrue(results)
+        for event in results:
+            self.assertIn("index", event)
+            self.assertFalse(event["result"]["ok"])
+            self.assertIn("more than", event["result"]["error"])
+
     def test_source_editing_ops(self):
         reply, _, _ = self.call("sources.enable", {"id": "duden", "enabled": False})
         self.assertTrue(reply["data"]["updated"])

@@ -99,6 +99,17 @@ class AiCliTest(unittest.TestCase):
             src.lookup("house", "en")
         self.assertIn("not installed", str(ctx.exception))
 
+    def test_an_endless_cli_answer_is_refused(self):
+        stub_cli("x" * 4096)
+        limit = ai.MAX_REPLY_BYTES
+        try:
+            ai.MAX_REPLY_BYTES = 512
+            with self.assertRaises(SourceError) as ctx:
+                self.source().lookup("house", "en")
+            self.assertIn("more than", str(ctx.exception))
+        finally:
+            ai.MAX_REPLY_BYTES = limit
+
     def test_a_failing_or_unparsable_cli_is_reported(self):
         stub_cli("boom", rc=3)
         with self.assertRaises(SourceError):

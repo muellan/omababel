@@ -12,15 +12,12 @@ into a :class:`FetchError`, which keeps the test suite hermetic.
 
 from __future__ import annotations
 
-import gzip
-import io
 import json
 import os
 import socket
 import urllib.error
 import urllib.parse
 import urllib.request
-import zlib
 from typing import Dict, Optional, Union
 
 from . import impersonate
@@ -65,7 +62,7 @@ class Response:
 
 
 class _SafeRedirects(urllib.request.HTTPRedirectHandler):
-    """urllib follows a redirect by replaying the original request.
+    """urllib follows redirects by replaying the original request.
 
     That includes the Authorization or X-Api-Key header, so a redirect to
     another origin would hand our credentials to whoever the remote party
@@ -94,15 +91,8 @@ _opener = urllib.request.build_opener(_SafeRedirects())
 
 
 def _decompress(body: bytes, encoding: str) -> bytes:
-    enc = (encoding or "").lower()
-    if enc == "gzip" or enc == "x-gzip":
-        return gzip.GzipFile(fileobj=io.BytesIO(body)).read()
-    if enc == "deflate":
-        try:
-            return zlib.decompress(body)
-        except zlib.error:
-            return zlib.decompress(body, -zlib.MAX_WBITS)
-    return body
+    """Bounded inflation – see ob.impersonate._decompress."""
+    return impersonate._decompress(body, encoding)
 
 
 def fetch(
@@ -151,19 +141,21 @@ def fetch(
     req = urllib.request.Request(url, data=payload, headers=hdrs, method=method)
     try:
         with _opener.open(req, timeout=timeout or DEFAULT_TIMEOUT) as resp:
-            raw = resp.read()
+            raw = impersonate.read_capped(resp)
             rh = {k.lower(): v for k, v in resp.headers.items()}
             body = _decompress(raw, rh.get("content-encoding", ""))
             return Response(resp.geturl(), resp.status, rh, body)
+    except impersonate.TooLarge as e:
+        raise FetchError(f"{url}: {e}", url=url)
     except urllib.error.HTTPError as e:
         try:
-            raw = e.read()
+            raw = impersonate.read_capped(e, impersonate.MAX_ERROR_BYTES)
             rh = {k.lower(): v for k, v in e.headers.items()}
             body = _decompress(raw, rh.get("content-encoding", ""))
         except Exception:  # pragma: no cover - defensive
             body, rh = b"", {}
         err = FetchError(f"HTTP {e.code} for {url}", status=e.code, url=url)
-        err.body = body  # type: ignore[attr-defined]
+        err.body = body[:impersonate.MAX_ERROR_BYTES]  # type: ignore[attr-defined]
         err.headers = rh  # type: ignore[attr-defined]
         raise err
     except urllib.error.URLError as e:

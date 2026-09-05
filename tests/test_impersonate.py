@@ -398,6 +398,7 @@ class CredentialSafetyTest(TempEnv):
         # ... and it did hold the header
         config = impersonate._curl_config("https://x/y", [("X-Api-Key", "sk-1")], "POST", True, 5, "")
         self.assertIn('header = "X-Api-Key: sk-1"', config)
+        self.assertIn("max-filesize", config)
 
     def test_the_curl_path_also_refuses_plain_http_with_a_key(self):
         os.environ["OMABABEL_CURL_IMPERSONATE"] = "/bin/true"
@@ -408,6 +409,81 @@ class CredentialSafetyTest(TempEnv):
         finally:
             os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
         self.assertIn("credentials over plain http", str(ctx.exception))
+
+
+class SizeLimitTest(TempEnv):
+    """Nothing a remote party sends is read without a ceiling."""
+
+    def setUp(self):
+        super().setUp()
+        impersonate.reset_state()
+        self._factory = impersonate.connection_factory
+        impersonate.MIN_INTERVAL = 0.0
+        os.environ.pop("OMABABEL_OFFLINE", None)
+
+    def tearDown(self):
+        impersonate.connection_factory = self._factory
+        impersonate.reset_state()
+        os.environ["OMABABEL_OFFLINE"] = "1"
+        super().tearDown()
+
+    def serve(self, *replies):
+        queue = list(replies)
+        impersonate.connection_factory = lambda *a: FakeConnection(*a, replies=queue)
+
+    def test_a_huge_body_is_refused_rather_than_held(self):
+        limit = impersonate.MAX_BODY_BYTES
+        try:
+            impersonate.MAX_BODY_BYTES = 4096
+            self.serve(FakeResponseObj(body=b"x" * 9000))
+            with self.assertRaises(impersonate.ImpersonateError) as ctx:
+                impersonate.fetch("https://example.org/big")
+            self.assertIn("exceeds", str(ctx.exception))
+        finally:
+            impersonate.MAX_BODY_BYTES = limit
+
+    def test_read_capped_stops_at_the_limit(self):
+        import io as _io
+        self.assertEqual(impersonate.read_capped(_io.BytesIO(b"abc"), 10), b"abc")
+        with self.assertRaises(impersonate.TooLarge):
+            impersonate.read_capped(_io.BytesIO(b"x" * 100), 10)
+
+    def test_a_compression_bomb_is_not_inflated(self):
+        import gzip as _gzip
+        import zlib as _zlib
+        bomb = _gzip.compress(b"0" * (impersonate.MAX_DECODED_BYTES + 1024))
+        self.assertLess(len(bomb), 200 * 1024)        # small on the wire...
+        with self.assertRaises(impersonate.TooLarge):  # ... never in memory
+            impersonate._decompress(bomb, "gzip")
+        with self.assertRaises(impersonate.TooLarge):
+            impersonate._decompress(_zlib.compress(b"0" * (impersonate.MAX_DECODED_BYTES + 1024)),
+                                    "deflate")
+        # a normal body still round trips
+        self.assertEqual(impersonate._decompress(_gzip.compress(b"hello"), "gzip"), b"hello")
+        self.assertEqual(impersonate._decompress(b"hello", ""), b"hello")
+
+    def test_an_error_body_is_kept_short(self):
+        self.serve(FakeResponseObj(status=404, body=b"e" * (impersonate.MAX_ERROR_BYTES * 2)))
+        with self.assertRaises(impersonate.ImpersonateError) as ctx:
+            impersonate.fetch("https://example.org/missing")
+        self.assertLessEqual(len(ctx.exception.body), impersonate.MAX_ERROR_BYTES)
+
+    def test_the_curl_output_is_capped(self):
+        script = Path(self.tmp) / "flood"
+        script.write_text("#!/bin/sh\nprintf 'HTTP/1.1 200 OK\\r\\n\\r\\n'\n"
+                          "python3 -c \"import sys; sys.stdout.write('x'*200000)\"\n",
+                          encoding="utf-8")
+        script.chmod(0o755)
+        os.environ["OMABABEL_CURL_IMPERSONATE"] = str(script)
+        limit = impersonate.MAX_BODY_BYTES
+        try:
+            impersonate.MAX_BODY_BYTES = 4096
+            with self.assertRaises(impersonate.ImpersonateError) as ctx:
+                impersonate.fetch_with_binary("https://example.org/x", timeout=10)
+            self.assertIn("exceeds", str(ctx.exception))
+        finally:
+            impersonate.MAX_BODY_BYTES = limit
+            os.environ.pop("OMABABEL_CURL_IMPERSONATE", None)
 
 
 if __name__ == "__main__":
