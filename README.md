@@ -383,11 +383,9 @@ text and a right click copies all of it.
 |----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `~/.config/omababel/sources.json`      | The source list (`omababel sources path`). Built-ins added by updates are merged in; deleted built-ins stay deleted. Contains no credentials |
 | `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                                                |
-|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                                                       |
 | `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                                                  |
 | `~/.cache/omababel/`                   | Indexes built from raw local files                                                                                                           |
-|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
 | login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                                                   |
 
 `omababel sources reset` restores the built-in list.
