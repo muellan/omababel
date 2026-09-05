@@ -62,7 +62,9 @@ class ManifestTest(unittest.TestCase):
             self.assertIn(needle, readme, needle)
 
     def test_readme_documents_credential_storage(self):
-        readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
+        # Whitespace-insensitive: the command examples are column-aligned, so
+        # `omababel    sources key` is the same documentation as one space.
+        readme = re.sub(r"\s+", " ", (ROOT / "README.md").read_text(encoding="utf-8").lower())
         for needle in ("keyring", "secret-tool", "never written to a file in plain text",
                        "omababel sources key"):
             self.assertIn(needle, readme, needle)
