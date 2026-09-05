@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import time
 from pathlib import Path
@@ -23,6 +24,42 @@ from . import formats, http, languages, store
 from .paths import data_dir
 
 Progress = Callable[[dict], None]
+
+# A dataset is bytes from a third party, and for FreeDict even the URL comes
+# from a third party (a JSON document on freedict.org names the release).  So
+# neither the address nor the file name nor the size is taken on trust.
+MAX_DOWNLOAD_BYTES = int(os.environ.get("OMABABEL_MAX_DOWNLOAD", str(4 * 1024 * 1024 * 1024)))
+# Everything a file name may contain.  A separator is not on the list, which
+# is the whole point.
+_SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]")
+# A FreeDict version, as it appears in the download directory listing.
+_VERSION = re.compile(r"[0-9][A-Za-z0-9._-]*")
+# Where a dataset may come from.  Nothing here needs a redirect off these
+# hosts, and `file://` or `ftp://` are not downloads at all.
+DOWNLOAD_HOSTS = (
+    "kaikki.org", "freedict.org", "download.freedict.org", "raw.githubusercontent.com",
+    "www.mdbg.net", "www.unicode.org", "unicode.org", "github.com", "objects.githubusercontent.com",
+)
+
+
+def check_download_url(url: str) -> None:
+    """Refuse a dataset address that is not https on a host we publish."""
+    import urllib.parse
+    parts = urllib.parse.urlsplit(str(url or ""))
+    host = (parts.hostname or "").lower()
+    if parts.scheme.lower() != "https":
+        raise ValueError(f"refusing to download over {parts.scheme or 'no'} scheme: {url}")
+    if not any(host == h or host.endswith("." + h) for h in DOWNLOAD_HOSTS):
+        raise ValueError(f"refusing to download a dataset from {host or url}")
+
+
+def _inside(folder: Path, target: Path) -> Path:
+    """``target``, once it is certain it is under ``folder``."""
+    root = folder.resolve()
+    full = (folder / target).resolve() if not target.is_absolute() else target.resolve()
+    if full != root and root not in full.parents:
+        raise ValueError(f"refusing to write outside the download directory: {target}")
+    return full
 
 KAIKKI_LANG_URL = "https://kaikki.org/dictionary/{name}/kaikki.org-dictionary-{name}.jsonl"
 KAIKKI_EDITION_URL = "https://kaikki.org/dictionary/downloads/{code}/{code}-extract.jsonl.gz"
@@ -117,7 +154,17 @@ def catalog_by_id() -> Dict[str, dict]:
 
 
 def index_path(dataset_id: str) -> Path:
-    return data_dir() / f"{dataset_id}.sqlite"
+    """Where a dataset's index lives.
+
+    ``install`` rejects an id that is not in the catalogue, but ``status`` and
+    ``remove`` take the id straight from the request, and an id of
+    ``../../../x`` would name a file well outside the data directory -- which
+    ``remove`` then unlinks.  The id is a name, so it has to look like one.
+    """
+    ident = str(dataset_id)
+    if not ident or _SAFE_NAME.search(ident) or ident.startswith("."):
+        raise ValueError(f"invalid dataset id: {dataset_id!r}")
+    return data_dir() / f"{ident}.sqlite"
 
 
 def status(dataset_id: str) -> dict:
@@ -151,12 +198,19 @@ def download(url: str, target: Path, progress: Optional[Progress] = None,
 
     if os.environ.get("OMABABEL_OFFLINE"):
         raise http.FetchError("offline mode (OMABABEL_OFFLINE is set)", url=url)
+    check_download_url(url)
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_suffix(target.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": http.DEFAULT_UA, "Accept": "*/*"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp, open(tmp, "wb") as out:
+        # The same redirect rules as every other request: only http(s), never
+        # a downgrade off https, never a credential across an origin.
+        with http._opener.open(req, timeout=timeout) as resp, open(tmp, "wb") as out:
             total = int(resp.headers.get("Content-Length") or 0)
+            if total and total > MAX_DOWNLOAD_BYTES:
+                raise ValueError(f"the download announces {total} bytes, more than the "
+                                 f"{MAX_DOWNLOAD_BYTES} byte limit "
+                                 f"(raise OMABABEL_MAX_DOWNLOAD to allow it)")
             done = 0
             last = 0.0
             while True:
@@ -165,6 +219,9 @@ def download(url: str, target: Path, progress: Optional[Progress] = None,
                     break
                 out.write(chunk)
                 done += len(chunk)
+                if done > MAX_DOWNLOAD_BYTES:
+                    raise ValueError(f"the download passed the {MAX_DOWNLOAD_BYTES} byte limit "
+                                     f"(raise OMABABEL_MAX_DOWNLOAD to allow it)")
                 now = time.time()
                 if progress and now - last > 0.3:
                     progress({"phase": "download", "bytes": done, "total": total, "url": url})
@@ -181,24 +238,40 @@ def download(url: str, target: Path, progress: Optional[Progress] = None,
 
 
 def freedict_release_url(pair: str) -> str:
-    """Find the TEI ``src`` release of a FreeDict dictionary."""
+    """Find the TEI ``src`` release of a FreeDict dictionary.
+
+    The address comes out of a JSON document served by freedict.org, so it is
+    a third party's suggestion of where we should go and what the file should
+    be called: it is checked like any other download address before it is
+    used, and the version scraped from the fallback listing has to look like
+    a version.
+    """
+    def usable(candidate) -> str:
+        if not isinstance(candidate, str):
+            return ""
+        try:
+            check_download_url(candidate)
+        except ValueError:
+            return ""
+        return candidate
+
     try:
         db = http.fetch(FREEDICT_DB, headers={"Accept": "application/json"}, timeout=60).json()
         for d in db:
             if isinstance(d, dict) and d.get("name") == pair:
                 releases = d.get("releases") or []
-                for rel in releases:
-                    if rel.get("platform") == "src" and rel.get("URL"):
-                        return rel["URL"]
-                for rel in releases:
-                    if rel.get("platform") == "dictd" and rel.get("URL"):
-                        return rel["URL"]
+                for platform in ("src", "dictd"):
+                    for rel in releases:
+                        if isinstance(rel, dict) and rel.get("platform") == platform:
+                            found = usable(rel.get("URL"))
+                            if found:
+                                return found
     except (http.FetchError, ValueError):
         pass
     # Fall back to the download directory listing.
     listing = http.fetch(FREEDICT_DIR.replace("{pair}", pair), timeout=60).text
-    import re
-    versions = sorted(set(re.findall(r'href="([0-9][^"/]*)/"', listing)),
+    versions = sorted(set(v for v in re.findall(r'href="([0-9][^"/]*)/"', listing)
+                          if _VERSION.fullmatch(v)),
                       key=lambda v: [int(x) if x.isdigit() else x for x in re.split(r"[.-]", v)])
     if not versions:
         raise http.FetchError(f"no FreeDict release found for {pair}")
@@ -209,9 +282,21 @@ def freedict_release_url(pair: str) -> str:
 # -------------------------------------------------------------------- install
 
 def _filename(url: str) -> str:
+    """A safe file name for what ``url`` returns.
+
+    The name has to come out of the URL and the URL is not always ours: for a
+    FreeDict dataset it comes from a JSON document on freedict.org.  Decoding
+    has to happen *before* the last path segment is taken, or a `%2F` turns
+    back into a separator afterwards and the name walks out of the downloads
+    directory -- `…/x/%2Fhome%2Fuser%2F.bashrc` used to yield an absolute
+    path, which `downloads / name` then adopted wholesale.
+    """
+    import posixpath
     import urllib.parse
-    name = url.rsplit("/", 1)[-1].split("?")[0] or "download"
-    return urllib.parse.unquote(name)
+    path = urllib.parse.unquote(urllib.parse.urlsplit(str(url)).path)
+    name = posixpath.basename(path.replace("\\", "/").rstrip("/"))
+    name = _SAFE_NAME.sub("_", name).lstrip(".")
+    return name or "download"
 
 
 def install(dataset_id: str, progress: Optional[Progress] = None, keep_download: bool = False,
@@ -235,7 +320,7 @@ def install(dataset_id: str, progress: Optional[Progress] = None, keep_download:
         for url in urls:
             try:
                 report({"phase": "download", "bytes": 0, "total": 0, "url": url})
-                files = [download(url, downloads / _filename(url), progress=report)]
+                files = [download(url, _inside(downloads, Path(_filename(url))), progress=report)]
                 break
             except http.FetchError as e:
                 last_err = e
@@ -246,7 +331,7 @@ def install(dataset_id: str, progress: Optional[Progress] = None, keep_download:
                 folder = downloads / "unihan-github"
                 folder.mkdir(parents=True, exist_ok=True)
                 for url in UNIHAN_GITHUB:
-                    download(url, folder / _filename(url), progress=report)
+                    download(url, _inside(folder, Path(_filename(url))), progress=report)
                 files = [folder]
             except http.FetchError as e:
                 last_err = e
@@ -263,7 +348,9 @@ def install(dataset_id: str, progress: Optional[Progress] = None, keep_download:
         a, b = ds["pair"].split("-")
         opts = {"src": languages.normalize(a) or a, "dst": languages.normalize(b) or b}
     if ds["kind"] == "freedict" and fmt == "dictd":
-        src = _extract_dictd(src, downloads / f"{dataset_id}-dictd")
+        unpacked = downloads / f"{dataset_id}-dictd"
+        src = _extract_dictd(src, unpacked)
+        files.append(unpacked)           # so the cleanup below takes it too
     report({"phase": "import", "count": 0, "message": f"indexing {src.name}"})
     tmp = target.with_suffix(".building")
     if tmp.exists():
@@ -302,8 +389,16 @@ def _extract_dictd(tarball: Path, folder: Path) -> Path:
     with tarfile.open(tarball, "r:*") as tf:
         members = [m for m in tf.getmembers() if m.isfile() and (m.name.endswith(".index") or ".dict" in m.name)]
         for m in members:
+            # Flattening the name is what keeps a `../../..` member inside the
+            # folder; forcing the mode is what keeps the archive from deciding
+            # that the file it just wrote is setuid and world-writable.
             m.name = os.path.basename(m.name)
-            tf.extract(m, folder)
+            m.mode = 0o600
+            m.uid = m.gid = os.getuid()
+            try:
+                tf.extract(m, folder, filter="data")
+            except TypeError:            # python < 3.12 has no extraction filter
+                tf.extract(m, folder)
     idx = next(folder.glob("*.index"), None)
     if idx is None:
         raise ValueError("no .index file inside dictd archive")

@@ -73,7 +73,7 @@ class ManifestTest(unittest.TestCase):
         stdlib_ok = {"__future__", "annotations", "argparse", "base64", "concurrent", "csv", "email", "gzip",
                      "hashlib", "html", "http", "io", "json",
                      "lzma", "os", "pathlib", "random", "re", "shlex", "shutil", "socket", "sqlite3", "ssl", "subprocess", "sys",
-                     "tarfile", "tempfile", "time", "traceback", "typing", "unicodedata", "urllib", "xml",
+                     "posixpath", "tarfile", "tempfile", "time", "traceback", "typing", "unicodedata", "urllib", "xml",
                      "zipfile", "zlib", "ob"}
         import ast
         for py in (ROOT / "backend").rglob("*.py"):

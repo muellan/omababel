@@ -282,9 +282,42 @@ class DataCatalogTest(TempEnv):
         self.assertFalse(data.index_path("wiktionary-de").exists())
 
     def test_download_helpers(self):
+        src = "https://download.freedict.org/dictionaries/deu-eng/1.0/s.src.tar.xz"
+        dictd = "https://download.freedict.org/dictionaries/deu-eng/1.0/d.dictd.tar.xz"
         with fake_fetch(lambda url, **kw: FakeResponse(json.dumps([{"name": "deu-eng", "releases": [
-                {"platform": "dictd", "URL": "https://x/d.tar.xz"}, {"platform": "src", "URL": "https://x/s.tar.xz"}]}]))):
-            self.assertEqual(data.freedict_release_url("deu-eng"), "https://x/s.tar.xz")
+                {"platform": "dictd", "URL": dictd}, {"platform": "src", "URL": src}]}]))):
+            self.assertEqual(data.freedict_release_url("deu-eng"), src)
+
+    def test_a_release_url_off_the_freedict_hosts_is_ignored(self):
+        """The release address comes out of a JSON document on freedict.org –
+        a compromised one must not be able to send the download elsewhere."""
+        listing = '<a href="1.0/">1.0/</a>'
+
+        def serve(url, **kw):
+            if "freedict-database" in url:
+                return FakeResponse(json.dumps([{"name": "deu-eng", "releases": [
+                    {"platform": "src", "URL": "https://evil.example/steal.tar.xz"},
+                    {"platform": "dictd", "URL": "file:///etc/passwd"}]}]))
+            return FakeResponse(listing)
+
+        with fake_fetch(serve):
+            # neither candidate is usable, so it falls back to the listing
+            self.assertEqual(data.freedict_release_url("deu-eng"),
+                             "https://download.freedict.org/dictionaries/deu-eng/1.0/"
+                             "freedict-deu-eng-1.0.src.tar.xz")
+
+    def test_a_scraped_version_has_to_look_like_a_version(self):
+        listing = '<a href="1.0/">1.0/</a><a href="9%2F..%2F..%2Fetc/">bogus</a>'
+
+        def serve(url, **kw):
+            if "freedict-database" in url:
+                raise data.http.FetchError("down")
+            return FakeResponse(listing)
+
+        with fake_fetch(serve):
+            self.assertEqual(data.freedict_release_url("deu-eng"),
+                             "https://download.freedict.org/dictionaries/deu-eng/1.0/"
+                             "freedict-deu-eng-1.0.src.tar.xz")
 
         def listing(url, **kw):
             if "freedict-database" in url:
@@ -295,8 +328,10 @@ class DataCatalogTest(TempEnv):
             self.assertEqual(data.freedict_release_url("deu-eng"),
                              "https://download.freedict.org/dictionaries/deu-eng/1.10/freedict-deu-eng-1.10.src.tar.xz")
         with self.assertRaises(data.http.FetchError):
-            data.download("https://example.org/x", self.tmp / "x")   # offline
-        self.assertEqual(data._filename("https://a/b/c%20d.txt?x=1"), "c d.txt")
+            data.download("https://kaikki.org/x", self.tmp / "x")    # offline
+        # everything outside [A-Za-z0-9._-] becomes an underscore, so a name
+        # can carry no separator and no surprise
+        self.assertEqual(data._filename("https://a/b/c%20d.txt?x=1"), "c_d.txt")
 
 
 if __name__ == "__main__":
