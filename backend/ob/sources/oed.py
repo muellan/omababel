@@ -15,7 +15,8 @@ from .. import http, htmlutil
 from .. import results as R
 from .base import Source, SourceError, register
 
-SEARCH_URL = "https://www.oed.com/search/dictionary/?scope=Entries&q={word}"
+WEB_ORIGIN = "https://www.oed.com"
+SEARCH_URL = WEB_ORIGIN + "/search/dictionary/?scope=Entries&q={word}"
 API_WORDS = "https://oed-researcher-api.oxfordlanguages.com/oed/api/v0.2/words/?lemma={word}&limit=20"
 API_SENSES = "https://oed-researcher-api.oxfordlanguages.com/oed/api/v0.2/word/{id}/senses/?limit=50"
 
@@ -114,7 +115,12 @@ class OED(Source):
             m = re.match(r"^(.+),\s*([^,]+)$", title)
             head, pos = (m.group(1), m.group(2)) if m else (title, "")
             senses = [R.sense(snippet)] if snippet else []
-            full = href if href.startswith("http") else "https://www.oed.com" + href
+            # The href comes off the page, and the result's `url` is what the
+            # card's "open ↗" button hands to the browser.  The predicate
+            # above is a search, not a prefix match, so an absolute link to
+            # somebody else's `/dictionary/x` passes it – anything not on
+            # oed.com is resolved against oed.com rather than followed.
+            full = href if href.startswith(WEB_ORIGIN) else WEB_ORIGIN + "/" + href.lstrip("/")
             entries.append(R.entry(head, pos=pos, senses=senses, lang="en", url=full))
             if len(entries) >= 8:
                 break

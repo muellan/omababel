@@ -12,7 +12,7 @@ from __future__ import annotations
 import html
 import re
 from html.parser import HTMLParser
-from typing import Callable, Iterator, List, Optional
+from typing import Callable, Iterator, List, Optional, Tuple
 
 VOID = {
     "area", "base", "br", "col", "embed", "hr", "img", "input", "link",
@@ -139,24 +139,31 @@ class Node:
     def get_text(self, sep: str = " ", strip: bool = True, block_sep: str = "\n") -> str:
         parts: List[str] = []
 
-        def walk(n: Node) -> None:
+        # Iterative, not recursive: the tree is built from a page a source
+        # sent, and a thousand nested <div>s would otherwise be a RecursionError
+        # in the middle of rendering rather than a text extraction.
+        # `closing` marks the second visit to a node, where its own separator
+        # is appended.
+        stack: List[Tuple[Node, bool]] = [(self, False)]
+        while stack:
+            n, closing = stack.pop()
+            if closing:
+                if n.tag in BLOCK:
+                    parts.append(block_sep)
+                elif sep == " ":
+                    parts.append(SOFT)
+                elif sep:
+                    parts.append(sep)
+                continue
             if n.tag is None:
                 parts.append(n.text)
-                return
+                continue
             if n.tag in SKIP_TEXT:
-                return
+                continue
             if n.tag in BLOCK:
                 parts.append(block_sep)
-            for c in n.children:
-                walk(c)
-            if n.tag in BLOCK:
-                parts.append(block_sep)
-            elif sep == " ":
-                parts.append(SOFT)
-            elif sep:
-                parts.append(sep)
-
-        walk(self)
+            stack.append((n, True))
+            stack.extend((c, False) for c in reversed(n.children))
         text = "".join(parts)
         return clean_text(text) if strip else resolve_soft(text)
 

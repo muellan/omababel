@@ -60,6 +60,13 @@ def decorate_lookup(result: dict) -> None:
                 s["examples_html"] = [linkify(x) for x in s.get("examples", [])]
                 s["synonyms_html"] = _join(s.get("synonyms", []))
                 s["antonyms_html"] = _join(s.get("antonyms", []))
+                # Tags are scraped ("Gebrauch", "Grammatik" notes from Duden)
+                # or read out of a downloaded dictionary, and the panel puts
+                # them inside a rich-text run.  They are not links – a usage
+                # note is not a word to look up – but they do have to be
+                # escaped, or an `<img src=…>` in one would make the panel
+                # fetch a URL of the page's choosing.
+                s["tags_html"] = [html.escape(str(t)) for t in s.get("tags", []) if t]
             extra = e.get("extra") or {}
             e["extra_html"] = [{"key": html.escape(str(k)), "value": linkify(str(v))}
                                for k, v in extra.items()]

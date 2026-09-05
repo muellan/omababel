@@ -81,6 +81,16 @@ Item {
   // selected card is brought into view.
   onSelectedCardChanged: Qt.callLater(root.showSelected)
 
+  // A result's `url` is built by its source, and a scraping source builds it
+  // from the page it just read.  What goes to the desktop's URL handler is
+  // therefore checked here rather than trusted: `file:`, `javascript:` and
+  // friends do not belong in a hand-off to the browser.
+  function openExternally(url) {
+    var text = String(url || "")
+    if (/^https?:\/\//i.test(text)) Qt.openUrlExternally(text)
+    else console.warn("omababel: refusing to open", text)
+  }
+
   function resultKey() {
     if (!root.result) return ""
     return [root.result.mode, root.result.query, root.result.lang, root.result.lang2].join("\u0000")
@@ -327,7 +337,7 @@ Item {
           verticalPadding: Style.spacing.xxs
           foreground: root.muted
           accent: root.accent
-          onClicked: Qt.openUrlExternally(cardRoot.url)
+          onClicked: root.openExternally(cardRoot.url)
         }
         Button {
           id: collapseButton
@@ -747,9 +757,11 @@ Item {
                     }
                     ObLinkText {
                       width: parent.width - senseLabel.width - Style.spacing.md
+                      // tags_html, not tags: this is a rich-text run, and a
+                      // tag comes off a scraped page.
                       html: (senseCol.modelData.gloss_html || "")
-                        + (senseCol.modelData.tags && senseCol.modelData.tags.length
-                            ? "  <font color=\"" + root.muted + "\"><i>[" + senseCol.modelData.tags.join(", ") + "]</i></font>" : "")
+                        + (senseCol.modelData.tags_html && senseCol.modelData.tags_html.length
+                            ? "  <font color=\"" + root.muted + "\"><i>[" + senseCol.modelData.tags_html.join(", ") + "]</i></font>" : "")
                       color: root.foreground
                       onSearchWord: function(w) { root.searchWord(w) }
                       onCopyText: function(t) { root.copyText(t) }

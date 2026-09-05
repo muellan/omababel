@@ -25,6 +25,7 @@ Nothing here ever writes a secret to a file.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import subprocess
 from typing import Optional
@@ -32,6 +33,9 @@ from typing import Optional
 SERVICE = "omababel"
 TOOL_ENV = "OMABABEL_SECRET_TOOL"      # tests point this at a stub
 TIMEOUT = 10
+# A source id names a keyring entry and is passed to secret-tool as an
+# argument; it is an identifier, so it looks like one.
+_BAD_ID = re.compile(r"[^A-Za-z0-9._-]")
 
 
 class SecretError(Exception):
@@ -75,7 +79,17 @@ def _run(argv, stdin: str = "") -> subprocess.CompletedProcess:
 
 
 def _attrs(source_id: str):
-    return ["service", SERVICE, "id", str(source_id)]
+    """The attribute pair that identifies one source's secret.
+
+    `--` first: the id is appended as a positional argument, and secret-tool
+    parses GLib options anywhere on the line, so an id of `--help` would turn
+    a lookup into a usage message printed on stdout – which `load` would then
+    hand back as the API key.
+    """
+    ident = str(source_id)
+    if not ident or ident.startswith("-") or _BAD_ID.search(ident):
+        raise SecretError(f"invalid source id: {source_id!r}")
+    return ["--", "service", SERVICE, "id", ident]
 
 
 def store(source_id: str, secret: str) -> None:

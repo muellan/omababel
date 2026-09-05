@@ -27,9 +27,25 @@ Text {
   font.pixelSize: Style.font.body
   text: root.styled(html)
 
+  // The only tags the backend ever emits.  Everything a source sends is
+  // escaped before it gets here, so this list is a second lock rather than
+  // the first: Qt's rich text understands `<img src="https://…">`, which
+  // would make the panel fetch a URL of a scraped page's choosing (and
+  // `<img src="file:///…">` a local file), so an unknown tag is dropped
+  // instead of rendered, whatever put it there.
+  readonly property var allowedTags: ["a", "b", "i", "u", "s", "em", "strong", "font", "br", "span"]
+
+  function safe(markup) {
+    return String(markup).replace(/<\s*\/?\s*([A-Za-z][A-Za-z0-9]*)[^>]*>/g,
+                                  function(tag, name) {
+      return root.allowedTags.indexOf(name.toLowerCase()) >= 0 ? tag : ""
+    })
+  }
+
   function styled(markup) {
     if (!markup) return ""
-    return markup.replace(/<a href=/g, '<a style="color:' + String(root.linkTint) + ';text-decoration:none" href=')
+    return root.safe(markup).replace(/<a href=/g,
+      '<a style="color:' + String(root.linkTint) + ';text-decoration:none" href=')
   }
 
   function wordFromHref(href) {
