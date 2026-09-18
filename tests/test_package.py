@@ -63,6 +63,21 @@ class ManifestTest(unittest.TestCase):
         for needle in ("browser", "curl-impersonate", "omababel_impersonate", "cookies"):
             self.assertIn(needle, readme, needle)
 
+    def test_readme_documents_the_acronym_and_wiktionary_sources(self):
+        readme = re.sub(r"\s+", " ", (ROOT / "README.md").read_text(encoding="utf-8").lower())
+        for needle in ("acronyms.thefreedictionary.com", "acronymfinder.com", "allacronyms.com",
+                       "looks like an acronym", "de.wiktionary.org"):
+            self.assertIn(needle, readme, needle)
+
+    def test_readme_says_nothing_is_written_into_the_plugin_directory(self):
+        readme = re.sub(r"\s+", " ", (ROOT / "README.md").read_text(encoding="utf-8"))
+        for needle in ("sys.pycache_prefix", "PYTHONPYCACHEPREFIX"):
+            self.assertIn(needle, readme, needle)
+
+    def test_the_version_is_the_same_everywhere(self):
+        from ob import __version__
+        self.assertEqual(self.manifest["version"], __version__)
+
     def test_readme_documents_credential_storage(self):
         # Whitespace-insensitive: the command examples are column-aligned, so
         # `omababel    sources key` is the same documentation as one space.

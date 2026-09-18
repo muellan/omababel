@@ -7,7 +7,9 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
 
 - **Lookup** - definitions from every dictionary configured for the selected
   language (Merriam-Webster, Duden, OED, Wiktionary, CC-CEDICT, ECDICT, Unihan, Claude, Gemini, Grok, ...)
-  with one clearly separated results section per dictionary.
+  with one clearly separated results section per dictionary. Typing an acronym
+  in capitals (`NASA`, `PhD`) also asks the acronym dictionaries what it can
+  stand for, with the letters it is built from printed in bold.
 
 - **Thesaurus** - synonyms and antonyms from all configured thesauruses for the
   selected language (Thesaurus.com, Merriam-Webster, Wiktionary, Claude, Gemini, Grok, ...), grouped
@@ -248,6 +250,10 @@ tunnelled through the proxy so the handshake is still with the site.
 | [Merriam-Webster](https://www.merriam-webster.com/) | dictionary + thesaurus (en) | Optional free [dictionaryapi.com](https://dictionaryapi.com/) key (one per reference)                                                                        |
 | [Oxford English Dictionary](https://www.oed.com/)   | dictionary (en)             | Subscription site - **disabled by default**; free access only yields search snippets, an OED Researcher API credential (`app_id:app_key`) gives full entries |
 | [Thesaurus.com](https://www.thesaurus.com/)         | thesaurus (en)              |                                                                                                                                                              |
+| [Acronyms (TheFreeDictionary)](https://acronyms.thefreedictionary.com/) | dictionary (any) | Acronyms and abbreviations; see [Acronyms](#acronyms-and-abbreviations)                                                                 |
+| [Acronym Finder](https://www.acronymfinder.com/)    | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
+| [All Acronyms](https://www.allacronyms.com/)        | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
+| [Wiktionary](https://www.wiktionary.org/)           | all three modes             | Used automatically while the downloadable Wiktionary dataset of a row is not installed; see [Local Dictionaries](#local-dictionaries-downloaded-on-demand)   |
 | [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
 | Google Translate                                    | translator, text            | The key-less endpoint rate-limits after a few requests; add a Cloud Translation API key for steady use                                                       |
 | DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
@@ -256,6 +262,39 @@ tunnelled through the proxy so the handshake is still with the site.
 The web sources are scraped from the public pages (like a browser would).
 Page layouts change; when a source stops returning results, check for a plugin
 update or report it. Using them is subject to the sites' terms.
+
+
+
+### Acronyms and Abbreviations
+
+Three acronym dictionaries - [acronyms.thefreedictionary.com](https://acronyms.thefreedictionary.com/),
+[acronymfinder.com](https://www.acronymfinder.com/) and
+[allacronyms.com](https://www.allacronyms.com/) - ship **enabled**, as ordinary
+dictionary sources. Each result card lists what the acronym can stand for, one
+meaning per line with the subject area next to it where the site gives one, and
+the letters the expansion is built from in **bold**:
+
+```
+NASA
+  1. National Aeronautics and Space Administration   [Governmental]
+  2. North American Saxophone Alliance               [Music]
+```
+
+They are only asked when the search term **looks like an acronym**: a single
+token of at most 12 characters, mostly capitals or digits - `NASA`, `PhD`,
+`B2B`, `Wi-Fi` yes, `Haus` and `nasa` no. So write acronyms in capitals; every
+ordinary word would otherwise cost three more requests and three more empty
+cards. The rows carry no language, since an acronym is not a language's
+property and the sites list international ones.
+
+An **all-uppercase** term also changes what an enabled AI row is asked: instead
+of explaining a word it is asked what the letters stand for (see
+[AI Services](#ai-services)).
+
+The bold letters are found by walking the expansion and matching each letter of
+the acronym at a word start or at a capital inside a word, so `HTTP` marks
+**H**yper**T**ext **T**ransfer **P**rotocol. An expansion that does not spell
+the acronym out is left unmarked rather than marked in the wrong places.
 
 
 
@@ -269,6 +308,7 @@ site. They are **disabled by default**; enable the ones you want in
 | Mode      | What it returns                                                                         |
 |-----------|-----------------------------------------------------------------------------------------|
 | Lookup    | One succinct explanation of the term, with a part of speech and one example             |
+| Lookup (an all-uppercase term) | What the letters can stand for, each with a short description and its field |
 | Thesaurus | Synonyms and antonyms, grouped by meaning, one card per meaning                         |
 | Translate | The best meaning-preserving translation, plus alternatives and a note about ambiguities |
 
@@ -327,9 +367,18 @@ Each dataset is downloaded once, indexed into an SQLite file under
 | `ecdict`                   | ECDICT: 770k English headwords with IPA, English definitions, Chinese translations, inflections                       | [skywind3000/ECDICT](https://github.com/skywind3000/ecdict)                                                                                             | MIT                |
 | `unihan`                   | Unihan: readings and definitions for ~98k Han characters (Mandarin, Cantonese, Japanese, Korean)                      | [unicode.org](https://www.unicode.org/Public/UCD/latest/ucd/Unihan.zip) / [unicode-org/unihan-database](https://github.com/unicode-org/unihan-database) | Unicode License v3 |
 
+**A Wiktionary row works before you download anything.** While its dataset is
+missing, it asks the matching edition of Wiktionary on the web instead - a
+`wiktionary-de` row asks the English Wiktionary (which is what that dataset
+contains), a `wiktionary-de-native` row asks `de.wiktionary.org`. The card is
+titled *"… · web"* while that is happening and the source list says which
+edition is being asked instead of *not installed*. It is one page per search
+rather than a local index, so installing the dataset is still much faster and
+works offline - but nothing is silently missing until you do.
+
 Default languages - German, English, Chinese (Mandarin), French, Spanish,
 Portuguese, Japanese - come pre-configured with source rows for all of the
-above (they show *not installed* until you download the data). `omababel data
+above. `omababel data
 list` prints the full catalogue, including the Wiktionary sets for ~40 more
 languages.
 
@@ -387,10 +436,18 @@ text and a right click copies all of it.
 | `~/.config/omababel/prefs.json`        | Last mode, languages and thesaurus sort order                                                                                                |
 | `~/.local/state/omababel/history.json` | Search history (size set in ⚙ → History, default 1000)                                                                                       |
 | `~/.local/share/omababel/`             | Dictionary data and indexes                                                                                                                  |
-| `~/.cache/omababel/`                   | Indexes built from raw local files                                                                                                           |
+| `~/.cache/omababel/`                   | Indexes built from raw local files, and the backend's compiled bytecode (see below)                                                          |
 | login keyring (gnome-keyring)          | API keys and other credentials, under `service=omababel` – see [Credentials](#credentials)                                                   |
 
 `omababel sources reset` restores the built-in list.
+
+**Nothing is ever written into the plugin directory itself.** That includes
+Python's bytecode cache, which by default would land next to the backend
+sources: Omarchy reloads a plugin when a file appears in its directory, and
+`omarchy plugin update` refuses to fast-forward a dirty checkout. The backend
+points `sys.pycache_prefix` at `~/.cache/omababel/pycache` instead (or goes
+without a cache if that cannot be created). Set `PYTHONPYCACHEPREFIX` to
+override it.
 
 
 
