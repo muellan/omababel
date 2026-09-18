@@ -34,6 +34,43 @@ from typing import Callable, Dict, List
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+
+def _bytecode_cache() -> str:
+    """Where the compiled ``ob`` package may be written.
+
+    Not next to the sources, which is what python does by default: the
+    sources live in the plugin checkout, and Omarchy reloads a plugin when a
+    file appears in its directory.  Every run that imports a module nobody
+    had imported before therefore dropped a fresh ``__pycache__`` file under
+    the shell's nose -- and the format readers are imported *lazily*, when a
+    dataset is actually indexed, so installing the first offline dictionary
+    did it in the middle of a long running install.  Once every module had
+    been compiled once the directory stopped changing and installing worked
+    from then on, which is exactly the "it crashes until suddenly it
+    doesn't" shape of the bug.
+
+    ``sys.pycache_prefix`` keeps the caching (the cold start is why it is
+    there) and moves the files to ``~/.cache/omababel/pycache``.
+    """
+    base = os.environ.get("OMABABEL_CACHE_DIR")
+    if not base:
+        home = os.environ.get("XDG_CACHE_HOME") or os.path.join(
+            os.environ.get("HOME") or os.path.expanduser("~"), ".cache")
+        base = os.path.join(home, "omababel")
+    return os.path.join(os.path.expanduser(base), "pycache")
+
+
+# PYTHONPYCACHEPREFIX (or an embedding parent) wins if it set one already.
+if sys.pycache_prefix is None:
+    try:
+        _prefix = _bytecode_cache()
+        os.makedirs(_prefix, exist_ok=True)
+        sys.pycache_prefix = _prefix
+    except OSError:
+        # Nowhere to put it: go without a cache rather than write into the
+        # plugin directory.
+        sys.dont_write_bytecode = True
+
 from ob import __version__, clipboard, data, impersonate, languages, paths, render, search, secrets  # noqa: E402
 from ob import results as R  # noqa: E402
 from ob import sources as S  # noqa: E402

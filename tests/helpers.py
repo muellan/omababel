@@ -21,6 +21,13 @@ FIXTURES = Path(__file__).resolve().parent / "fixtures"
 if str(BACKEND) not in sys.path:
     sys.path.insert(0, str(BACKEND))
 
+# Same reason as in backend/omababel.py: nothing may be written into the
+# plugin checkout, not even bytecode -- Omarchy reloads a plugin whose
+# directory changes, and a test run that leaves `__pycache__` behind also
+# makes `omarchy plugin update` refuse to fast-forward.
+if sys.pycache_prefix is None:
+    sys.pycache_prefix = str(Path(tempfile.gettempdir()) / "omababel-test-pycache")
+
 os.environ.setdefault("OMABABEL_OFFLINE", "1")
 
 

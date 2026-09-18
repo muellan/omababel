@@ -88,6 +88,45 @@ class ManifestTest(unittest.TestCase):
                     top = name.split(".")[0]
                     self.assertIn(top, stdlib_ok, f"{py.name}: third-party import '{top}'")
 
+    def test_backend_leaves_the_plugin_directory_untouched(self):
+        """A backend run must not create a single file in the checkout.
+
+        Python's default is to cache the compiled `ob` package next to the
+        sources.  Omarchy reloads a plugin when its directory changes, and
+        the format readers are imported lazily -- so the first install of an
+        offline dictionary used to write `ob/formats/__pycache__/…` in the
+        middle of the install and pull the shell down with it.
+        """
+        import subprocess
+        import tempfile
+
+        def snapshot():
+            return {p for p in ROOT.rglob("*") if ".git" not in p.parts}
+
+        requests = [
+            '{"op": "ping", "params": {}}',
+            '{"op": "state.get", "params": {}}',
+            # imports ob.formats.tei lazily, which is where it used to bite
+            '{"op": "data.install", "params": {"id": "freedict-deu-eng",'
+            ' "path": "tests/fixtures/deu-eng.tei"}}',
+        ]
+        with tempfile.TemporaryDirectory(prefix="omababel-pkg-") as tmp:
+            env = dict(os.environ)
+            env.pop("PYTHONPYCACHEPREFIX", None)
+            for key, sub in (("OMABABEL_CONFIG_DIR", "config"), ("OMABABEL_DATA_DIR", "data"),
+                             ("OMABABEL_STATE_DIR", "state"), ("OMABABEL_CACHE_DIR", "cache")):
+                env[key] = os.path.join(tmp, sub)
+            env["OMABABEL_OFFLINE"] = "1"
+            before = snapshot()
+            for request in requests:
+                subprocess.run(["python3", str(ROOT / "backend" / "omababel.py")],
+                               input=request.encode("utf-8"), stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, env=env, cwd=str(ROOT), timeout=120)
+            self.assertEqual(snapshot() - before, set(),
+                             "the backend wrote into the plugin directory")
+            self.assertTrue(list(Path(tmp, "cache").rglob("*.pyc")),
+                            "the bytecode cache was not written either")
+
     def test_bin_wrapper(self):
         wrapper = ROOT / "bin" / "omababel"
         self.assertTrue(wrapper.is_file())

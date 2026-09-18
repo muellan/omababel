@@ -13,6 +13,11 @@
 
 set -o pipefail
 
+# Nothing may be left behind in the plugin checkout, not even bytecode:
+# Omarchy reloads a plugin whose directory changes and `omarchy plugin
+# update` refuses to fast-forward a dirty one.
+export PYTHONPYCACHEPREFIX="${PYTHONPYCACHEPREFIX:-${TMPDIR:-/tmp}/omababel-test-pycache}"
+
 here="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 root="$(dirname "$here")"
 do_python=1
