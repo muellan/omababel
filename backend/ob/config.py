@@ -74,6 +74,17 @@ def default_sources() -> List[dict]:
                     notes="Subscription site; free access only returns search snippets. Enter an OED Researcher API credential (app_id:app_key) for full entries."))
     rows.append(row("thesaurus-com", "Thesaurus.com", "thesaurus", "thesauruscom",
                     url="https://www.thesaurus.com/browse/{word}", languages=["en"]))
+    # ---- acronyms and abbreviations.  No language: the sites are in English
+    # but list acronyms from everywhere, and they only answer at all when the
+    # search term looks like an acronym, so they cost nothing on a plain word.
+    acronym_note = ("Answers only when the search term looks like an acronym (a short, "
+                    "capital-heavy token such as NASA or PhD).")
+    rows.append(row("tfd-acronyms", "Acronyms (TheFreeDictionary)", "dictionary", "tfd-acronyms",
+                    url="https://acronyms.thefreedictionary.com/{word}", notes=acronym_note))
+    rows.append(row("acronymfinder", "Acronym Finder", "dictionary", "acronymfinder",
+                    url="https://www.acronymfinder.com/{word}.html", notes=acronym_note))
+    rows.append(row("allacronyms", "All Acronyms", "dictionary", "allacronyms",
+                    url="https://www.allacronyms.com/{word}", notes=acronym_note))
     # ---- remote translators
     rows.append(row("leo", "LEO", "translator", "leo", url="https://dict.leo.org/", translation_mode="word"))
     rows.append(row("google-translate", "Google Translate", "translator", "google",

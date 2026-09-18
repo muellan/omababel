@@ -19,7 +19,13 @@ def sense(gloss: str, examples: Optional[Iterable[str]] = None,
           synonyms: Optional[Iterable[str]] = None,
           antonyms: Optional[Iterable[str]] = None,
           tags: Optional[Iterable[str]] = None,
-          label: str = "") -> dict:
+          label: str = "", acronym: str = "") -> dict:
+    """One meaning.
+
+    ``acronym`` is set when the gloss spells one out ("NASA" -> "National
+    Aeronautics and Space Administration"); `ob.render` then prints the
+    letters it is built from in bold.
+    """
     return {
         "gloss": clean(gloss),
         "examples": [clean(e) for e in (examples or []) if clean(e)],
@@ -27,6 +33,7 @@ def sense(gloss: str, examples: Optional[Iterable[str]] = None,
         "antonyms": dedupe(antonyms or []),
         "tags": [t for t in (tags or []) if t],
         "label": label,
+        "acronym": clean(acronym),
     }
 
 
