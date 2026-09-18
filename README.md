@@ -20,7 +20,7 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
   CC-CEDICT, ECDICT, ...), full-text translation services 
   (Google Translate, DeepL, Claude, Gemini, Grok, ...) between the two selected languages.
 
-![](assets/preview.png)
+![](preview.png)
 
 
 A note on speed: web sources and local dictionaries are usually queried in milliseconds,
