@@ -8,6 +8,7 @@ Unihan, dictd, TSV, JSON) are indexed into the cache on first use.
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -15,6 +16,14 @@ from .. import formats, languages, store
 from .. import results as R
 from ..paths import resolve_local
 from .base import Source, SourceError, register
+
+
+# `wiktionary-de` (the English edition's German entries) and
+# `wiktionary-de-native` (the German edition) -- the two shapes `ob.data`
+# publishes.  Both have a web edition to ask while the dump is not installed.
+_WIKTIONARY_DATASET = re.compile(r"^wiktionary-([a-z]{2,3})(-native)?$")
+
+_UNSET = object()
 
 
 def _is_cjk_word(text: str) -> bool:
@@ -42,6 +51,57 @@ class Local(Source):
         self.dataset = str(cfg.get("dataset") or "")
         self._store: Optional[store.Store] = None
         self._meta_cache: Optional[dict] = None
+        self._fallback = _UNSET
+
+    # ------------------------------------------------------------ fallback
+    def web_fallback(self):
+        """The live source to use while this row's dataset is missing.
+
+        A Wiktionary dump is hundreds of megabytes and is installed on
+        demand, so until it is there the row would simply not answer.  The
+        same edition of Wiktionary is on the web, so ask that instead --
+        slower and one page at a time, but an answer.
+        """
+        if self._fallback is _UNSET:
+            self._fallback = self._build_fallback()
+        return self._fallback
+
+    def _build_fallback(self):
+        m = _WIKTIONARY_DATASET.match(self.dataset)
+        if not m:
+            return None
+        code, native = m.group(1), bool(m.group(2))
+        if languages.normalize(code) is None:
+            return None
+        edition = code if native else "en"
+        from .wiktionary import API, Wiktionary
+        cfg = dict(self.cfg)
+        cfg["driver"] = "wiktionary"
+        cfg["kind"] = "remote"
+        cfg["path"] = ""
+        cfg["url"] = API.replace("{edition}", edition)
+        if not cfg.get("languages"):
+            cfg["languages"] = [code]
+        if self.type == "translator" and not cfg.get("pairs"):
+            # The translation tables of an entry point outwards from the
+            # entry's own language, so this row translates `code` -> anything.
+            cfg["pairs"] = [[code, other] for other in languages.LANGUAGES if other != code]
+        try:
+            return Wiktionary(cfg)
+        except Exception:      # noqa: BLE001 - a fallback must never be fatal
+            return None
+
+    def available(self) -> bool:
+        """False only when there is nothing at all to ask."""
+        return self.installed() or self.web_fallback() is not None
+
+    def describe(self) -> dict:
+        out = super().describe()
+        if not self.installed() and self.web_fallback() is not None:
+            out["kind"] = "remote"
+            out["name"] = f"{self.name} · web"
+            out["fallback"] = "web"
+        return out
 
     # --------------------------------------------------------------- files
     def file_path(self) -> Path:
@@ -61,6 +121,11 @@ class Local(Source):
         except SourceError as e:
             return {"installed": False, "error": str(e)}
         if not p.exists():
+            fallback = self.web_fallback()
+            if fallback is not None:
+                return {"installed": False, "path": str(p), "fallback": fallback.edition,
+                        "note": f"not installed - querying {fallback.edition}.wiktionary.org",
+                        "hint": f"run: omababel data install {self.dataset}"}
             hint = f"run: omababel data install {self.dataset}" if self.dataset else "file not found"
             return {"installed": False, "error": hint, "path": str(p)}
         try:
@@ -109,14 +174,16 @@ class Local(Source):
         if self.cfg_languages:
             return self.cfg_languages
         if not self.installed():
-            return []
+            fallback = self.web_fallback()
+            return fallback.effective_languages() if fallback is not None else []
         return [languages.normalize(x) or x for x in self._meta()["languages"] if x]
 
     def effective_pairs(self) -> List[Tuple[str, str]]:
         if self.cfg.get("pairs"):
             return super().effective_pairs()
         if not self.installed():
-            return []
+            fallback = self.web_fallback()
+            return fallback.effective_pairs() if fallback is not None else []
         meta = self._meta()
         langs = [languages.normalize(x) or x for x in meta["languages"] if x]
         tlangs = [languages.normalize(x) or x for x in meta["translation_langs"] if x]
@@ -130,7 +197,8 @@ class Local(Source):
 
     def supports(self, mode: str, lang: str, lang2: Optional[str] = None) -> bool:
         if not self.installed():
-            return False
+            fallback = self.web_fallback()
+            return fallback is not None and fallback.supports(mode, lang, lang2)
         return super().supports(mode, lang, lang2)
 
     # ---------------------------------------------------------------- work
@@ -148,6 +216,8 @@ class Local(Source):
                        pronunciation=e.get("pron", ""), lang=e.get("lang", ""), extra=extra, url=url)
 
     def lookup(self, word: str, lang: str) -> dict:
+        if not self.installed() and self.web_fallback() is not None:
+            return self.web_fallback().lookup(word, lang)
         with self._open() as st:
             langs = self.effective_languages()
             use_lang = lang if (lang in langs or not langs) else None
@@ -165,12 +235,16 @@ class Local(Source):
         return {"entries": [self._to_entry(r) for r in rows], "url": ""}
 
     def thesaurus(self, word: str, lang: str) -> dict:
+        if not self.installed() and self.web_fallback() is not None:
+            return self.web_fallback().thesaurus(word, lang)
         with self._open() as st:
             langs = self.effective_languages()
             res = st.thesaurus(word, lang if (lang in langs or not langs) else None)
         return res
 
     def translate(self, text: str, src: str, dst: str) -> dict:
+        if not self.installed() and self.web_fallback() is not None:
+            return self.web_fallback().translate(text, src, dst)
         with self._open() as st:
             pairs = st.translate(text.strip(), src, dst)
         return R.translation("word", pairs)

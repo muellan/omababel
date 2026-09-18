@@ -62,6 +62,14 @@ class Source:
                 "driver": self.driver, "kind": self.kind,
                 "translation_mode": self.translation_mode}
 
+    def available(self) -> bool:
+        """Whether this row can answer at all right now.
+
+        Only a local row that has neither its dataset nor a web fallback
+        says no; everything remote is always worth asking.
+        """
+        return True
+
     def effective_languages(self) -> List[str]:
         """Languages this row serves (config wins over driver defaults)."""
         if self.cfg_languages:

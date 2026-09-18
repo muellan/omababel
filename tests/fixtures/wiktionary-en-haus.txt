@@ -1,0 +1,52 @@
+==Dutch==
+
+===Etymology===
+From {{inh|nl|dum|hûs}}.
+
+===Noun===
+{{nl-noun|n|-}}
+
+# {{lb|nl|dialectal}} [[house]]
+
+==German==
+
+===Pronunciation===
+* {{IPA|de|/haʊ̯s/}}
+
+===Etymology===
+From {{inh|de|gmh|hūs}}, from {{inh|de|goh|hūs}}.
+
+===Noun===
+{{de-noun|n,es,#er}}
+
+# [[house]], [[building]] {{gloss|a structure people live in}}
+#: {{uxi|de|Wir bauen ein '''Haus'''.|We are building a house.}}
+#: {{syn|de|Gebäude|Wohnhaus}}
+# {{lb|de|figurative}} [[home]], [[household]]
+# {{lb|de|business}} a [[firm]], a [[company]]
+
+====Synonyms====
+* {{l|de|Gebäude}}
+* {{l|de|Bau}}
+
+====Antonyms====
+* {{l|de|Hütte}}
+
+====Derived terms====
+* {{l|de|Hausbau}}
+
+==English==
+
+===Noun===
+{{en-noun}}
+
+# {{lb|en|rare}} A [[house]] in German-speaking contexts.
+
+====Translations====
+{{trans-top|a building}}
+* German: {{t+|de|Haus|n}}
+* French: {{t+|fr|maison|f}}
+* Chinese:
+*: Mandarin: {{t+|cmn|房子|tr=fángzi}}
+* Spanish: {{t+|es|casa|f}}
+{{trans-bottom}}

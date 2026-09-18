@@ -40,7 +40,9 @@ class ManifestTest(unittest.TestCase):
 
     def test_no_symlinks_in_plugin(self):
         for path in ROOT.rglob("*"):
-            if ".git" in path.parts:
+            # `.git` and the shell kit `tests/run.sh` clones for the QML
+            # checks are not part of the plugin.
+            if ".git" in path.parts or ".cache" in path.parts:
                 continue
             self.assertFalse(path.is_symlink(), f"symlink found: {path}")
 

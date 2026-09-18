@@ -106,10 +106,12 @@ class LocalSourceTest(TempEnv):
         self.assertEqual(res["antonyms"], ["small", "little"])
 
     def test_missing_file(self):
-        src = S.build({"id": "x", "driver": "local", "type": "dictionary", "path": "nope.json", "dataset": "wiktionary-de"})
+        # ecdict, not a Wiktionary: no web edition to fall back to.
+        src = S.build({"id": "x", "driver": "local", "type": "dictionary", "path": "nope.json", "dataset": "ecdict"})
         self.assertFalse(src.installed())
+        self.assertFalse(src.available())
         self.assertFalse(src.supports("lookup", "de"))
-        self.assertIn("omababel data install wiktionary-de", src.status()["error"])
+        self.assertIn("omababel data install ecdict", src.status()["error"])
         with self.assertRaises(SourceError):
             src.lookup("x", "de")
         empty = S.build({"id": "y", "driver": "local", "type": "dictionary"})

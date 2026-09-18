@@ -1,0 +1,28 @@
+== Haus ({{Sprache|Deutsch}}) ==
+=== {{Wortart|Substantiv|Deutsch}}, {{n}} ===
+
+{{Bedeutungen}}
+:[1] Gebäude, das Menschen zum Wohnen oder Arbeiten dient
+:[2] ''übertragen:'' die Bewohner eines Hauses
+:[3] ''Wirtschaft:'' ein Unternehmen
+
+{{Synonyme}}
+:[1] [[Gebäude]], [[Wohnhaus]], [[Bau]]
+:[2] [[Haushalt]]
+
+{{Gegenwörter}}
+:[1] [[Hütte]], [[Baracke]]
+
+{{Beispiele}}
+:[1] Wir bauen ein neues ''Haus''.
+
+{{Übersetzungen}}
+{{Ü-Tabelle|Ü-links=
+*{{en}}: {{Ü|en|house}}
+}}
+
+== Haus ({{Sprache|Englisch}}) ==
+=== {{Wortart|Substantiv|Englisch}} ===
+
+{{Bedeutungen}}
+:[1] selten für ein deutsches Haus

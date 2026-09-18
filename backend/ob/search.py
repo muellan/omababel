@@ -48,7 +48,7 @@ def coverage(cfg: Optional[SourcesConfig] = None) -> dict:
         mode = by_type.get(src.type)
         if not src.enabled or mode is None:
             continue
-        if src.kind == "local" and hasattr(src, "installed") and not src.installed():
+        if not src.available():
             continue
         if mode != "translate":
             langs = src.effective_languages()
@@ -125,7 +125,7 @@ def run(mode: str, query: str, lang: str, lang2: str = "", cfg: Optional[Sources
             continue
         if src.supports(mode, lang, lang2 if mode == "translate" else None):
             chosen.append(src)
-        elif src.kind == "local" and hasattr(src, "installed") and not src.installed():
+        elif not src.available():
             skipped.append({"id": src.id, "name": src.name, "reason": "not installed",
                             "dataset": getattr(src, "dataset", "")})
     out: Dict[str, object] = {

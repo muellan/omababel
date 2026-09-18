@@ -375,7 +375,10 @@ Item {
   function localInfo(row) {
     var st = localStatus[row.id]
     if (!st) return ""
-    if (!st.installed) return "not installed"
+    // A Wiktionary row whose dump is not downloaded yet is not dead: it
+    // asks the corresponding web edition instead (slower, one page at a
+    // time), and the Install button is still there to make it fast.
+    if (!st.installed) return st.note ? st.note : "not installed"
     return (st.entries ? st.entries.toLocaleString() + " entries" : "installed")
   }
 
