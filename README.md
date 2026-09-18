@@ -1,5 +1,7 @@
 # Omababel
 
+[![Built for Omarchy](assets/built-for-omarchy.svg)](https://github.com/tcballard/omarchy-badges)
+
 A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/)
 (Omarchy Quattro and later) that offers three modes:
 
@@ -16,7 +18,7 @@ A dictionary, thesaurus and translation panel for [Omarchy](https://omarchy.org/
   CC-CEDICT, ECDICT, ...), full-text translation services 
   (Google Translate, DeepL, Claude, Gemini, Grok, ...) between the two selected languages.
 
-![](preview.png)
+![](assets/preview.png)
 
 
 A note on speed: web sources and local dictionaries are usually queried in milliseconds,
