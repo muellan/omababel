@@ -1,5 +1,7 @@
-"""Acronym and abbreviation lookup: the three sites, and the bold initials."""
+"""Acronym and abbreviation lookup: the three sites, the bold initials and
+the AI source's acronym prompt."""
 
+import json
 import unittest
 
 from helpers import FakeResponse, TempEnv, fake_fetch, read_fixture
@@ -153,6 +155,41 @@ class BoldTest(unittest.TestCase):
         senses = result["results"][0]["entries"][0]["senses"]
         self.assertIn("<b>N</b>ational", senses[0]["gloss_html"])
         self.assertNotIn("<b>", senses[1]["gloss_html"])
+
+
+class AiAcronymTest(TempEnv):
+    def ai(self, reply):
+        src = S.build({"id": "ai", "driver": "ai", "type": "dictionary", "service": "claude",
+                       "transport": "cli"})
+        src._cli_call = lambda prompt: (self.prompts.append(prompt), json.dumps(reply))[1]
+        return src
+
+    def setUp(self):
+        super().setUp()
+        self.prompts = []
+
+    def test_an_all_caps_query_asks_for_expansions(self):
+        src = self.ai({"expansions": [
+            {"expansion": "National Aeronautics and Space Administration",
+             "meaning": "The civil space agency of the United States.", "domain": "Space"},
+            {"expansion": "", "meaning": "dropped"}]})
+        res = src.lookup("NASA", "en")
+        self.assertIn("acronym or abbreviation", self.prompts[0])
+        self.assertIn("expansions", self.prompts[0])
+        entry = res["entries"][0]
+        self.assertEqual(entry["pos"], "acronym")
+        self.assertEqual(len(entry["senses"]), 1)
+        self.assertEqual(entry["senses"][0]["acronym"], "NASA")
+        self.assertEqual(entry["senses"][0]["tags"], ["Space"])
+        self.assertIn("civil space agency", entry["senses"][0]["examples"][0])
+
+    def test_an_ordinary_word_keeps_the_ordinary_prompt(self):
+        src = self.ai({"explanation": "a building", "pos": "noun"})
+        res = src.lookup("Haus", "de")
+        self.assertIn("Explain the German word", self.prompts[0])
+        self.assertNotIn("acronym", self.prompts[0])
+        self.assertEqual(res["entries"][0]["senses"][0]["gloss"], "a building")
+        self.assertEqual(res["entries"][0]["senses"][0]["acronym"], "")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,7 @@ from typing import List, Optional, Tuple
 
 from .. import http, languages, paths
 from .. import results as R
+from .acronyms import is_all_caps
 from .base import Source, SourceError, register
 
 # service id -> (label, default CLI, default API endpoint, fallback model, key hint)
@@ -284,6 +285,8 @@ class AI(Source):
         word = word.strip()
         if not word:
             return {"entries": [], "url": ""}
+        if is_all_caps(word):
+            return self._acronym(word, lang)
         data = self._ask(
             f"Explain the {languages.name(lang)} word or phrase \"{word}\" for a dictionary entry.",
             'Answer with one JSON object and nothing else: {"explanation": "one succinct '
@@ -297,6 +300,40 @@ class AI(Source):
                         senses=[R.sense(explanation, examples=examples)],
                         lang=lang, extra={"model": self.model})
         return {"entries": [entry], "url": ""}
+
+    def _acronym(self, word: str, lang: str) -> dict:
+        """An all-uppercase term is an acronym far more often than a word.
+
+        Asking "explain the word NASA" gets an explanation of the agency;
+        asking what the letters stand for gets the expansions, which is what
+        the acronym dictionaries next to this row are answering too.
+        """
+        name = languages.name(lang)
+        data = self._ask(
+            f"Explain the acronym or abbreviation \"{word}\" as it is used in {name}.",
+            'Answer with one JSON object and nothing else: {"expansions": [{"expansion": '
+            '"what the letters stand for, written out in full", "meaning": "one short '
+            'sentence saying what it is", "domain": "the field it is used in, or empty"}]}. '
+            'At most 6 expansions, the most common first, and none you are not sure of. '
+            'Write the expansion in ' + name + ' where the acronym has one.')
+        senses = []
+        for item in data.get("expansions") or []:
+            if not isinstance(item, dict):
+                continue
+            expansion = R.clean(item.get("expansion", ""))
+            if not expansion:
+                continue
+            meaning = R.clean(item.get("meaning", ""))
+            domain = R.clean(item.get("domain", ""))
+            # The sentence goes on the example line: it reads as the gloss's
+            # second line, and it keeps the gloss itself exactly the string
+            # whose initials get printed in bold.
+            senses.append(R.sense(expansion, examples=[meaning] if meaning else [],
+                                  tags=[domain] if domain else [], acronym=word))
+        if not senses:
+            return {"entries": [], "url": ""}
+        return {"entries": [R.entry(word, pos="acronym", senses=senses, lang=lang,
+                                    extra={"model": self.model})], "url": ""}
 
     def thesaurus(self, word: str, lang: str) -> dict:
         word = word.strip()
