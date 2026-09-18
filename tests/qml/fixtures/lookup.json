@@ -52,22 +52,6 @@
   },
   {
    "source": {
-    "id": "allacronyms",
-    "name": "All Acronyms",
-    "type": "dictionary",
-    "driver": "allacronyms",
-    "kind": "remote",
-    "translation_mode": "word"
-   },
-   "ok": true,
-   "error": "",
-   "entries": [],
-   "url": "",
-   "count": 0,
-   "ms": 12
-  },
-  {
-   "source": {
     "id": "wiktionary-de",
     "name": "Wiktionary (German, English edition) · web",
     "type": "dictionary",

@@ -83,8 +83,8 @@ def default_sources() -> List[dict]:
                     url="https://acronyms.thefreedictionary.com/{word}", notes=acronym_note))
     rows.append(row("acronymfinder", "Acronym Finder", "dictionary", "acronymfinder",
                     url="https://www.acronymfinder.com/{word}.html", notes=acronym_note))
-    rows.append(row("allacronyms", "All Acronyms", "dictionary", "allacronyms",
-                    url="https://www.allacronyms.com/{word}", notes=acronym_note))
+    # rows.append(row("allacronyms", "All Acronyms", "dictionary", "allacronyms",
+    #                 url="https://www.allacronyms.com/{word}", notes=acronym_note))
     # ---- remote translators
     rows.append(row("leo", "LEO", "translator", "leo", url="https://dict.leo.org/", translation_mode="word"))
     rows.append(row("google-translate", "Google Translate", "translator", "google",

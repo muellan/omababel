@@ -65,7 +65,7 @@ class ManifestTest(unittest.TestCase):
 
     def test_readme_documents_the_acronym_and_wiktionary_sources(self):
         readme = re.sub(r"\s+", " ", (ROOT / "README.md").read_text(encoding="utf-8").lower())
-        for needle in ("acronyms.thefreedictionary.com", "acronymfinder.com", "allacronyms.com",
+        for needle in ("acronyms.thefreedictionary.com", "acronymfinder.com",
                        "looks like an acronym", "de.wiktionary.org"):
             self.assertIn(needle, readme, needle)
 

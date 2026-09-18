@@ -108,7 +108,7 @@ class DriverTest(TempEnv):
     def test_the_three_built_in_rows_are_enabled(self):
         from ob.config import default_sources
         rows = {r["id"]: r for r in default_sources()}
-        for id in ("tfd-acronyms", "acronymfinder", "allacronyms"):
+        for id in ("tfd-acronyms", "acronymfinder"):
             self.assertIn(id, rows)
             self.assertTrue(rows[id]["enabled"], id)
             self.assertEqual(rows[id]["type"], "dictionary")

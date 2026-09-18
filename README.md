@@ -252,7 +252,6 @@ tunnelled through the proxy so the handshake is still with the site.
 | [Thesaurus.com](https://www.thesaurus.com/)                             | thesaurus (en)              |                                                                                                                                                              |
 | [Acronyms (TheFreeDictionary)](https://acronyms.thefreedictionary.com/) | dictionary (any)            | Acronyms and abbreviations; see [Acronyms](#acronyms-and-abbreviations)                                                                                      |
 | [Acronym Finder](https://www.acronymfinder.com/)                        | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
-| [All Acronyms](https://www.allacronyms.com/)                            | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
 | [Wiktionary](https://www.wiktionary.org/)                               | all three modes             | Used automatically while the downloadable Wiktionary dataset of a row is not installed; see [Local Dictionaries](#local-dictionaries-downloaded-on-demand)   |
 | [LEO](https://www.leo.org/)                                             | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
 | Google Translate                                                        | translator, text            | The key-less endpoint rate-limits after a few requests; add a Cloud Translation API key for steady use                                                       |
@@ -267,7 +266,7 @@ update or report it. Using them is subject to the sites' terms.
 
 ### Acronyms and Abbreviations
 
-Three acronym dictionaries (see sources table above) ship **enabled**, 
+A few acronym dictionaries (see sources table above) ship **enabled**, 
 as ordinary dictionary sources.
 Each result card lists what the acronym can stand for, one
 meaning per line with the subject area next to it where the site gives one,
