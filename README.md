@@ -171,9 +171,9 @@ sources with this property". All of them start engaged; switching *Disabled*
 off hides the disabled sources, leaving *Enabled* and *Thesaurus* on shows
 the enabled thesaurus sources, and **Reset filter** puts everything back. The
 dropdown next to them narrows by kind (AI services, web sources, local
-dictionaries, Wiktionary, Freedict, with or without a stored key). The result of the last action — a test, an install, a
-save — sits in its own strip above the list and stays there while the list
-scrolls.
+dictionaries, Wiktionary, Freedict, with or without a stored key).
+The result of the last action (a test, an install, a save)
+sits in its own strip above the list and stays there while the list scrolls.
 
 **Reordering** decides which source answers first. Click selects a row,
 `Ctrl+click` adds or removes one, `Shift+click` takes a range, and the
@@ -244,20 +244,20 @@ tunnelled through the proxy so the handshake is still with the site.
 
 ### Built-in Remote Sources
 
-| Source                                              | Type                        | Notes                                                                                                                                                        |
-|-----------------------------------------------------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [Duden](https://www.duden.de/)                      | dictionary (de)             | Meanings, examples, grammar, origin, synonyms                                                                                                                |
-| [Merriam-Webster](https://www.merriam-webster.com/) | dictionary + thesaurus (en) | Optional free [dictionaryapi.com](https://dictionaryapi.com/) key (one per reference)                                                                        |
-| [Oxford English Dictionary](https://www.oed.com/)   | dictionary (en)             | Subscription site - **disabled by default**; free access only yields search snippets, an OED Researcher API credential (`app_id:app_key`) gives full entries |
-| [Thesaurus.com](https://www.thesaurus.com/)         | thesaurus (en)              |                                                                                                                                                              |
-| [Acronyms (TheFreeDictionary)](https://acronyms.thefreedictionary.com/) | dictionary (any) | Acronyms and abbreviations; see [Acronyms](#acronyms-and-abbreviations)                                                                 |
-| [Acronym Finder](https://www.acronymfinder.com/)    | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
-| [All Acronyms](https://www.allacronyms.com/)        | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
-| [Wiktionary](https://www.wiktionary.org/)           | all three modes             | Used automatically while the downloadable Wiktionary dataset of a row is not installed; see [Local Dictionaries](#local-dictionaries-downloaded-on-demand)   |
-| [LEO](https://www.leo.org/)                         | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
-| Google Translate                                    | translator, text            | The key-less endpoint rate-limits after a few requests; add a Cloud Translation API key for steady use                                                       |
-| DeepL                                               | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
-| AI service                                          | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                             |
+| Source                                                                  | Type                        | Notes                                                                                                                                                        |
+|-------------------------------------------------------------------------|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [Duden](https://www.duden.de/)                                          | dictionary (de)             | Meanings, examples, grammar, origin, synonyms                                                                                                                |
+| [Merriam-Webster](https://www.merriam-webster.com/)                     | dictionary + thesaurus (en) | Optional free [dictionaryapi.com](https://dictionaryapi.com/) key (one per reference)                                                                        |
+| [Oxford English Dictionary](https://www.oed.com/)                       | dictionary (en)             | Subscription site - **disabled by default**; free access only yields search snippets, an OED Researcher API credential (`app_id:app_key`) gives full entries |
+| [Thesaurus.com](https://www.thesaurus.com/)                             | thesaurus (en)              |                                                                                                                                                              |
+| [Acronyms (TheFreeDictionary)](https://acronyms.thefreedictionary.com/) | dictionary (any)            | Acronyms and abbreviations; see [Acronyms](#acronyms-and-abbreviations)                                                                                      |
+| [Acronym Finder](https://www.acronymfinder.com/)                        | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
+| [All Acronyms](https://www.allacronyms.com/)                            | dictionary (any)            | Acronyms and abbreviations                                                                                                                                   |
+| [Wiktionary](https://www.wiktionary.org/)                               | all three modes             | Used automatically while the downloadable Wiktionary dataset of a row is not installed; see [Local Dictionaries](#local-dictionaries-downloaded-on-demand)   |
+| [LEO](https://www.leo.org/)                                             | translator, word            | German ↔ English/French/Spanish/Italian/Chinese/Russian/Portuguese/Polish                                                                                    |
+| Google Translate                                                        | translator, text            | The key-less endpoint rate-limits after a few requests; add a Cloud Translation API key for steady use                                                       |
+| DeepL                                                                   | translator, text            | **Disabled by default** (the key-less endpoint rate-limits within a few requests); add a DeepL API key (free keys end in `:fx`) and enable it                |
+| AI service                                                              | all three modes             | Claude, ChatGPT, Grok, Gemini or Muse - **disabled by default**; see [AI Services](#ai-services)                                                             |
 
 The web sources are scraped from the public pages (like a browser would).
 Page layouts change; when a source stops returning results, check for a plugin
@@ -267,12 +267,11 @@ update or report it. Using them is subject to the sites' terms.
 
 ### Acronyms and Abbreviations
 
-Three acronym dictionaries - [acronyms.thefreedictionary.com](https://acronyms.thefreedictionary.com/),
-[acronymfinder.com](https://www.acronymfinder.com/) and
-[allacronyms.com](https://www.allacronyms.com/) - ship **enabled**, as ordinary
-dictionary sources. Each result card lists what the acronym can stand for, one
-meaning per line with the subject area next to it where the site gives one, and
-the letters the expansion is built from in **bold**:
+Three acronym dictionaries (see sources table above) ship **enabled**, 
+as ordinary dictionary sources.
+Each result card lists what the acronym can stand for, one
+meaning per line with the subject area next to it where the site gives one,
+and the letters the expansion is built from in **bold**:
 
 ```
 NASA
@@ -281,20 +280,12 @@ NASA
 ```
 
 They are only asked when the search term **looks like an acronym**: a single
-token of at most 12 characters, mostly capitals or digits - `NASA`, `PhD`,
-`B2B`, `Wi-Fi` yes, `Haus` and `nasa` no. So write acronyms in capitals; every
-ordinary word would otherwise cost three more requests and three more empty
-cards. The rows carry no language, since an acronym is not a language's
-property and the sites list international ones.
+token of at most 12 characters, mostly capitals or digits, so `NASA`, `PhD`,
+`B2B`, `Wi-Fi` are treated as acronym, `Haus` and `nasa` are not.
 
 An **all-uppercase** term also changes what an enabled AI row is asked: instead
 of explaining a word it is asked what the letters stand for (see
 [AI Services](#ai-services)).
-
-The bold letters are found by walking the expansion and matching each letter of
-the acronym at a word start or at a capital inside a word, so `HTTP` marks
-**H**yper**T**ext **T**ransfer **P**rotocol. An expansion that does not spell
-the acronym out is left unmarked rather than marked in the wrong places.
 
 
 
