@@ -2,168 +2,234 @@
  "status": {
   "wiktionary-de": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-de",
-   "path": "/home/user/.omababel/data/wiktionary-de.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-de"
   },
   "wiktionary-de-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-de",
-   "path": "/home/user/.omababel/data/wiktionary-de.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-de"
   },
   "wiktionary-de-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-de",
-   "path": "/home/user/.omababel/data/wiktionary-de.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-de"
   },
   "wiktionary-de-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-de-native",
-   "path": "/home/user/.omababel/data/wiktionary-de-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de-native.sqlite",
+   "fallback": "de",
+   "note": "not installed - querying de.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-de-native"
   },
   "wiktionary-de-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-de-native",
-   "path": "/home/user/.omababel/data/wiktionary-de-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-de-native.sqlite",
+   "fallback": "de",
+   "note": "not installed - querying de.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-de-native"
   },
   "wiktionary-en": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-en",
-   "path": "/home/user/.omababel/data/wiktionary-en.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-en.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-en"
   },
   "wiktionary-en-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-en",
-   "path": "/home/user/.omababel/data/wiktionary-en.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-en.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-en"
   },
   "wiktionary-en-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-en",
-   "path": "/home/user/.omababel/data/wiktionary-en.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-en.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-en"
   },
   "wiktionary-zh": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-zh",
-   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-zh"
   },
   "wiktionary-zh-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-zh",
-   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-zh"
   },
   "wiktionary-zh-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-zh",
-   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-zh"
   },
   "wiktionary-zh-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-zh-native",
-   "path": "/home/user/.omababel/data/wiktionary-zh-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh-native.sqlite",
+   "fallback": "zh",
+   "note": "not installed - querying zh.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-zh-native"
   },
   "wiktionary-zh-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-zh-native",
-   "path": "/home/user/.omababel/data/wiktionary-zh-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-zh-native.sqlite",
+   "fallback": "zh",
+   "note": "not installed - querying zh.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-zh-native"
   },
   "wiktionary-fr": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-fr",
-   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-fr"
   },
   "wiktionary-fr-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-fr",
-   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-fr"
   },
   "wiktionary-fr-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-fr",
-   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-fr"
   },
   "wiktionary-fr-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-fr-native",
-   "path": "/home/user/.omababel/data/wiktionary-fr-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr-native.sqlite",
+   "fallback": "fr",
+   "note": "not installed - querying fr.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-fr-native"
   },
   "wiktionary-fr-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-fr-native",
-   "path": "/home/user/.omababel/data/wiktionary-fr-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-fr-native.sqlite",
+   "fallback": "fr",
+   "note": "not installed - querying fr.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-fr-native"
   },
   "wiktionary-es": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-es",
-   "path": "/home/user/.omababel/data/wiktionary-es.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-es"
   },
   "wiktionary-es-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-es",
-   "path": "/home/user/.omababel/data/wiktionary-es.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-es"
   },
   "wiktionary-es-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-es",
-   "path": "/home/user/.omababel/data/wiktionary-es.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-es"
   },
   "wiktionary-es-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-es-native",
-   "path": "/home/user/.omababel/data/wiktionary-es-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es-native.sqlite",
+   "fallback": "es",
+   "note": "not installed - querying es.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-es-native"
   },
   "wiktionary-es-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-es-native",
-   "path": "/home/user/.omababel/data/wiktionary-es-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-es-native.sqlite",
+   "fallback": "es",
+   "note": "not installed - querying es.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-es-native"
   },
   "wiktionary-pt": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-pt",
-   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-pt"
   },
   "wiktionary-pt-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-pt",
-   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-pt"
   },
   "wiktionary-pt-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-pt",
-   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-pt"
   },
   "wiktionary-pt-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-pt-native",
-   "path": "/home/user/.omababel/data/wiktionary-pt-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt-native.sqlite",
+   "fallback": "pt",
+   "note": "not installed - querying pt.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-pt-native"
   },
   "wiktionary-pt-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-pt-native",
-   "path": "/home/user/.omababel/data/wiktionary-pt-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-pt-native.sqlite",
+   "fallback": "pt",
+   "note": "not installed - querying pt.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-pt-native"
   },
   "wiktionary-ja": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-ja",
-   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-ja"
   },
   "wiktionary-ja-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-ja",
-   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-ja"
   },
   "wiktionary-ja-translator": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-ja",
-   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja.sqlite",
+   "fallback": "en",
+   "note": "not installed - querying en.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-ja"
   },
   "wiktionary-ja-native": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-ja-native",
-   "path": "/home/user/.omababel/data/wiktionary-ja-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja-native.sqlite",
+   "fallback": "ja",
+   "note": "not installed - querying ja.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-ja-native"
   },
   "wiktionary-ja-native-thesaurus": {
    "installed": false,
-   "error": "run: omababel data install wiktionary-ja-native",
-   "path": "/home/user/.omababel/data/wiktionary-ja-native.sqlite"
+   "path": "/home/user/.omababel/data/wiktionary-ja-native.sqlite",
+   "fallback": "ja",
+   "note": "not installed - querying ja.wiktionary.org",
+   "hint": "run: omababel data install wiktionary-ja-native"
   },
   "freedict-deu-eng": {
    "path": "/home/user/.omababel/data/freedict-deu-eng.sqlite",
@@ -377,10 +443,14 @@
  },
  "coverage": {
   "lookup": {
-   "any": false,
+   "any": true,
    "langs": [
     "de",
     "en",
+    "es",
+    "fr",
+    "ja",
+    "pt",
     "zh"
    ]
   },
@@ -388,7 +458,12 @@
    "any": false,
    "langs": [
     "de",
-    "en"
+    "en",
+    "es",
+    "fr",
+    "ja",
+    "pt",
+    "zh"
    ]
   },
   "translate": {
@@ -399,6 +474,7 @@
     "es",
     "fr",
     "it",
+    "ja",
     "pl",
     "pt",
     "ru",
@@ -406,42 +482,328 @@
    ],
    "pairs": {
     "de": [
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
+     "el",
      "en",
+     "eo",
      "es",
+     "et",
+     "fa",
+     "fi",
      "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
      "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
      "pl",
      "pt",
+     "ro",
      "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
      "zh"
     ],
     "en": [
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
      "de",
+     "el",
+     "eo",
+     "es",
+     "et",
+     "fa",
+     "fi",
      "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "pt",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
      "zh"
     ],
     "fr": [
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
      "de",
-     "en"
+     "el",
+     "en",
+     "eo",
+     "es",
+     "et",
+     "fa",
+     "fi",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "pt",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
+     "zh"
     ],
     "es": [
-     "de"
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
+     "de",
+     "el",
+     "en",
+     "eo",
+     "et",
+     "fa",
+     "fi",
+     "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "pt",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
+     "zh"
     ],
     "it": [
      "de"
     ],
     "zh": [
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
      "de",
-     "en"
+     "el",
+     "en",
+     "eo",
+     "es",
+     "et",
+     "fa",
+     "fi",
+     "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "pt",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi"
     ],
     "ru": [
      "de"
     ],
     "pt": [
-     "de"
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
+     "de",
+     "el",
+     "en",
+     "eo",
+     "es",
+     "et",
+     "fa",
+     "fi",
+     "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ja",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
+     "zh"
     ],
     "pl": [
      "de"
+    ],
+    "ja": [
+     "ar",
+     "bg",
+     "ca",
+     "cs",
+     "da",
+     "de",
+     "el",
+     "en",
+     "eo",
+     "es",
+     "et",
+     "fa",
+     "fi",
+     "fr",
+     "ga",
+     "he",
+     "hi",
+     "hr",
+     "hu",
+     "id",
+     "is",
+     "it",
+     "ko",
+     "la",
+     "lt",
+     "lv",
+     "ms",
+     "nb",
+     "nl",
+     "pl",
+     "pt",
+     "ro",
+     "ru",
+     "sk",
+     "sl",
+     "sr",
+     "sv",
+     "sw",
+     "th",
+     "tr",
+     "uk",
+     "vi",
+     "zh"
     ]
    }
   }

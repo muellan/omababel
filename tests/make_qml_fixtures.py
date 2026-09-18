@@ -91,6 +91,27 @@ def main() -> None:
         "url": "https://translate.google.com/?sl=en&tl=de&text=house", "alternatives": ["Das Gebäude"],
         "alternatives_html": ['<a href="w:Das">Das</a> <a href="w:Geb%C3%A4ude">Gebäude</a>'], "count": 2, "ms": 240})
     state = op("state.get")
+
+    # An acronym card, built from the same scrape fixture the python tests
+    # use.  It is the one result the panel prints bold text inside, so the
+    # harness should have one to render; the sites cannot be reached from
+    # here, hence the hand-assembled card rather than another `op("search")`.
+    from ob import render                                              # noqa: E402
+    from ob.sources.acronyms import FreeDictionaryAcronyms, to_entries  # noqa: E402
+    acronym_url = "https://acronyms.thefreedictionary.com/NASA"
+    acronym_card = {
+        "source": {"id": "tfd-acronyms", "name": "Acronyms (TheFreeDictionary)",
+                   "type": "dictionary", "driver": "tfd-acronyms", "kind": "remote",
+                   "translation_mode": ""},
+        "ok": True, "error": "", "url": acronym_url, "ms": 180,
+        "entries": to_entries("NASA", FreeDictionaryAcronyms.parse(
+            (fixtures / "tfd-acronyms-nasa.html").read_text(encoding="utf-8"), "NASA"),
+            url=acronym_url),
+    }
+    acronym_card["count"] = len(acronym_card["entries"])
+    render.decorate_lookup({"results": [acronym_card]})
+    lookup["results"].append(acronym_card)
+
     datasets = op("data.list")
     status = op("sources.status")
 

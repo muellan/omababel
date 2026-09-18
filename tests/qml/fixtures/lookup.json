@@ -20,6 +20,84 @@
   },
   {
    "source": {
+    "id": "tfd-acronyms",
+    "name": "Acronyms (TheFreeDictionary)",
+    "type": "dictionary",
+    "driver": "tfd-acronyms",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "entries": [],
+   "url": "",
+   "count": 0,
+   "ms": 12
+  },
+  {
+   "source": {
+    "id": "acronymfinder",
+    "name": "Acronym Finder",
+    "type": "dictionary",
+    "driver": "acronymfinder",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "entries": [],
+   "url": "",
+   "count": 0,
+   "ms": 12
+  },
+  {
+   "source": {
+    "id": "allacronyms",
+    "name": "All Acronyms",
+    "type": "dictionary",
+    "driver": "allacronyms",
+    "kind": "remote",
+    "translation_mode": "word"
+   },
+   "ok": true,
+   "error": "",
+   "entries": [],
+   "url": "",
+   "count": 0,
+   "ms": 12
+  },
+  {
+   "source": {
+    "id": "wiktionary-de",
+    "name": "Wiktionary (German, English edition) · web",
+    "type": "dictionary",
+    "driver": "local",
+    "kind": "remote",
+    "translation_mode": "word",
+    "fallback": "web"
+   },
+   "ok": false,
+   "error": "Wiktionary (German, English edition): offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 12
+  },
+  {
+   "source": {
+    "id": "wiktionary-de-native",
+    "name": "Wiktionary (German edition) · web",
+    "type": "dictionary",
+    "driver": "local",
+    "kind": "remote",
+    "translation_mode": "word",
+    "fallback": "web"
+   },
+   "ok": false,
+   "error": "Wiktionary (German edition): offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 12
+  },
+  {
+   "source": {
     "id": "mini-de",
     "name": "Mini German",
     "type": "dictionary",
@@ -49,6 +127,7 @@
        "antonyms": [],
        "tags": [],
        "label": "",
+       "acronym": "",
        "gloss_html": "<a href=\"w:Geb%C3%A4ude\">Gebäude</a>, <a href=\"w:das\">das</a> <a href=\"w:Menschen\">Menschen</a> <a href=\"w:zum\">zum</a> <a href=\"w:Wohnen\">Wohnen</a> <a href=\"w:dient\">dient</a>",
        "examples_html": [
         "<a href=\"w:ein\">ein</a> <a href=\"w:gro%C3%9Fes\">großes</a> <a href=\"w:Haus\">Haus</a>"
@@ -66,6 +145,7 @@
        "antonyms": [],
        "tags": [],
        "label": "",
+       "acronym": "",
        "gloss_html": "<a href=\"w:Familie\">Familie</a>, <a href=\"w:Geschlecht\">Geschlecht</a>",
        "examples_html": [],
        "synonyms_html": "<a href=\"w:Dynastie\">Dynastie</a>",
@@ -82,87 +162,94 @@
    "url": "",
    "count": 1,
    "ms": 12
+  },
+  {
+   "source": {
+    "id": "tfd-acronyms",
+    "name": "Acronyms (TheFreeDictionary)",
+    "type": "dictionary",
+    "driver": "tfd-acronyms",
+    "kind": "remote",
+    "translation_mode": ""
+   },
+   "ok": true,
+   "error": "",
+   "url": "https://acronyms.thefreedictionary.com/NASA",
+   "ms": 12,
+   "entries": [
+    {
+     "headword": "NASA",
+     "pos": "acronym",
+     "pronunciation": "",
+     "lang": "",
+     "senses": [
+      {
+       "gloss": "National Aeronautics and Space Administration",
+       "examples": [],
+       "synonyms": [],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "acronym": "NASA",
+       "gloss_html": "<a href=\"w:National\"><b>N</b>ational</a> <a href=\"w:Aeronautics\"><b>A</b>eronautics</a> <a href=\"w:and\">and</a> <a href=\"w:Space\"><b>S</b>pace</a> <a href=\"w:Administration\"><b>A</b>dministration</a>",
+       "examples_html": [],
+       "synonyms_html": "",
+       "antonyms_html": "",
+       "tags_html": []
+      },
+      {
+       "gloss": "North American Saxophone Alliance",
+       "examples": [],
+       "synonyms": [],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "acronym": "NASA",
+       "gloss_html": "<a href=\"w:North\"><b>N</b>orth</a> <a href=\"w:American\"><b>A</b>merican</a> <a href=\"w:Saxophone\"><b>S</b>axophone</a> <a href=\"w:Alliance\"><b>A</b>lliance</a>",
+       "examples_html": [],
+       "synonyms_html": "",
+       "antonyms_html": "",
+       "tags_html": []
+      },
+      {
+       "gloss": "National Auto Sport Association",
+       "examples": [],
+       "synonyms": [],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "acronym": "NASA",
+       "gloss_html": "<a href=\"w:National\"><b>N</b>ational</a> <a href=\"w:Auto\"><b>A</b>uto</a> <a href=\"w:Sport\"><b>S</b>port</a> <a href=\"w:Association\"><b>A</b>ssociation</a>",
+       "examples_html": [],
+       "synonyms_html": "",
+       "antonyms_html": "",
+       "tags_html": []
+      },
+      {
+       "gloss": "Never A Straight Answer (humorous)",
+       "examples": [],
+       "synonyms": [],
+       "antonyms": [],
+       "tags": [],
+       "label": "",
+       "acronym": "NASA",
+       "gloss_html": "<a href=\"w:Never\"><b>N</b>ever</a> <a href=\"w:A\"><b>A</b></a> <a href=\"w:Straight\"><b>S</b>traight</a> <a href=\"w:Answer\"><b>A</b>nswer</a> (<a href=\"w:humorous\">humorous</a>)",
+       "examples_html": [],
+       "synonyms_html": "",
+       "antonyms_html": "",
+       "tags_html": []
+      }
+     ],
+     "extra": {},
+     "url": "https://acronyms.thefreedictionary.com/NASA",
+     "headword_html": "<a href=\"w:NASA\">NASA</a>",
+     "extra_html": []
+    }
+   ],
+   "count": 1
   }
  ],
  "skipped": [
-  {
-   "id": "wiktionary-de",
-   "name": "Wiktionary (German, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-de"
-  },
-  {
-   "id": "wiktionary-de-native",
-   "name": "Wiktionary (German edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-de-native"
-  },
-  {
-   "id": "wiktionary-en",
-   "name": "Wiktionary (English, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-en"
-  },
-  {
-   "id": "wiktionary-zh",
-   "name": "Wiktionary (Chinese (Mandarin), English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-zh"
-  },
-  {
-   "id": "wiktionary-zh-native",
-   "name": "Wiktionary (Chinese (Mandarin) edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-zh-native"
-  },
-  {
-   "id": "wiktionary-fr",
-   "name": "Wiktionary (French, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-fr"
-  },
-  {
-   "id": "wiktionary-fr-native",
-   "name": "Wiktionary (French edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-fr-native"
-  },
-  {
-   "id": "wiktionary-es",
-   "name": "Wiktionary (Spanish, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-es"
-  },
-  {
-   "id": "wiktionary-es-native",
-   "name": "Wiktionary (Spanish edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-es-native"
-  },
-  {
-   "id": "wiktionary-pt",
-   "name": "Wiktionary (Portuguese, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-pt"
-  },
-  {
-   "id": "wiktionary-pt-native",
-   "name": "Wiktionary (Portuguese edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-pt-native"
-  },
-  {
-   "id": "wiktionary-ja",
-   "name": "Wiktionary (Japanese, English edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-ja"
-  },
-  {
-   "id": "wiktionary-ja-native",
-   "name": "Wiktionary (Japanese edition)",
-   "reason": "not installed",
-   "dataset": "wiktionary-ja-native"
-  },
   {
    "id": "ecdict",
    "name": "ECDICT",

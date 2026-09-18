@@ -1,9 +1,10 @@
-"""Acronym and abbreviation lookup: the three sites and what they answer."""
+"""Acronym and abbreviation lookup: the three sites, and the bold initials."""
 
 import unittest
 
 from helpers import FakeResponse, TempEnv, fake_fetch, read_fixture
 
+from ob import render
 from ob import sources as S
 from ob.sources import acronyms as A
 
@@ -117,6 +118,41 @@ class DriverTest(TempEnv):
         self.assertTrue(src.supports("lookup", "de"))
         self.assertTrue(src.supports("lookup", "ja"))
         self.assertFalse(src.supports("thesaurus", "en"))
+
+
+class BoldTest(unittest.TestCase):
+    def test_the_initials_are_marked(self):
+        text = "National Aeronautics and Space Administration"
+        self.assertEqual(sorted(render.acronym_bold(text, "NASA")), [0, 9, 25, 31])
+
+    def test_a_capital_inside_a_word_counts(self):
+        self.assertEqual(sorted(render.acronym_bold("HyperText Transfer Protocol", "HTTP")),
+                         [0, 5, 10, 19])
+
+    def test_an_expansion_that_does_not_fit_is_left_alone(self):
+        self.assertEqual(render.acronym_bold("Something Entirely Different", "NASA"), set())
+        self.assertEqual(render.acronym_bold("", "NASA"), set())
+        self.assertEqual(render.acronym_bold("National Aeronautics", ""), set())
+
+    def test_linkify_puts_the_bold_inside_the_link(self):
+        html = render.linkify("National Aeronautics", bold={0, 9})
+        self.assertIn('<a href="w:National"><b>N</b>ational</a>', html)
+        self.assertIn('<a href="w:Aeronautics"><b>A</b>eronautics</a>', html)
+
+    def test_bold_is_escaped_like_everything_else(self):
+        html = render.linkify("<b>x</b> & y", bold={0})
+        self.assertNotIn("<b>x", html)
+        self.assertIn("&amp;", html)
+
+    def test_decorate_uses_the_senses_acronym(self):
+        result = {"mode": "lookup", "results": [{"entries": [
+            {"headword": "NASA", "senses": [
+                {"gloss": "National Aeronautics and Space Administration", "acronym": "NASA"},
+                {"gloss": "plain gloss", "acronym": ""}]}]}]}
+        render.decorate(result)
+        senses = result["results"][0]["entries"][0]["senses"]
+        self.assertIn("<b>N</b>ational", senses[0]["gloss_html"])
+        self.assertNotIn("<b>", senses[1]["gloss_html"])
 
 
 if __name__ == "__main__":

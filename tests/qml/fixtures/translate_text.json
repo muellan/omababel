@@ -36,6 +36,22 @@
   },
   {
    "source": {
+    "id": "wiktionary-en-translator",
+    "name": "Wiktionary translations (English) · web",
+    "type": "translator",
+    "driver": "local",
+    "kind": "remote",
+    "translation_mode": "word",
+    "fallback": "web"
+   },
+   "ok": false,
+   "error": "Wiktionary translations (English): offline mode (OMABABEL_OFFLINE is set)",
+   "count": 0,
+   "ms": 12,
+   "alternatives_html": []
+  },
+  {
+   "source": {
     "id": "freedict-deu-eng",
     "name": "FreeDict German → English",
     "type": "translator",
@@ -152,48 +168,6 @@
   }
  ],
  "skipped": [
-  {
-   "id": "wiktionary-de-translator",
-   "name": "Wiktionary translations (German)",
-   "reason": "not installed",
-   "dataset": "wiktionary-de"
-  },
-  {
-   "id": "wiktionary-en-translator",
-   "name": "Wiktionary translations (English)",
-   "reason": "not installed",
-   "dataset": "wiktionary-en"
-  },
-  {
-   "id": "wiktionary-zh-translator",
-   "name": "Wiktionary translations (Chinese (Mandarin))",
-   "reason": "not installed",
-   "dataset": "wiktionary-zh"
-  },
-  {
-   "id": "wiktionary-fr-translator",
-   "name": "Wiktionary translations (French)",
-   "reason": "not installed",
-   "dataset": "wiktionary-fr"
-  },
-  {
-   "id": "wiktionary-es-translator",
-   "name": "Wiktionary translations (Spanish)",
-   "reason": "not installed",
-   "dataset": "wiktionary-es"
-  },
-  {
-   "id": "wiktionary-pt-translator",
-   "name": "Wiktionary translations (Portuguese)",
-   "reason": "not installed",
-   "dataset": "wiktionary-pt"
-  },
-  {
-   "id": "wiktionary-ja-translator",
-   "name": "Wiktionary translations (Japanese)",
-   "reason": "not installed",
-   "dataset": "wiktionary-ja"
-  },
   {
    "id": "freedict-eng-deu",
    "name": "FreeDict English → German",

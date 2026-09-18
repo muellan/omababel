@@ -11,7 +11,7 @@ from __future__ import annotations
 import html
 import re
 import urllib.parse
-from typing import Iterable
+from typing import Iterable, List, Optional, Set
 
 # letters/digits/marks plus in-word apostrophes and hyphens; CJK runs count
 # as one token (they have no spaces anyway).
@@ -28,16 +28,22 @@ def href_word(href: str) -> str:
     return ""
 
 
-def linkify(text: str, css_class: str = "") -> str:
-    """Escape ``text`` and wrap each word in a link."""
+def linkify(text: str, css_class: str = "", bold: Optional[Set[int]] = None) -> str:
+    """Escape ``text`` and wrap each word in a link.
+
+    ``bold`` holds character offsets to print in bold -- the letters an
+    acronym is built from (see :func:`acronym_bold`).  They are wrapped
+    *inside* the link so a click still hits the whole word.
+    """
     if not text:
         return ""
+    bold = bold or set()
     out = []
     pos = 0
     for m in _TOKEN.finditer(text):
         out.append(html.escape(text[pos:m.start()]))
         word = m.group(0).strip("-'’")
-        token = html.escape(m.group(0))
+        token = _emphasise(text, m.start(), m.end(), bold)
         if word:
             out.append(f'<a href="{word_href(word)}">{token}</a>')
         else:
@@ -45,6 +51,49 @@ def linkify(text: str, css_class: str = "") -> str:
         pos = m.end()
     out.append(html.escape(text[pos:]))
     return "".join(out).replace("\n", "<br>")
+
+
+def _emphasise(text: str, start: int, end: int, bold: Set[int]) -> str:
+    """The escaped slice ``text[start:end]`` with ``bold`` offsets in ``<b>``."""
+    if not any(i in bold for i in range(start, end)):
+        return html.escape(text[start:end])
+    out = []
+    for i in range(start, end):
+        char = html.escape(text[i])
+        out.append(f"<b>{char}</b>" if i in bold else char)
+    return "".join(out)
+
+
+# A letter of an acronym may start a word, or sit inside one at a capital
+# ("HyperText Transfer Protocol" spells HTTP with two letters from one word).
+_WORD_START = re.compile(r"(?<![\w'’])[\w]", re.UNICODE)
+
+
+def acronym_bold(expansion: str, acronym: str) -> Set[int]:
+    """Where ``acronym``'s letters sit in ``expansion``.
+
+    Greedy, left to right, and all or nothing: if the expansion does not
+    actually spell the acronym out (a site's "see also" row, an expansion in
+    another word order) nothing is highlighted rather than something wrong.
+    """
+    letters = [ch for ch in str(acronym or "") if ch.isalnum()]
+    if not letters or not expansion:
+        return set()
+    candidates = [m.start() for m in _WORD_START.finditer(expansion)]
+    candidates += [i for i, ch in enumerate(expansion)
+                   if i and ch.isupper() and expansion[i - 1].isalpha()]
+    candidates = sorted(set(candidates))
+    found: List[int] = []
+    at = 0
+    for letter in letters:
+        target = letter.casefold()
+        while at < len(candidates) and expansion[candidates[at]].casefold() != target:
+            at += 1
+        if at >= len(candidates):
+            return set()
+        found.append(candidates[at])
+        at += 1
+    return set(found)
 
 
 def _join(words: Iterable[str]) -> str:
@@ -56,7 +105,10 @@ def decorate_lookup(result: dict) -> None:
         for e in r.get("entries", []):
             e["headword_html"] = linkify(e.get("headword", ""))
             for s in e.get("senses", []):
-                s["gloss_html"] = linkify(s.get("gloss", ""))
+                # An acronym sense prints the letters its expansion is built
+                # from in bold: "**N**ational **A**eronautics and ...".
+                s["gloss_html"] = linkify(s.get("gloss", ""),
+                                          bold=acronym_bold(s.get("gloss", ""), s.get("acronym", "")))
                 s["examples_html"] = [linkify(x) for x in s.get("examples", [])]
                 s["synonyms_html"] = _join(s.get("synonyms", []))
                 s["antonyms_html"] = _join(s.get("antonyms", []))
