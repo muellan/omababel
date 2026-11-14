@@ -25,9 +25,16 @@ class ManifestTest(unittest.TestCase):
         self.assertEqual(m["id"], "muellan.omababel")
         self.assertIsInstance(m["kinds"], list)
         self.assertTrue(m["kinds"])
-        self.assertEqual(m["kinds"], ["panel"])
+        self.assertEqual(m["kinds"], ["panel", "bar-widget"])
         self.assertTrue(m.get("keepLoaded"))
         self.assertEqual(m.get("license"), "MIT")
+        self.assertEqual(m["entryPoints"].get("barWidget"), "BarIcon.qml")
+        widget = m.get("barWidget")
+        self.assertIsInstance(widget, dict)
+        self.assertEqual(widget.get("displayName"), "Omababel")
+        self.assertEqual(widget.get("category"), "Tools")
+        self.assertFalse(widget.get("allowMultiple"))
+        self.assertEqual(widget.get("defaultSection"), "right")
 
     def test_entry_points_exist_and_are_safe(self):
         eps = self.manifest["entryPoints"]
@@ -184,6 +191,23 @@ class QmlStructureTest(unittest.TestCase):
             src = self.strip(f.read_text(encoding="utf-8"))
             for open_ch, close_ch in (("{", "}"), ("(", ")"), ("[", "]")):
                 self.assertEqual(src.count(open_ch), src.count(close_ch), f"{f.name}: unbalanced {open_ch}{close_ch}")
+
+    def test_the_bar_icon_toggles_the_panel(self):
+        """The icon is a separate entry point. A click asks the shell to
+        toggle this plugin — the path a keybinding already takes, which
+        opens and closes the panel — and falls back to the IPC command a
+        bar without that facade can still run."""
+        src = (ROOT / "BarIcon.qml").read_text(encoding="utf-8")
+        for needle in ("BarWidget", "BarIconButton", "\\uf02d", "function togglePanel(",
+                       "shell.toggle", "omarchy-shell shell toggle", "tooltipText: \"Omababel\""):
+            self.assertIn(needle, src, needle)
+        # The panel entry point is untouched by the icon: still the same contract.
+        self.assertNotIn("BarIcon", (ROOT / "Omababel.qml").read_text(encoding="utf-8"))
+
+    def test_readme_documents_the_bar_icon(self):
+        readme = re.sub(r"\s+", " ", (ROOT / "README.md").read_text(encoding="utf-8"))
+        self.assertIn("omarchy bar put muellan.omababel", readme)
+        self.assertIn("BarIcon.qml", readme)
 
     def test_panel_contract(self):
         src = (ROOT / "Omababel.qml").read_text(encoding="utf-8")
