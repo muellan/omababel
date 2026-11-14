@@ -48,6 +48,18 @@ Hyprland:
 o.bind("SUPER + SHIFT + SLASH", "Omababel", "omarchy-shell shell toggle muellan.omababel '{}'")
 ```
 
+It can also sit on the bar as a book icon. The icon stays off until you add
+it, so a keybinding keeps working exactly as before. It is listed as
+**Omababel** wherever the bar offers widgets to add. From a terminal it
+lands on the right:
+
+```
+omarchy bar put muellan.omababel
+```
+
+`--section left` (or `centerEnd`, `tray`, …) picks somewhere else, and once
+it is up you can drag it. A click opens and closes the panel.
+
 The payload can pre-fill the search. Looking up the primary selection
 (highlighted text) is one binding away:
 
@@ -584,6 +596,7 @@ real and prints what came back - run it when a site changed its layout.
 
 ```
 Omababel.qml         panel UI (Quickshell, qs.Commons / qs.Ui kit)
+BarIcon.qml          optional bar icon; a click toggles the panel
 Ob*.qml              results view, preferences, backend bridge, installer
 backend/omababel.py  one JSON request in, one JSON reply out (+ a CLI)
 backend/ob/          sources/ (drivers), formats/ (importers), store.py (SQLite),

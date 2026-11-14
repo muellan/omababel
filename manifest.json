@@ -2,14 +2,22 @@
   "schemaVersion": 1,
   "id": "muellan.omababel",
   "name": "Omababel",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "author": "André Müller",
   "license": "MIT",
   "description": "Dictionary, thesaurus and translation panel.",
   "icon": "accessories-dictionary",
-  "kinds": ["panel"],
+  "kinds": ["panel", "bar-widget"],
   "keepLoaded": true,
   "entryPoints": {
-    "panel": "Omababel.qml"
+    "panel": "Omababel.qml",
+    "barWidget": "BarIcon.qml"
+  },
+  "barWidget": {
+    "displayName": "Omababel",
+    "description": "Opens the dictionary, thesaurus and translation panel",
+    "category": "Tools",
+    "allowMultiple": false,
+    "defaultSection": "right"
   }
 }
